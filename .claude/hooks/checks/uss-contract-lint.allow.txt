@@ -1,0 +1,12 @@
+# uss-contract-lint 예외. 한 줄에 하나: `경로조각::규칙ID`
+# 규칙ID 를 생략하면 해당 경로의 모든 규칙을 면제한다(되도록 쓰지 말 것).
+#
+# 규칙ID 목록:
+#   auth-header · refresh-token · auth-client-split · utc-convert · date-parse · page-size
+#   any-type · null-coalesce · job-status · dark-mode · responsive · media-query
+#   removed-token · removed-semantic · relative-import · endpoint · cross-feature · forbidden-dep
+#
+# 예외를 추가하기 전에 먼저 rules/ 를 확인한다. 대부분은 예외가 아니라 코드가 틀린 경우다.
+
+# refreshQueue 는 401 재발급 큐라 이름에 refresh 가 들어간다. 토큰 저장이 아니다.
+shared/api/refreshQueue.ts::refresh-token

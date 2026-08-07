@@ -1,0 +1,5 @@
+# token-lint 예외 경로(토큰 정의 파일). 한 줄에 하나, 경로 부분일치.
+src/shared/styles/globals.css
+tailwind.config.ts
+tailwind.config.js
+components.json
