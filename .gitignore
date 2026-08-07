@@ -1,0 +1,23 @@
+# macOS
+.DS_Store
+
+# 의존성·빌드 산출물
+node_modules/
+dist/
+.vite/
+
+# 환경 변수 (비밀값은 커밋하지 않는다)
+.env
+.env.*
+!.env.example
+
+# 개인 설정
+.claude/settings.local.json
+CLAUDE.local.md
+
+# Playwright (Step 7)
+playwright-report/
+test-results/
+
+# 게이트 로그
+/tmp/gate.*.log
