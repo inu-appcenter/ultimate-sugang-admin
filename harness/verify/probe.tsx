@@ -9,6 +9,8 @@ import { createMemoryRouter, RouterProvider } from 'react-router';
 
 import { Providers } from '@/app/providers';
 import { AdminMenu } from '@/features/auth/components/AdminMenu';
+import { useUpdateDisplaySemester } from '@/features/semester/queries';
+import type { DisplaySemester } from '@/features/semester/schemas';
 import { AdminLoginPage } from '@/pages/AdminLoginPage';
 import { LoginLayout } from '@/shared/components/layout/LoginLayout';
 import { MainLayout } from '@/shared/components/layout/MainLayout';
@@ -53,6 +55,157 @@ export const renderSyncMain = (settleMs = 100) =>
     />,
     settleMs,
   );
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const buttonByText = (scope: ParentNode, label: string) =>
+  [...scope.querySelectorAll('button')].find((node) => node.textContent?.trim() === label);
+
+/**
+ * M1 은 카드의 [학기 설정] 로만 열린다. 카드→모달 배선까지 같이 보려고 SyncMainPage 에서 눌러 연다.
+ * Radix Dialog 는 body 로 portal 하므로 마크업은 document.body 에서 읽는다.
+ */
+export async function openDisplaySemesterModal(settleMs = 200) {
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const root = createRoot(container);
+
+  await act(async () => {
+    root.render(
+      <Providers>
+        <RouterProvider
+          router={createMemoryRouter([{ path: '/', element: <SyncMainPage /> }], {
+            initialEntries: ['/'],
+          })}
+        />
+      </Providers>,
+    );
+  });
+  await act(async () => {
+    await sleep(settleMs);
+  });
+
+  const trigger = buttonByText(container, '학기 설정');
+  await act(async () => {
+    trigger?.click();
+  });
+  await act(async () => {
+    await sleep(settleMs);
+  });
+  const opened = document.body.innerHTML;
+
+  const cancel = buttonByText(document.body, '취소');
+  await act(async () => {
+    cancel?.click();
+  });
+  await act(async () => {
+    await sleep(settleMs);
+  });
+  const afterCancel = document.body.innerHTML;
+
+  await act(async () => {
+    root.unmount();
+  });
+  container.remove();
+  return { hasTrigger: trigger !== undefined, opened, afterCancel };
+}
+
+/**
+ * 학기 드롭다운을 열어 값을 바꾸고 [저장] 까지 누른다.
+ * 열기는 키보드로 한다 — jsdom 에는 PointerEvent 가 없어 Radix 의 포인터 경로가 돌지 않는다.
+ */
+export async function changeDisplaySemesterTerm(optionLabel: string, settleMs = 200) {
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const root = createRoot(container);
+
+  await act(async () => {
+    root.render(
+      <Providers>
+        <RouterProvider
+          router={createMemoryRouter([{ path: '/', element: <SyncMainPage /> }], {
+            initialEntries: ['/'],
+          })}
+        />
+      </Providers>,
+    );
+  });
+  await act(async () => {
+    await sleep(settleMs);
+  });
+  await act(async () => {
+    buttonByText(container, '학기 설정')?.click();
+  });
+  await act(async () => {
+    await sleep(settleMs);
+  });
+
+  const trigger = document.getElementById('display-semester-term');
+  trigger?.focus();
+  await act(async () => {
+    trigger?.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+  });
+  await act(async () => {
+    await sleep(settleMs);
+  });
+
+  const options = [...document.querySelectorAll('[role="option"]')];
+  const optionLabels = options.map((node) => node.textContent ?? '');
+  await act(async () => {
+    options
+      .find((node) => node.textContent === optionLabel)
+      ?.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+  });
+  await act(async () => {
+    await sleep(settleMs);
+  });
+  const dirty = document.body.innerHTML;
+
+  await act(async () => {
+    buttonByText(document.body, '저장')?.click();
+  });
+  await act(async () => {
+    await sleep(settleMs);
+  });
+  const afterSave = document.body.innerHTML;
+
+  await act(async () => {
+    root.unmount();
+  });
+  container.remove();
+  return { optionLabels, dirty, afterSave };
+}
+
+/** 훅을 실제로 마운트해 mutate 를 돌린다. invalidation 범위(D10)를 캐시에서 직접 본다. */
+export async function runDisplaySemesterUpdate(body: DisplaySemester, settleMs = 300) {
+  let mutate: ((value: DisplaySemester) => void) | null = null;
+
+  function MutationProbe() {
+    mutate = useUpdateDisplaySemester().mutate;
+    return null;
+  }
+
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const root = createRoot(container);
+
+  await act(async () => {
+    root.render(
+      <Providers>
+        <MutationProbe />
+      </Providers>,
+    );
+  });
+  await act(async () => {
+    mutate?.(body);
+    await sleep(settleMs);
+  });
+
+  await act(async () => {
+    root.unmount();
+  });
+  container.remove();
+}
 
 function mount(element: ReactElement): string {
   const container = document.createElement('div');

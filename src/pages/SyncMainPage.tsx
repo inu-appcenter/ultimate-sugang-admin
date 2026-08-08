@@ -12,10 +12,7 @@ export function SyncMainPage() {
       <h1 className="mb-6 text-h1 text-foreground">강의 데이터 관리</h1>
 
       <div className="flex flex-col gap-6">
-        <DisplaySemesterCard
-          onOpenSettings={() => {
-          }}
-        />
+        <DisplaySemesterCard />
         <CourseSummaryCard
           onUpdateClick={() => {
           }}
