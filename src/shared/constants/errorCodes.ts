@@ -1,0 +1,26 @@
+/** 04 §9-2 · 03 §9. code 는 정수다. 백오피스 전용 대역은 5000번대. */
+export const ERROR_CODE = {
+  MISSING_ACCESS_TOKEN: 1000,
+  INVALID_ACCESS_TOKEN: 1001,
+  INVALID_FORM_ACCESS_TOKEN: 1002,
+  INVALID_SIGNATURE_ACCESS_TOKEN: 1003,
+  EXPIRED_ACCESS_TOKEN: 1004,
+  INVALID_REQUEST_PARAMETER: 7777,
+  INVALID_ENUM_TYPE: 8888,
+  UNEXPECTED_SERVER_ERROR: 9999,
+
+  ADMIN_LOGIN_FAILED: 5000,
+  ADMIN_NOT_FOUND: 5001,
+  NOT_ADMIN_TOKEN: 5002,
+  SEMESTER_SETTING_NOT_FOUND: 5100,
+  SYNC_JOB_ALREADY_RUNNING: 5200,
+  SYNC_STRATEGY_MISMATCH: 5201,
+  SYNC_JOB_NOT_FOUND: 5202,
+} as const;
+
+/** 재사용 코드 자체 문구 (서버 격식체 → 구어체 재작성). */
+export const REUSED_CODE_MESSAGE: Record<number, string> = {
+  7777: '입력값을 다시 확인해주세요.',
+  8888: '처리할 수 없는 값이 있어요.',
+  9999: '서버에 문제가 생겼어요. 잠시 후 다시 시도해주세요.',
+};

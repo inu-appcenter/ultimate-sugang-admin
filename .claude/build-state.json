@@ -21,7 +21,7 @@
   "manual_review": [],
   "checklist": [
     { "id": "step-1:setup",            "status": "COMPLETED", "note": "Vite+TS+Tailwind+shadcn, DS-01 토큰 배선, alias, env(Zod), 빈 라우터 2개" },
-    { "id": "step-2:infra",            "status": "TODO", "note": "apiClient(1개)·tokenManager·refreshQueue·errorHandler·constants·lib·MSW 셋업" },
+    { "id": "step-2:infra",            "status": "IN_PROGRESS", "note": "apiClient(1개)·tokenManager·refreshQueue·errorHandler·constants·lib·MSW 셋업" },
     { "id": "step-3:ADMIN_LOGIN",      "status": "TODO", "note": "LoginLayout·로그인 폼(RHF+Zod)·auth store·protectedLoader" },
     { "id": "step-4:SYNC_MAIN_shell",  "status": "TODO", "note": "MainLayout+Header·카드1·카드2·이력 테이블·4상태·Pagination(10행)" },
     { "id": "step-5-1:M1_semester",    "status": "TODO", "note": "표시 학기 조회/변경. 카드2 무영향(D10)" },
