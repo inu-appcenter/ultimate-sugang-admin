@@ -19,7 +19,7 @@ description: USS 백오피스 빌드의 전체 흐름을 소유한다. "빌드 �
 1. 재개 항목을 `IN_PROGRESS` 로 표시(state 갱신).
 2. 항목이 속한 `.claude/resource/phases/` 문서의 절차·참조파일을 따른다.
    `step-1-setup` · `step-2-infra` · `step-3-login` · `step-4-sync-shell` · `step-5-job-flow`(4 하위단계) · `step-6-expand` · `step-7-qa`.
-3. 화면/모달 구현 항목이면 **`implement-one-screen`** 스킬 절차를 사용 (0단계 = **Figma URL 확인(선택)**, 없으면 `01 §4~§7` 로 진행·중단 없음).
+3. 화면/모달 구현 항목이면  **`implement-one-screen`** 스킬 절차를 사용 (0단계 = **Figma URL 확인(선택)**, 없으면 `01 §4~§7` 로 진행·중단 없음).
 4. 결정 **D1~D12** 적용 → [[decisions]]. 특히 D4(전략은 서버 판정) · D8(화면 2개) · D10(표시 학기 ↔ 적재 독립) · D12(enum 미매핑은 경고).
 5. 게이트 실행(커밋 직전): `bash .claude/hooks/checks/gate-runner.sh --full`(QA 는 `--with-smoke`). 매 턴 Stop 훅은 fast 게이트를 자동 실행한다.
    - `OK` → green 커밋(메시지에 항목 ID).
