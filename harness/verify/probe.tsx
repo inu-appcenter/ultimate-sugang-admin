@@ -164,6 +164,8 @@ export async function changeDisplaySemesterTerm(optionLabel: string, settleMs = 
   await act(async () => {
     buttonByText(document.body, '저장')?.click();
   });
+  const saving = document.body.innerHTML;
+
   await act(async () => {
     await sleep(settleMs);
   });
@@ -173,7 +175,7 @@ export async function changeDisplaySemesterTerm(optionLabel: string, settleMs = 
     root.unmount();
   });
   container.remove();
-  return { optionLabels, dirty, afterSave };
+  return { optionLabels, dirty, saving, afterSave };
 }
 
 /** 훅을 실제로 마운트해 mutate 를 돌린다. invalidation 범위(D10)를 캐시에서 직접 본다. */

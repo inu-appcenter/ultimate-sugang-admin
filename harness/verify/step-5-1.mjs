@@ -1,8 +1,10 @@
 /** step-5-1:M1_semester — 표시 학기 조회/변경 모달. 계약·옵션·마크업·D10 격리. */
+import { delay, http, HttpResponse } from 'msw';
+
 import { createChecker, createRuntime, installDom } from './env.mjs';
 
 installDom();
-const { load, close } = await createRuntime();
+const { load, server, close } = await createRuntime();
 
 const { mockDb } = await load('/src/mocks/db.ts');
 const { tokenManager } = await load('/src/shared/api/tokenManager.ts');
@@ -24,7 +26,11 @@ const { result, check, eq, section } = createChecker();
 
 const text = (html) => html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
 
-const saveButtonTag = (html) => /<button[^>]*(?=>\s*저장\s*<\/button>)/.exec(html)?.[0] ?? '';
+// spinner 가 붙으면 버튼 안에 svg 가 끼므로 여는 태그만 따로 잘라 낸다.
+const saveButtonTag = (html) => {
+  const element = /<button[^>]*>(?:(?!<\/button>)[\s\S])*?저장\s*<\/button>/.exec(html)?.[0];
+  return element === undefined ? '' : (/<button[^>]*>/.exec(element)?.[0] ?? '');
+};
 // class 에 Tailwind 의 `disabled:` 변형이 잔뜩 들어 있어서 속성 자리인지까지 봐야 한다.
 const isDisabled = (tag) => /\sdisabled(?:=|\s|$)/.test(tag);
 
@@ -132,7 +138,21 @@ section('변경 → [저장] (01 §7-1 · 04 §10-7)');
 {
   mockDb.reset();
   queryClient.clear();
-  const { optionLabels, dirty, afterSave } = await probe.changeDisplaySemesterTerm('겨울계절학기');
+  // 응답이 즉시 오면 pending 스냅샷을 찍을 틈이 없다. 150ms 늦춰 저장 중 화면을 본다.
+  server.use(
+    http.put('http://localhost:8080/api/v1/admin/semesters/display', async ({ request }) => {
+      await delay(150);
+      const body = await request.json();
+      mockDb.state.displaySemester = body;
+      return HttpResponse.json(body);
+    }),
+  );
+
+  const { optionLabels, dirty, saving, afterSave } = await probe.changeDisplaySemesterTerm(
+    '겨울계절학기',
+    400,
+  );
+  server.resetHandlers();
 
   eq('학기 목록은 TERM_ORDER 순서', optionLabels, [
     '1학기',
@@ -147,6 +167,9 @@ section('변경 → [저장] (01 §7-1 · 04 §10-7)');
     dirtySaveTag !== '' && !isDisabled(dirtySaveTag),
     dirtySaveTag.slice(-60),
   );
+
+  check('저장 중에는 spinner (DS-01 §6)', /animate-spin/.test(saving));
+  check('저장 중에는 [저장] 비활성', isDisabled(saveButtonTag(saving)));
 
   eq('서버 반영', mockDb.state.displaySemester, { academicYear: 2026, term: 'WINTER' });
   check('성공 토스트', text(afterSave).includes('표시 학기를 변경했어요.'));
