@@ -1,0 +1,48 @@
+{
+  "id": "step-5-2:M2_preflight",
+  "spec": "PASS",
+  "ds": "PASS",
+  "commit": "624f90e",
+  "ts": "2026-08-08",
+  "rounds": { "spec": 2, "ds": 2 },
+  "diffs": [
+    {
+      "round": 1,
+      "reviewer": "spec",
+      "verdict": "FAIL",
+      "finding": "판정 실패 시 에러 토스트가 두 번 떴다. queryClient 의 MutationCache.onError 가 전역에서 토스트를 띄우는데 호출부에서 onError: showErrorToast 를 또 걸었다. 04 §9-2 는 에러 1건 → 문구 1건. M1(SemesterSettingModal)에도 step-5-1 부터 같은 줄이 있었다.",
+      "fix": "두 모달의 호출부 onError 제거. 에러 토스트 발원지를 MutationCache/QueryCache 하나로 수렴시켰다. 하네스가 includes(존재)에서 개수 세기로 바뀌었다. 커밋 ef4b399."
+    },
+    {
+      "round": 1,
+      "reviewer": "spec",
+      "verdict": "지적",
+      "finding": "build-state 의 step-5-2 note 가 'strategy 보관' 인데 코드는 아직 보관하지 않는다. 또 5-3 이 보관할 것은 strategy 문자열이 아니라 SyncPreflight 응답 객체 전체다(deleteCounts·currentSemester 를 M4 가 쓴다).",
+      "fix": "note 를 5-3 으로 옮기고 문구를 'preflight 응답 보관' 으로 고쳤다."
+    },
+    {
+      "round": 1,
+      "reviewer": "ds",
+      "verdict": "FAIL",
+      "finding": "'현재 적재' 라벨이 두 줄로 접혔다. text-caption(13px)에서 자연 폭 48.22px 가 w-12(48px)를 넘긴다. FieldRow 는 text-body(15px) 기준이라 '연도'·'학기' 는 한 줄이었고 그 폭을 그대로 가져온 게 원인. items-center 라 행 높이도 40px 로 떴다.",
+      "fix": "임의 값 없이 whitespace-nowrap 으로 해결. 값 컬럼은 여전히 64px 에서 시작해 FieldRow 와 정렬이 맞는다. 커밋 624f90e."
+    }
+  ],
+  "self_judgements_accepted": [
+    "적재 데이터가 없으면 '현재 적재' 행을 숨긴다 — 01 §7-2 에 그때의 문구가 없어 지어내지 않았다. 04 §10-2 가 카드 2에서 값 없는 행을 숨기는 패턴을 이미 정해뒀다.",
+    "[다음]은 판정 중에만 비활성이다 — 01 §7-1 의 dirty 규칙은 M1 전용이고 §7-2 표에는 그 행이 없다. 값을 안 바꾼 상태가 곧 UPSERT 정상 경로라 dirty 로 막으면 갱신 흐름이 통째로 막힌다.",
+    "초기값을 SyncMainPage 가 두 쿼리로 합성한다 — features/sync 가 features/semester 를 직접 import 할 수 없다(architecture).",
+    "strategy 미소비는 하위단계 경계다 — tsconfig 의 noUnusedLocals 때문에 소비자 없이 보관하면 typecheck 가 깨진다. onPreflight 가 응답 객체 전체를 넘기므로 5-3 이 재요청·재계산할 이유가 없다(D4 보존)."
+  ],
+  "open_questions": [
+    {
+      "tag": "spec-gap",
+      "text": "적재 데이터가 없고(summary.semester === null) 표시 학기 조회가 실패하면 initialTarget 이 null 이라 M2 를 렌더하지 않는다 → [데이터 업데이트] 가 죽은 버튼이 된다. 01 §6-3 은 데이터가 없을 때도 버튼이 M2 를 연다고 하지만 그 상황의 초기값은 명세에 없다. 대안(빈 Select 로 열기 · 버튼 비활성+툴팁) 모두 명세에 없는 문구를 지어내야 해서 손대지 않았다. 두 리뷰어 모두 비차단으로 넘겼다."
+    }
+  ],
+  "deferred": [
+    "M1 에러 경로에도 토스트 개수 검사를 두면 대칭이 맞는다(현재는 5-2 만 센다). 코드 경로는 전역 handler 하나라 중복 위험은 없다.",
+    "'현재 적재' 라벨 컬럼을 FieldRow 같은 공용 컴포넌트로 뽑으면 폰트 폴백 시 오버플로가 커지는 문제를 한 곳에서 관리할 수 있다."
+  ],
+  "verify": "harness/verify/step-5-2.mjs 33건 (전체 215건)"
+}
