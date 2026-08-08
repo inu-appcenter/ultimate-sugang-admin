@@ -102,7 +102,7 @@ section('모달 마크업 — [학기 설정] 으로 연다 (01 §7-1)');
 {
   mockDb.reset();
   queryClient.clear();
-  const { hasTrigger, opened, afterCancel } = await probe.openDisplaySemesterModal();
+  const { hasTrigger, opened, afterCancel } = await probe.openSemesterSettingModal();
   const body = text(opened);
 
   check('카드에 [학기 설정] 버튼이 있다', hasTrigger);

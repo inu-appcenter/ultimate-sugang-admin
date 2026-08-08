@@ -26,16 +26,16 @@ import {
 import { TERM_ORDER, termLabels } from '@/shared/constants/labels';
 import { academicYearOptions } from '@/shared/lib/academicYearOptions';
 
-const YEAR_FIELD_ID = 'display-semester-year';
-const TERM_FIELD_ID = 'display-semester-term';
+const YEAR_FIELD_ID = 'semester-setting-year';
+const TERM_FIELD_ID = 'semester-setting-term';
 
-interface DisplaySemesterModalProps {
+interface SemesterSettingModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   current: DisplaySemester;
 }
 
-export function DisplaySemesterModal({ open, onOpenChange, current }: DisplaySemesterModalProps) {
+export function SemesterSettingModal({ open, onOpenChange, current }: SemesterSettingModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -47,13 +47,13 @@ export function DisplaySemesterModal({ open, onOpenChange, current }: DisplaySem
             강의 데이터에는 영향을 주지 않아요.
           </DialogDescription>
         </DialogHeader>
-        <DisplaySemesterForm current={current} onClose={() => onOpenChange(false)} />
+        <SemesterSettingForm current={current} onClose={() => onOpenChange(false)} />
       </DialogContent>
     </Dialog>
   );
 }
 
-function DisplaySemesterForm({
+function SemesterSettingForm({
   current,
   onClose,
 }: {
