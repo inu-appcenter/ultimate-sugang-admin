@@ -23,7 +23,10 @@ export function SyncMainPage() {
 
       <div className="flex flex-col gap-6">
         <DisplaySemesterCard />
-        <CourseSummaryCard onUpdateClick={() => setTargetOpen(true)} />
+        <CourseSummaryCard
+          targetReady={initialTarget !== null}
+          onUpdateClick={() => setTargetOpen(true)}
+        />
         <SyncJobTable page={page} onPageChange={setPage} />
       </div>
 

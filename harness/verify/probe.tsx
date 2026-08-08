@@ -244,6 +244,49 @@ export async function openSyncTargetModal({ termLabel = null, settleMs = 200 } =
   return { opened, openedDialog, judgingDialog, afterNext };
 }
 
+/**
+ * 잠긴 [데이터 업데이트] 의 툴팁을 연다. Radix Tooltip 은 포커스로도 열리고,
+ * disabled 버튼은 포커스를 못 받으므로 감싼 span 에 포커스를 준다.
+ */
+export async function focusBlockedUpdateButton(settleMs = 2500) {
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const root = createRoot(container);
+
+  await act(async () => {
+    root.render(
+      <Providers>
+        <RouterProvider
+          router={createMemoryRouter([{ path: '/', element: <SyncMainPage /> }], {
+            initialEntries: ['/'],
+          })}
+        />
+      </Providers>,
+    );
+  });
+  await act(async () => {
+    await sleep(settleMs);
+  });
+  const settled = container.innerHTML;
+
+  const wrapper = [...container.querySelectorAll('span[tabindex="0"]')].find((node) =>
+    node.textContent?.includes('데이터 업데이트'),
+  );
+  await act(async () => {
+    wrapper?.focus();
+  });
+  await act(async () => {
+    await sleep(300);
+  });
+  const focused = document.body.innerHTML;
+
+  await act(async () => {
+    root.unmount();
+  });
+  container.remove();
+  return { settled, focused, hasWrapper: wrapper !== undefined };
+}
+
 /** 훅을 실제로 마운트해 mutate 를 돌린다. invalidation 범위(D10)를 캐시에서 직접 본다. */
 export async function runDisplaySemesterUpdate(body: DisplaySemester, settleMs = 300) {
   let mutate: ((value: DisplaySemester) => void) | null = null;
