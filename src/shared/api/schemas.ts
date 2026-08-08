@@ -21,6 +21,27 @@ export const authTokenResponseSchema = z.object({
 });
 export type AuthTokenResponse = z.infer<typeof authTokenResponseSchema>;
 
+/**
+ * 03 §8 계약 enum. 값을 더하거나 바꾸지 않는다.
+ * shared 에 두는 이유: `CourseTerm` 은 semester·sync 두 도메인이 함께 쓰는데
+ * features 끼리 직접 import 할 수 없다 (04 §4-1). 한글 라벨도 이미 shared/constants/labels.ts 에 있다.
+ */
+export const courseTermSchema = z.enum(['FIRST', 'SECOND', 'SUMMER', 'WINTER']);
+export type CourseTerm = z.infer<typeof courseTermSchema>;
+
+export const syncStrategySchema = z.enum(['INITIAL', 'UPSERT', 'REPLACE']);
+export type SyncStrategy = z.infer<typeof syncStrategySchema>;
+
+/** 중간 상태는 RUNNING 하나뿐이다 — PREVIEW·PENDING 같은 값을 만들지 않는다 (D11). */
+export const syncJobStatusSchema = z.enum(['RUNNING', 'SUCCESS', 'FAILED']);
+export type SyncJobStatus = z.infer<typeof syncJobStatusSchema>;
+
+export const syncChangeTypeSchema = z.enum(['CREATED', 'UPDATED', 'CLOSED', 'WARNING']);
+export type SyncChangeType = z.infer<typeof syncChangeTypeSchema>;
+
+export const syncPhaseSchema = z.enum(['COURSE_FETCH', 'TIMETABLE_FETCH', 'PERSIST']);
+export type SyncPhase = z.infer<typeof syncPhaseSchema>;
+
 /** 03 §2-4 페이지네이션 래퍼. content 스키마만 갈아끼운다. */
 export const paginatedSchema = <T extends z.ZodTypeAny>(content: T) =>
   z.object({

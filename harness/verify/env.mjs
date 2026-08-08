@@ -69,6 +69,8 @@ export async function createRuntime() {
   return {
     load,
     calls,
+    /** 한 케이스만 다른 응답을 내고 싶을 때 `server.use(...)` 로 덮는다. */
+    server,
     close: async () => {
       server.close();
       await vite.close();

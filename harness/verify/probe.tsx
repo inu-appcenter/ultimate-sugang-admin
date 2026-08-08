@@ -14,6 +14,46 @@ import { LoginLayout } from '@/shared/components/layout/LoginLayout';
 import { MainLayout } from '@/shared/components/layout/MainLayout';
 import { SyncMainPage } from '@/pages/SyncMainPage';
 
+/**
+ * 데이터를 부르는 화면용. 첫 페인트(Loading)와 쿼리가 끝난 뒤(Data/Empty/Error)를 같이 돌려준다.
+ * 호출 전에 queryClient.clear() 를 해야 이전 케이스의 캐시가 안 샌다.
+ */
+async function mountAsync(
+  element: ReactElement,
+  settleMs: number,
+): Promise<{ firstPaint: string; settled: string }> {
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const root = createRoot(container);
+
+  await act(async () => {
+    root.render(<Providers>{element}</Providers>);
+  });
+  const firstPaint = container.innerHTML;
+
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, settleMs));
+  });
+  const settled = container.innerHTML;
+
+  await act(async () => {
+    root.unmount();
+  });
+  container.remove();
+  return { firstPaint, settled };
+}
+
+/** 에러 케이스는 queries.retry=1 의 재시도(기본 지연 ~1초)를 기다려야 해서 settleMs 를 늘려 부른다. */
+export const renderSyncMain = (settleMs = 100) =>
+  mountAsync(
+    <RouterProvider
+      router={createMemoryRouter([{ path: '/', element: <SyncMainPage /> }], {
+        initialEntries: ['/'],
+      })}
+    />,
+    settleMs,
+  );
+
 function mount(element: ReactElement): string {
   const container = document.createElement('div');
   document.body.appendChild(container);
