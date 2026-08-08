@@ -1,5 +1,4 @@
 import type { AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { toast } from 'sonner';
 
 import { apiClient } from '@/shared/api/client';
 import { authTokenResponseSchema } from '@/shared/api/schemas';
@@ -30,12 +29,27 @@ function notifyWaiters(token: string | null): void {
 }
 
 /**
+ * 세션 만료 안내를 리로드 너머로 넘기는 일회용 표식.
+ * `04 §6-4` 가 시키는 대로 하드 이동을 하면 문서가 사라지면서 토스트도 같이 날아간다.
+ * 그런데 `01 §9-1` 은 "다시 로그인해주세요." 를 **보여주라**고 한다. 그래서 표식만 남기고
+ * 로그인 화면이 대신 띄운다.
+ */
+const SESSION_EXPIRED_KEY = 'uss_admin_session_expired';
+
+/** 로그인 화면이 마운트될 때 한 번 꺼내 쓴다. 두 번 뜨지 않도록 꺼내면서 지운다. */
+export function consumeSessionExpiredNotice(): string | null {
+  const notice = sessionStorage.getItem(SESSION_EXPIRED_KEY);
+  if (notice !== null) sessionStorage.removeItem(SESSION_EXPIRED_KEY);
+  return notice;
+}
+
+/**
  * 서버를 부르지 않는다 — `/auth/logout` 엔드포인트가 없다 (03 §3-3).
  * 토큰을 버리고 통째로 리로드하므로 메모리에 있던 auth store 도 같이 사라진다.
  */
 function forceLogout(): void {
   tokenManager.clear();
-  toast.error('다시 로그인해주세요.');
+  sessionStorage.setItem(SESSION_EXPIRED_KEY, '다시 로그인해주세요.');
   window.location.href = ROUTES.LOGIN;
 }
 

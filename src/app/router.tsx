@@ -6,6 +6,7 @@ import { useAuthStore } from '@/features/auth/store';
 import { AdminLoginPage } from '@/pages/AdminLoginPage';
 import { SyncMainPage } from '@/pages/SyncMainPage';
 import { tokenManager } from '@/shared/api/tokenManager';
+import { LoginLayout } from '@/shared/components/layout/LoginLayout';
 import { MainLayout } from '@/shared/components/layout/MainLayout';
 import { ROUTES } from '@/shared/constants/routes';
 
@@ -37,11 +38,17 @@ const protectedLoader: LoaderFunction = async () => {
   return null;
 };
 
+/** 04 §8 — 라우트는 2개뿐이고 각각 레이아웃을 element 로 갖는다. */
 export const router = createBrowserRouter([
-  { path: ROUTES.LOGIN, element: <AdminLoginPage /> },
   {
+    path: ROUTES.LOGIN,
+    element: <LoginLayout />,
+    children: [{ index: true, element: <AdminLoginPage /> }],
+  },
+  {
+    path: ROUTES.HOME,
     element: <MainLayout headerRight={<AdminMenu />} />,
     loader: protectedLoader,
-    children: [{ path: ROUTES.SYNC_MAIN, element: <SyncMainPage /> }],
+    children: [{ index: true, element: <SyncMainPage /> }],
   },
 ]);
