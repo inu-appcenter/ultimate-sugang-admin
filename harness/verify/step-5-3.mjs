@@ -1,4 +1,7 @@
 /** step-5-3:M3_M4_execute — 확인 모달 3종 + POST /sync/jobs + 409 2종. */
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { http, HttpResponse } from 'msw';
 
 import { createChecker, createRuntime, installDom } from './env.mjs';
@@ -36,6 +39,18 @@ const fresh = () => {
 await login({ loginId: 'haksa01', password: 'uss1234!' }).then((token) =>
   tokenManager.set(token.accessToken, token.name),
 );
+
+section('destructive 는 진한 빨강 면이다 (사용자 결정 2026-08-09)');
+{
+  // 연분홍(danger-bg) 면으로 되돌리면 M4 가 M3 의 파란 [갱신]보다 약해 보인다.
+  const globals = readFileSync(join(process.cwd(), 'src/shared/styles/globals.css'), 'utf8');
+  check('--destructive 는 danger-text', /--destructive:\s*var\(--danger-text\)/.test(globals));
+  check(
+    '--destructive-foreground 는 흰색',
+    /--destructive-foreground:\s*var\(--primary-foreground\)/.test(globals),
+  );
+  check('danger-bg 면으로 되돌아가지 않았다', !/--destructive:\s*var\(--danger-bg\)/.test(globals));
+}
 
 section('UPSERT → M3 (01 §7-3)');
 {

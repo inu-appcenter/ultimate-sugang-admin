@@ -82,6 +82,7 @@ section('D4 — 클라이언트가 전략 값을 만들어내지 않는다');
     new RegExp(`(?<![=!<>])=\\s*['"]${STRATEGY}['"]`),
     new RegExp(`return\\s+['"]${STRATEGY}['"]`),
     new RegExp(`\\?\\s*['"]${STRATEGY}['"]`),
+    new RegExp(`:\\s*['"]${STRATEGY}['"]`),
     /expectedStrategy:\s*['"]/,
   ];
   const offenders = [];
@@ -112,8 +113,16 @@ section('D4 — 클라이언트가 전략 값을 만들어내지 않는다');
     produces.some((rule) => rule.test("{ expectedStrategy: 'UPSERT' }")),
   );
   check(
+    '가드가 삼항 alternate 를 잡는다',
+    produces.some((rule) => rule.test("const s = cond ? compute() : 'REPLACE';")),
+  );
+  check(
     '서버 값 비교는 통과시킨다',
     !produces.some((rule) => rule.test("preflight.strategy === 'REPLACE'")),
+  );
+  check(
+    '전략을 키로 쓰는 맵은 통과시킨다',
+    !produces.some((rule) => rule.test('const COPY = { UPSERT: {}, INITIAL: {} };')),
   );
 }
 

@@ -7,6 +7,7 @@ import { Button } from '@/shared/components/ui/button';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -17,6 +18,7 @@ import { formatNumber } from '@/shared/lib/formatNumber';
 import { formatSemesterCompact, formatSemesterLong } from '@/shared/lib/formatSemester';
 
 const CONFIRM_FIELD_ID = 'sync-replace-confirm';
+const EXPECTED_TEXT_ID = 'sync-replace-expected';
 
 const DELETE_LABELS: [keyof DeleteCounts, string][] = [
   ['courses', '강의'],
@@ -66,9 +68,12 @@ function ReplaceBody({ preflight, onClose }: { preflight: SyncPreflight; onClose
 
   return (
     <div className="flex flex-col gap-4">
-      <dl className="flex flex-col gap-1 text-body">
+      <dl className="flex flex-col gap-1">
         {currentSemester !== null && (
-          <SemesterRow label="현재" value={formatSemesterLong(currentSemester.academicYear, currentSemester.term)} />
+          <SemesterRow
+            label="현재"
+            value={formatSemesterLong(currentSemester.academicYear, currentSemester.term)}
+          />
         )}
         <SemesterRow
           label="변경"
@@ -77,12 +82,16 @@ function ReplaceBody({ preflight, onClose }: { preflight: SyncPreflight; onClose
       </dl>
 
       <div>
-        <p className="text-body text-foreground">다음 데이터가 영구 삭제됩니다.</p>
+        <DialogDescription className="text-body text-foreground">
+          다음 데이터가 영구 삭제됩니다.
+        </DialogDescription>
         <dl className="mt-2 flex flex-col gap-1">
           {DELETE_LABELS.map(([key, label]) => (
-            <div key={key} className="flex items-center gap-4 text-caption">
-              <dt className="w-16 shrink-0 text-fg-secondary">{label}</dt>
-              <dd className="text-foreground">{`${formatNumber(deleteCounts[key])}건`}</dd>
+            <div key={key} className="flex items-center gap-4">
+              <dt className="shrink-0 text-caption text-fg-secondary">{label}</dt>
+              <dd className="ml-auto text-body text-foreground">
+                {`${formatNumber(deleteCounts[key])}건`}
+              </dd>
             </div>
           ))}
         </dl>
@@ -92,9 +101,12 @@ function ReplaceBody({ preflight, onClose }: { preflight: SyncPreflight; onClose
 
       <div className="flex flex-col gap-2">
         <Label htmlFor={CONFIRM_FIELD_ID}>확인을 위해 아래를 입력하세요</Label>
-        <p className="font-mono text-body text-foreground">{expected}</p>
+        <p id={EXPECTED_TEXT_ID} className="font-mono text-body text-foreground">
+          {expected}
+        </p>
         <Input
           id={CONFIRM_FIELD_ID}
+          aria-describedby={EXPECTED_TEXT_ID}
           className="font-mono"
           value={confirmText}
           onChange={(event) => setConfirmText(event.target.value)}
@@ -118,8 +130,8 @@ function ReplaceBody({ preflight, onClose }: { preflight: SyncPreflight; onClose
 function SemesterRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center gap-4">
-      <dt className="w-8 shrink-0 text-fg-secondary">{label}</dt>
-      <dd className="text-foreground">{value}</dd>
+      <dt className="shrink-0 text-caption text-fg-secondary">{label}</dt>
+      <dd className="text-body text-foreground">{value}</dd>
     </div>
   );
 }
