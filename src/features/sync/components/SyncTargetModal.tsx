@@ -4,7 +4,6 @@ import { Controller, useForm } from 'react-hook-form';
 
 import { useSyncPreflight } from '@/features/sync/queries';
 import { semesterRefSchema, type SemesterRef, type SyncPreflight } from '@/features/sync/schemas';
-import { showErrorToast } from '@/shared/api/errorHandler';
 import { FieldRow } from '@/shared/components/form/FieldRow';
 import { Button } from '@/shared/components/ui/button';
 import {
@@ -80,10 +79,7 @@ function SyncTargetForm({
   const { mutate, isPending } = useSyncPreflight();
 
   const submit = handleSubmit((target) => {
-    mutate(target, {
-      onSuccess: onPreflight,
-      onError: showErrorToast,
-    });
+    mutate(target, { onSuccess: onPreflight });
   });
 
   return (

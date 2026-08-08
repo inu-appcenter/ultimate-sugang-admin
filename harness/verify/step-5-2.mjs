@@ -171,7 +171,9 @@ section('판정 실패 — 토스트 + 모달 유지 (04 §9-2)');
 
   const { afterNext } = await probe.openSyncTargetModal();
   const body = text(afterNext);
-  check('토스트로 알린다', body.includes('처리할 수 없는 값이 있어요.'));
+  // 호출부 onError 와 MutationCache 의 전역 onError 가 겹치면 같은 문구가 두 번 뜬다.
+  const toasts = body.match(/처리할 수 없는 값이 있어요\./g)?.length ?? 0;
+  eq('토스트는 한 번만 (04 §9-2)', toasts, 1);
   check('모달은 열린 채로 둔다', body.includes('적재할 학기를 골라주세요.'));
 
   server.resetHandlers();
