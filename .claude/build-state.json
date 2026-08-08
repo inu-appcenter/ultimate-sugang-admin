@@ -22,7 +22,7 @@
   "checklist": [
     { "id": "step-1:setup",            "status": "COMPLETED", "note": "Vite+TS+Tailwind+shadcn, DS-01 토큰 배선, alias, env(Zod), 빈 라우터 2개" },
     { "id": "step-2:infra",            "status": "COMPLETED", "note": "apiClient(1개)·tokenManager·refreshQueue·errorHandler·constants·lib·MSW 셋업" },
-    { "id": "step-3:ADMIN_LOGIN",      "status": "IN_PROGRESS", "note": "LoginLayout·로그인 폼(RHF+Zod)·auth store·protectedLoader" },
+    { "id": "step-3:ADMIN_LOGIN",      "status": "COMPLETED", "note": "LoginLayout·로그인 폼(RHF+Zod)·auth store·protectedLoader" },
     { "id": "step-4:SYNC_MAIN_shell",  "status": "TODO", "note": "MainLayout+Header·카드1·카드2·이력 테이블·4상태·Pagination(10행)" },
     { "id": "step-5-1:M1_semester",    "status": "TODO", "note": "표시 학기 조회/변경. 카드2 무영향(D10)" },
     { "id": "step-5-2:M2_preflight",   "status": "TODO", "note": "학기 선택 + preflight + strategy 보관" },
@@ -72,6 +72,15 @@
       "gate": "--full OK",
       "retry": 0,
       "text": "apiClient 1개·tokenManager·refreshQueue·errorHandler·types·schemas·queryClient, constants 4종, lib 3종, providers, MSW 9개 핸들러+Job 타임라인. Vite SSR + msw/node 로 42건 검증 전부 통과. 리뷰어 대상 아님(step-3~6만)."
+    },
+    {
+      "id": "step-3:ADMIN_LOGIN",
+      "ts": "2026-08-08",
+      "commit": "cce66cd",
+      "gate": "--full OK",
+      "review": "spec=PASS · ds=PASS (2라운드)",
+      "retry": 0,
+      "text": "LoginLayout·로그인 폼(RHF+Zod)·auth store·protectedLoader·MainLayout+Header·M5. shadcn 4종을 DS-01 로 재정의. 리뷰 1라운드에서 둘 다 FAIL — aria-invalid 미생성(입력 에러 링이 죽어 있었음), 고아 jsdom, 04 §8 구조 이탈. 전부 수정 후 2라운드 PASS. 검증 하네스(harness/verify + npm run verify) 도입, 88건 통과."
     }
   ]
 }

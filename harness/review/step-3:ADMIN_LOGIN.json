@@ -1,0 +1,62 @@
+{
+  "id": "step-3:ADMIN_LOGIN",
+  "spec": "PASS",
+  "ds": "PASS",
+  "diffs": [
+    {
+      "reviewer": "ds",
+      "round": 1,
+      "severity": "blocking",
+      "where": "tailwind.config.ts",
+      "text": "aria-invalid variant 가 Tailwind 3.4 기본 theme.aria 목록에 없어 `aria-invalid:ring-2 ring-danger-text` 가 CSS 로 생성되지 않았다. DS-01 §6-1 의 입력창 error 상태가 통째로 죽어 있었다.",
+      "resolution": "theme.extend.aria 에 { invalid: 'invalid=\"true\"' } 추가. 재빌드로 규칙 2개 생성 확인. (bdf3391)"
+    },
+    {
+      "reviewer": "ds",
+      "round": 1,
+      "severity": "minor",
+      "where": "ConfirmModal.tsx, ui/dialog.tsx",
+      "text": "버튼 안 아이콘이 16px. DS-01 §7 은 버튼 20px.",
+      "resolution": "20px 로 변경. label.tsx 의 죽은 peer-disabled:* 도 제거. (bdf3391)"
+    },
+    {
+      "reviewer": "spec",
+      "round": 1,
+      "severity": "blocking",
+      "where": "package.json",
+      "text": "jsdom 이 소비처 없이 devDependency 에만 있고, 커밋 메시지의 '검증 38건 통과' 를 리포에서 재현할 수 없다.",
+      "resolution": "harness/verify/ 에 검증 하네스를 넣고 `npm run verify` 추가. step-2 44건 + step-3 44건. (b5440ef, cce66cd)"
+    },
+    {
+      "reviewer": "spec",
+      "round": 1,
+      "severity": "minor",
+      "where": "src/app/router.tsx, src/shared/constants/routes.ts, src/features/auth/",
+      "text": "04 §8 구조 이탈 — LoginLayout 이 라우트 element 가 아니고, ROUTES 가 HOME 대신 SYNC_MAIN, features/auth/types.ts 부재.",
+      "resolution": "전부 04 §8/§4 형태로 수정. (b5440ef)"
+    },
+    {
+      "reviewer": "spec",
+      "round": 1,
+      "severity": "question",
+      "where": "src/shared/api/refreshQueue.ts",
+      "text": "toast.error 직후 하드 리로드라 01 §9-1 의 '다시 로그인해주세요.' 가 실제로 보이지 않는다.",
+      "resolution": "sessionStorage 표식을 남기고 로그인 화면이 띄우도록 변경. 리뷰어가 위반 아님으로 승인하되 리뷰 패킷 §C 명시를 요구. (b5440ef)"
+    },
+    {
+      "reviewer": "spec",
+      "round": 2,
+      "severity": "minor",
+      "where": "src/shared/api/refreshQueue.ts, src/app/router.tsx",
+      "text": "재발급 401 을 인터셉터(하드 이동)와 protectedLoader(redirect)가 둘 다 처리해 만료 안내가 사라질 수 있다.",
+      "resolution": "인터셉터는 reject 만 하고 정리는 부른 쪽이 한다. 표식은 '1' 만 저장하고 문구는 상수 한 곳. 어서션 추가. (cce66cd)"
+    }
+  ],
+  "carry_forward": [
+    "Step 5-3: 필드 인라인 에러 · 로그인 401 카드 에러 · M4 Strict Match 검증 에러의 표시 모양을 통일할 것. DS 리뷰어가 제각각이면 위반으로 잡겠다고 예고.",
+    "헤더 로그아웃 버튼(size=sm 32px + 아이콘 20px)이 답답해 보이면 아이콘이 아니라 버튼 높이를 올린다."
+  ],
+  "reviewed_commit": "b5440ef",
+  "commit": "cce66cd",
+  "ts": "2026-08-08"
+}
