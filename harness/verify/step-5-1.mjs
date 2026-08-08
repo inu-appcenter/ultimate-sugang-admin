@@ -128,6 +128,9 @@ section('모달 마크업 — [학기 설정] 으로 연다 (01 §7-1)');
   check('폭 400px (max-w-modal)', opened.includes('max-w-modal'));
   check('M4 전용 480px 이 아니다', !opened.includes('max-w-modal-wide'));
   check('카드 radius 가 아니라 modal radius', opened.includes('rounded-modal'));
+  // 맨 duration-200 은 (0,1,0) 이라 animate-in 의 (0,2,0) 150ms 한테 진다.
+  check('모션 200ms 를 variant 로 건다', opened.includes('data-[state=open]:duration-200'));
+  check('맨 duration-200 을 쓰지 않는다', !/(?<![\]:])\bduration-200\b/.test(opened));
   check('다크·반응형 클래스 없음', !/\bdark:|["'\s:](sm|md|lg|xl):[a-z[]/.test(opened));
   check('raw hex 없음', !/#[0-9a-fA-F]{6}\b/.test(opened));
 
