@@ -32,10 +32,46 @@ export function installDom() {
   globalThis.localStorage = dom.window.localStorage;
   globalThis.sessionStorage = dom.window.sessionStorage;
   globalThis.history = dom.window.history;
-  globalThis.HTMLElement = dom.window.HTMLElement;
-  globalThis.Element = dom.window.Element;
-  globalThis.Node = dom.window.Node;
   globalThis.getComputedStyle = dom.window.getComputedStyle;
+
+  /**
+   * Radix 는 전역 생성자를 그냥 참조한다 — Dialog 의 FocusScope 는 MutationObserver,
+   * Select 는 HTMLFormElement 를 찾는다. 하나라도 비면 컴포넌트가 통째로 throw 한다.
+   */
+  for (const name of [
+    'Element',
+    'HTMLElement',
+    'HTMLButtonElement',
+    'HTMLFormElement',
+    'HTMLInputElement',
+    'Node',
+    'NodeFilter',
+    'NodeList',
+    'DocumentFragment',
+    'DOMRect',
+    'MutationObserver',
+    'Event',
+    'CustomEvent',
+    'KeyboardEvent',
+    'MouseEvent',
+    'PointerEvent',
+  ]) {
+    globalThis[name] = dom.window[name];
+  }
+  // jsdom 이 구현하지 않은 것들. Radix Select 목록을 열면 셋 다 호출된다.
+  dom.window.HTMLElement.prototype.hasPointerCapture = () => false;
+  dom.window.HTMLElement.prototype.setPointerCapture = () => {};
+  dom.window.HTMLElement.prototype.releasePointerCapture = () => {};
+  dom.window.HTMLElement.prototype.scrollIntoView = () => {};
+
+  // jsdom 에 ResizeObserver 가 없다. Radix Popper(Select 목록)가 열릴 때만 쓴다.
+  globalThis.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+  dom.window.ResizeObserver = globalThis.ResizeObserver;
+
   Object.defineProperty(globalThis, 'navigator', {
     value: dom.window.navigator,
     configurable: true,
