@@ -20,7 +20,7 @@
   "retry": {},
   "manual_review": [],
   "checklist": [
-    { "id": "step-1:setup",            "status": "IN_PROGRESS", "note": "Vite+TS+Tailwind+shadcn, DS-01 토큰 배선, alias, env(Zod), 빈 라우터 2개" },
+    { "id": "step-1:setup",            "status": "COMPLETED", "note": "Vite+TS+Tailwind+shadcn, DS-01 토큰 배선, alias, env(Zod), 빈 라우터 2개" },
     { "id": "step-2:infra",            "status": "TODO", "note": "apiClient(1개)·tokenManager·refreshQueue·errorHandler·constants·lib·MSW 셋업" },
     { "id": "step-3:ADMIN_LOGIN",      "status": "TODO", "note": "LoginLayout·로그인 폼(RHF+Zod)·auth store·protectedLoader" },
     { "id": "step-4:SYNC_MAIN_shell",  "status": "TODO", "note": "MainLayout+Header·카드1·카드2·이력 테이블·4상태·Pagination(10행)" },
@@ -43,5 +43,14 @@
       "text": "shadcn 별칭 토큰(--accent, --destructive)은 새 값을 만들지 않고 DS-01 토큰을 가리키게 했다. accent=bg-hover(shadcn 의 중립 hover 표면이며 DS-01 이 제거한 보라 의미색과 다름), destructive=danger-bg / destructive-foreground=danger-text (ui-conventions 의 `bg-danger-bg`(≡`bg-destructive`) 매핑을 그대로 따름)."
     }
   ],
-  "log": []
+  "log": [
+    {
+      "id": "step-1:setup",
+      "ts": "2026-08-08",
+      "commit": "cf14d8a",
+      "gate": "--full OK",
+      "retry": 0,
+      "text": "Vite8+React19+TS·Tailwind3.4+shadcn 배선·DS-01 토큰 전체·env.ts·04 §4 폴더·라우터 2개. 리뷰어 대상 아님(step-3~6만)."
+    }
+  ]
 }
