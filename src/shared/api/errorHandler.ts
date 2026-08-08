@@ -16,6 +16,12 @@ const HTTP_STATUS_MESSAGE: Record<number, string> = {
 const SERVER_ERROR_MESSAGE = '서버에 문제가 생겼어요. 잠시 후 다시 시도해주세요.';
 const NETWORK_ERROR_MESSAGE = '네트워크 연결을 확인해주세요.';
 
+export function getErrorCode(error: unknown): number | null {
+  if (!isAxiosError(error) || !error.response) return null;
+  const parsed = errorResponseSchema.safeParse(error.response.data);
+  return parsed.success ? parsed.data.code : null;
+}
+
 export function getErrorMessage(error: unknown): string {
   if (!isAxiosError(error)) return SERVER_ERROR_MESSAGE;
   if (!error.response) return NETWORK_ERROR_MESSAGE;

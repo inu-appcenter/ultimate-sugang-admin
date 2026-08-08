@@ -47,6 +47,14 @@ export const syncPreflightSchema = z.object({
 });
 export type SyncPreflight = z.infer<typeof syncPreflightSchema>;
 
+export const syncJobCreateRequestSchema = semesterRefSchema.extend({
+  expectedStrategy: syncStrategySchema,
+});
+export type SyncJobCreateRequest = z.infer<typeof syncJobCreateRequestSchema>;
+
+export const syncJobCreatedSchema = z.object({ jobId: z.number() });
+export type SyncJobCreated = z.infer<typeof syncJobCreatedSchema>;
+
 export const syncJobListItemSchema = z.object({
   jobId: z.number(),
   academicYear: z.number(),
