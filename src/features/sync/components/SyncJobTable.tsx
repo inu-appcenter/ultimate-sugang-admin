@@ -10,7 +10,7 @@ import { LoadingSkeleton } from '@/shared/components/states/LoadingSkeleton';
 import { Card, CardTitle } from '@/shared/components/ui/card';
 import { formatNumber } from '@/shared/lib/formatNumber';
 import { formatSemesterCompact } from '@/shared/lib/formatSemester';
-import { formatShortDateTime } from '@/shared/lib/formatDateTime';
+import { formatDateTime } from '@/shared/lib/formatDateTime';
 
 /**
  * 카운트는 SUCCESS 가 아니면 null 이다.
@@ -23,8 +23,10 @@ const columns: Array<DataTableColumn<SyncJobListItem>> = [
   {
     key: 'startedAt',
     header: '일시',
+    // 01 §6-4 컬럼 표가 정한 `YYYY-MM-DD HH:mm`. 150px 폭도 이 형식 기준이다.
+    // (§6-1 와이어프레임은 박스 폭에 맞춰 줄여 그린 예시라 근거로 쓰지 않는다 — 사용자 확정)
     width: 150,
-    render: (job) => formatShortDateTime(job.startedAt),
+    render: (job) => formatDateTime(job.startedAt),
   },
   {
     key: 'semester',
@@ -67,7 +69,11 @@ export function SyncJobTable({ page, onPageChange }: SyncJobTableProps) {
 
       {isPending && <LoadingSkeleton rows={5} className="mt-4" />}
 
-      {isError && <ErrorState message={getErrorMessage(error)} onRetry={() => void refetch()} />}
+      {/* 이미 받아둔 데이터가 있으면 그걸 계속 보여준다. 재조회 실패는 전역 토스트가 알린다 —
+          Error State 와 본문이 같이 뜨면 화면이 깨진다. 카드 1·2 도 같은 규칙이다. */}
+      {isError && data === undefined && (
+        <ErrorState message={getErrorMessage(error)} onRetry={() => void refetch()} />
+      )}
 
       {data !== undefined &&
         (data.content.length === 0 ? (

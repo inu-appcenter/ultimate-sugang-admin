@@ -12,6 +12,7 @@ const { installRefreshInterceptor } = await load('/src/shared/api/refreshQueue.t
 const { login } = await load('/src/features/auth/api.ts');
 const { queryClient } = await load('/src/shared/api/queryClient.ts');
 const { formatSemesterCompact, formatSemesterLong } = await load('/src/shared/lib/formatSemester.ts');
+const { syncKeys } = await load('/src/features/sync/queries.ts');
 const probe = await load('/harness/verify/probe.tsx');
 
 installRefreshInterceptor();
@@ -61,10 +62,10 @@ section('Loading → Data (04 §10-1)');
   check('시간표 건수', body.includes('2,847건'));
   check('수치가 text-metric', settled.includes('text-metric'));
   check('마지막 업데이트 전체 일시', body.includes('2026-08-05 14:22'));
+  check('테이블 일시도 긴 형식 (01 §6-4)', body.includes('2026-07-28 16:40'));
   check('변경 요약', CHANGE_SUMMARY.test(body) && body.includes('신규 12 · 수정 45 · 폐강 3'));
   check('Primary 버튼', body.includes('데이터 업데이트'));
   check('이력 타이틀', body.includes('업데이트 이력'));
-  check('테이블 짧은 일시', body.includes('08-05 14:22'));
   check('대상 학기 컬럼', body.includes('2026-1학기'));
   check('실패 행 카운트는 - 표기', body.includes('-'));
   check('교체 배지가 명도 강조(neutral-strong)', settled.includes('bg-foreground'));
@@ -83,6 +84,48 @@ section('페이지네이션 10행 고정 (03 §2-4)');
   eq('헤더 1 + 본문 10행', rows, 11);
   check('페이지 번호 2 노출', text(settled).includes('2'));
   check('이전/다음 버튼', text(settled).includes('이전') && text(settled).includes('다음'));
+}
+
+section('테이블 divider — 헤더 아래 선이 살아 있어야 한다 (01 §6-4 · DS-00 §5-2)');
+{
+  mockDb.reset();
+  const { settled } = await render();
+  // last:border-0 을 tr 에 걸면 thead 의 tr 도 :last-child 라 헤더 divider 가 사라진다.
+  check('tr 에 last:border-0 이 없다', !settled.includes('last:border-0'));
+  // 마크업에서는 & 가 &amp; 로 이스케이프되므로 그 앞부분을 뺀 조각으로 본다.
+  check('마지막 행만 지우는 규칙은 tbody 에 있다', settled.includes('_tr:last-child]:border-0'));
+  const theadRow = /<thead[^>]*>\s*<tr class="([^"]*)"/.exec(settled);
+  check('헤더 tr 이 border-b 를 갖는다', theadRow !== null && theadRow[1].includes('border-b'), theadRow?.[1]);
+  check('컬럼 폭이 결정적(table-fixed)', settled.includes('table-fixed'));
+}
+
+section('재조회가 실패해도 Error State 와 본문이 겹치지 않는다 (01 §9)');
+{
+  mockDb.reset();
+  queryClient.clear();
+  // 이미 받아둔 데이터가 있는 상태를 만든다 (stale 로 두어 마운트 시 재조회가 돈다).
+  queryClient.setQueryData(syncKeys.summary(), {
+    semester: { academicYear: 2026, term: 'FIRST' },
+    courseCount: 1203,
+    scheduleCount: 2847,
+    lastJob: null,
+    runningJobId: null,
+  });
+  queryClient.setQueryDefaults(syncKeys.summary(), { staleTime: 0 });
+  server.use(
+    http.get('http://localhost:8080/api/v1/admin/courses/summary', () =>
+      HttpResponse.json({ code: 9999, message: '서버 오류' }, { status: 500 }),
+    ),
+  );
+
+  const { settled } = await probe.renderSyncMain(2500);
+  const body = text(settled);
+  check('기존 데이터는 그대로 보인다', body.includes('1,203건'));
+  // 토스트 문구에도 "다시 시도해주세요."가 들어 있어서 버튼 노드로 구분한다.
+  check('Error State 가 겹쳐 뜨지 않는다', !settled.includes('>다시 시도<'));
+  check('알림은 토스트가 한다', body.includes('서버에 문제가 생겼어요.'));
+  server.resetHandlers();
+  queryClient.clear();
 }
 
 section('null 분기 — semester (04 §10-2)');
@@ -142,7 +185,7 @@ section('Error — 500 이면 Error State + [다시 시도] (01 §9)');
   const { settled } = await render(2500);
   const body = text(settled);
   check('에러 문구', body.includes('서버에 문제가 생겼어요. 잠시 후 다시 시도해주세요.'));
-  check('[다시 시도] 버튼', body.includes('다시 시도'));
+  check('[다시 시도] 버튼', settled.includes('>다시 시도<'));
   check('경고 아이콘 48px', settled.includes('h-12 w-12'));
   server.resetHandlers();
 }

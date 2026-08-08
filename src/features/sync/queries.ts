@@ -2,12 +2,11 @@ import { useQuery } from '@tanstack/react-query';
 
 import { fetchCoursesSummary, fetchSyncJobs } from '@/features/sync/api';
 
-/** 04 §6-7 queryKey 팩토리. job·details 키는 Step 5·6 에서 쓴다. */
+/** 04 §6-7 queryKey 팩토리. `job`·`details` 키는 실제로 쓰는 Step 5-4·6 에서 추가한다. */
 export const syncKeys = {
   all: ['sync'] as const,
   summary: () => [...syncKeys.all, 'summary'] as const,
   jobs: (page: number) => [...syncKeys.all, 'jobs', page] as const,
-  job: (id: number) => [...syncKeys.all, 'job', id] as const,
 };
 
 export function useCoursesSummary() {
