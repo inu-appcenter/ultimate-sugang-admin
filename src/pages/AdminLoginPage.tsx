@@ -10,7 +10,7 @@ import { useLoginMutation } from '@/features/auth/queries';
 import { loginFormSchema, type LoginFormValues } from '@/features/auth/schemas';
 import { useAuthStore } from '@/features/auth/store';
 import { getErrorMessage } from '@/shared/api/errorHandler';
-import { consumeSessionExpiredNotice } from '@/shared/api/refreshQueue';
+import { consumeSessionExpiredFlag, SESSION_EXPIRED_MESSAGE } from '@/shared/api/refreshQueue';
 import { tokenManager } from '@/shared/api/tokenManager';
 import { FormField } from '@/shared/components/form/FormField';
 import { Button } from '@/shared/components/ui/button';
@@ -27,8 +27,7 @@ export function AdminLoginPage() {
   // 세션이 만료돼 튕겨 온 경우 "다시 로그인해주세요." 를 여기서 띄운다 (01 §9-1).
   // 하드 리로드를 거치면서 토스트가 날아가므로 표식을 넘겨받는 구조다.
   useEffect(() => {
-    const notice = consumeSessionExpiredNotice();
-    if (notice !== null) toast.error(notice);
+    if (consumeSessionExpiredFlag()) toast.error(SESSION_EXPIRED_MESSAGE);
   }, []);
 
   const {

@@ -38,6 +38,11 @@
       "text": ".env.development 을 사람이 만들어야 한다. PreToolUse 훅이 .env* 쓰기를 차단한다(우회하지 않음). 내용 2줄: VITE_API_HOST=http://localhost:8080 / VITE_USE_MSW=true. Step 2 에서 apiClient 가 src/env.ts 를 import 하는 순간부터 없으면 런타임에서 throw 한다."
     },
     {
+      "tag": "carry-forward",
+      "item": "step-5-3:M3_M4_execute",
+      "text": "[Step 5 로 이월] 에러 표시 모양을 셋이 통일해야 한다: 필드 인라인 에러(FieldError, 아이콘 없음) · 로그인 401 카드 에러(AlertTriangle) · M4 Strict Match 입력 검증 에러. DS 리뷰어가 Step 5 에서 제각각이면 위반으로 잡겠다고 예고했다. 또 헤더 로그아웃 버튼이 size=sm(32px)에 아이콘 20px 라 답답해 보이면 아이콘을 줄이지 말고 버튼 높이를 올린다(20px 이 DS-01 §7 값)."
+    },
+    {
       "tag": "decision",
       "item": "step-1:setup",
       "text": "shadcn 별칭 토큰(--accent, --destructive)은 새 값을 만들지 않고 DS-01 토큰을 가리키게 했다. accent=bg-hover(shadcn 의 중립 hover 표면이며 DS-01 이 제거한 보라 의미색과 다름), destructive=danger-bg / destructive-foreground=danger-text (ui-conventions 의 `bg-danger-bg`(≡`bg-destructive`) 매핑을 그대로 따름)."

@@ -5,6 +5,7 @@ import { AdminMenu } from '@/features/auth/components/AdminMenu';
 import { useAuthStore } from '@/features/auth/store';
 import { AdminLoginPage } from '@/pages/AdminLoginPage';
 import { SyncMainPage } from '@/pages/SyncMainPage';
+import { markSessionExpired } from '@/shared/api/refreshQueue';
 import { tokenManager } from '@/shared/api/tokenManager';
 import { LoginLayout } from '@/shared/components/layout/LoginLayout';
 import { MainLayout } from '@/shared/components/layout/MainLayout';
@@ -32,7 +33,9 @@ const protectedLoader: LoaderFunction = async () => {
     tokenManager.set(reissued.accessToken, reissued.name);
     setAdmin(reissued.name);
   } catch {
+    // 여기서만 정리한다 — 인터셉터는 재발급 401 을 그대로 넘겨준다(경쟁 방지).
     tokenManager.clear();
+    markSessionExpired();
     throw redirect(ROUTES.LOGIN);
   }
   return null;
