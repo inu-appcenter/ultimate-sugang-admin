@@ -62,7 +62,7 @@ section('재발급 실패 → 토큰 폐기 + 로그인 화면으로');
   check('요청이 거부됨', err instanceof Error);
   eq('토큰 폐기됨', tokenManager.getAccessToken(), null);
   check('하드 이동 발생', dom.hardNavigated === true);
-  eq('세션 만료 안내가 리로드 너머로 넘어감', sessionStorage.getItem('uss_admin_session_expired'), '다시 로그인해주세요.');
+  eq('세션 만료 표식이 리로드 너머로 넘어감', sessionStorage.getItem('uss_admin_session_expired'), '1');
   sessionStorage.clear();
   mockDb.setRefreshBlocked(false);
 }

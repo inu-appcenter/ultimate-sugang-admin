@@ -8,6 +8,9 @@ const { mockDb } = await load('/src/mocks/db.ts');
 const { tokenManager } = await load('/src/shared/api/tokenManager.ts');
 const { installRefreshInterceptor } = await load('/src/shared/api/refreshQueue.ts');
 const { login, reissueToken } = await load('/src/features/auth/api.ts');
+const { consumeSessionExpiredFlag, SESSION_EXPIRED_MESSAGE } = await load(
+  '/src/shared/api/refreshQueue.ts',
+);
 const { useAuthStore } = await load('/src/features/auth/store.ts');
 const { loginFormSchema } = await load('/src/features/auth/schemas.ts');
 const { router } = await load('/src/app/router.tsx');
@@ -60,12 +63,23 @@ section('protectedLoader (04 §7-3)');
 
   mockDb.setRefreshBlocked(true);
   localStorage.clear();
+  sessionStorage.clear();
+  dom.hardNavigated = false;
   localStorage.setItem('uss_admin_access_token', 'mock-access-token-dead');
   useAuthStore.getState().reset();
   const dead = await runLoader().catch((e) => e);
   check('재발급 실패 시 리다이렉트', dead instanceof Response);
   eq('토큰 폐기됨', tokenManager.getAccessToken(), null);
+  // 인터셉터가 하드 이동까지 하면 라우터 이동과 경쟁해 만료 안내가 사라진다. 로더만 정리해야 한다.
+  check('인터셉터가 하드 이동을 걸지 않는다', dom.hardNavigated === false);
   mockDb.setRefreshBlocked(false);
+}
+
+section('세션 만료 안내 (01 §9-1)');
+{
+  check('로더 경로에서 표식이 남았다', consumeSessionExpiredFlag() === true);
+  check('두 번째 호출은 false — 토스트가 두 번 뜨지 않는다', consumeSessionExpiredFlag() === false);
+  eq('문구 출처는 한 곳', SESSION_EXPIRED_MESSAGE, '다시 로그인해주세요.');
   sessionStorage.clear();
 }
 

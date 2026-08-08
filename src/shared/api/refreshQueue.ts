@@ -29,18 +29,28 @@ function notifyWaiters(token: string | null): void {
 }
 
 /**
- * 세션 만료 안내를 리로드 너머로 넘기는 일회용 표식.
+ * 세션 만료 안내를 화면 전환 너머로 넘기는 일회용 표식.
+ *
  * `04 §6-4` 가 시키는 대로 하드 이동을 하면 문서가 사라지면서 토스트도 같이 날아간다.
  * 그런데 `01 §9-1` 은 "다시 로그인해주세요." 를 **보여주라**고 한다. 그래서 표식만 남기고
- * 로그인 화면이 대신 띄운다.
+ * 로그인 화면이 대신 띄운다. 값은 `'1'` 만 넣는다 — 문구를 저장하면 배포 전에 남은 옛 문구가
+ * 배포 후에 떠오를 수 있고 문구 출처가 두 군데로 갈린다.
  */
 const SESSION_EXPIRED_KEY = 'uss_admin_session_expired';
 
+/** 01 §9-1 의 세션 만료 문구. 출처는 여기 하나다. */
+export const SESSION_EXPIRED_MESSAGE = '다시 로그인해주세요.';
+
+/** 세션이 끊겼음을 로그인 화면에 알린다. protectedLoader 도 자기 경로에서 이걸 부른다. */
+export function markSessionExpired(): void {
+  sessionStorage.setItem(SESSION_EXPIRED_KEY, '1');
+}
+
 /** 로그인 화면이 마운트될 때 한 번 꺼내 쓴다. 두 번 뜨지 않도록 꺼내면서 지운다. */
-export function consumeSessionExpiredNotice(): string | null {
-  const notice = sessionStorage.getItem(SESSION_EXPIRED_KEY);
-  if (notice !== null) sessionStorage.removeItem(SESSION_EXPIRED_KEY);
-  return notice;
+export function consumeSessionExpiredFlag(): boolean {
+  const marked = sessionStorage.getItem(SESSION_EXPIRED_KEY) !== null;
+  if (marked) sessionStorage.removeItem(SESSION_EXPIRED_KEY);
+  return marked;
 }
 
 /**
@@ -49,7 +59,7 @@ export function consumeSessionExpiredNotice(): string | null {
  */
 function forceLogout(): void {
   tokenManager.clear();
-  sessionStorage.setItem(SESSION_EXPIRED_KEY, '다시 로그인해주세요.');
+  markSessionExpired();
   window.location.href = ROUTES.LOGIN;
 }
 
@@ -64,11 +74,12 @@ export function installRefreshInterceptor(): void {
 
       if (original.url?.includes(LOGIN_PATH)) return Promise.reject(error);
 
-      // 재발급 요청 자체가 401 이면 되살릴 방법이 없다.
-      if (original.url?.includes(REFRESH_PATH)) {
-        forceLogout();
-        return Promise.reject(error);
-      }
+      /**
+       * 재발급 요청 자체가 401 이면 여기서 되살릴 방법이 없다. 다만 **여기서 로그아웃시키지 않는다.**
+       * 부른 쪽이 정리한다 — 아래 큐가 부른 경우는 catch 가, protectedLoader 가 직접 부른 경우는
+       * 로더가 처리한다. 둘 다 하면 하드 이동과 라우터 이동이 경쟁해서 만료 안내가 사라진다.
+       */
+      if (original.url?.includes(REFRESH_PATH)) return Promise.reject(error);
       original._retry = true;
 
       if (isRefreshing) {
