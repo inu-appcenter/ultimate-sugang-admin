@@ -57,7 +57,7 @@ export function ConfirmModal({
             {cancelLabel}
           </Button>
           <Button variant={confirmVariant} onClick={onConfirm} disabled={confirmDisabled || isPending}>
-            {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+            {isPending && <Loader2 className="h-5 w-5 animate-spin" />}
             {confirmLabel}
           </Button>
         </DialogFooter>
