@@ -1,0 +1,59 @@
+{
+  "id": "step-5-1:M1_semester",
+  "spec": "PASS",
+  "ds": "PASS",
+  "commit": "ef8b44d",
+  "ts": "2026-08-08",
+  "rounds": { "spec": 2, "ds": 3 },
+  "diffs": [
+    {
+      "round": 1,
+      "reviewer": "spec",
+      "verdict": "FAIL",
+      "finding": "모달 파일명이 04 §4 트리(137행)의 SemesterSettingModal.tsx 와 다름(DisplaySemesterModal.tsx). 구조는 04 가 정한다(source-of-truth §1-2).",
+      "fix": "파일·컴포넌트·필드 id(semester-setting-year/term) 를 트리 이름에 맞춰 rename. 커밋 e78586c."
+    },
+    {
+      "round": 1,
+      "reviewer": "ds",
+      "verdict": "FAIL",
+      "finding": "[저장]이 isPending 동안 disabled 만 되고 spinner 가 없음. DS-01 §6 Loading 행이 'spinner + 텍스트, disabled' 를 규정하고 AdminLoginPage 의 [로그인]이 이미 그 형태.",
+      "fix": "Loader2 h-5 w-5 animate-spin 추가. 커밋 119586b."
+    },
+    {
+      "round": 1,
+      "reviewer": "ds",
+      "verdict": "보완",
+      "finding": "select.tsx 의 min-w-[8rem] 임의 값. Tailwind 표준 min-w-32 가 같은 8rem.",
+      "fix": "min-w-32 로 교체(생성 CSS 로 동일 값 확인). 커밋 119586b."
+    },
+    {
+      "round": 1,
+      "reviewer": "ds",
+      "verdict": "보완",
+      "finding": "로컬 FieldRow 가 features/semester 안에 있어 M2(features/sync)가 재사용할 수 없다. features 간 직접 import 금지라 복붙이 나올 자리.",
+      "fix": "shared/components/form/FieldRow.tsx 로 상향. prop 이름은 같은 폴더 FormField 에 맞춰 htmlFor → id. 커밋 119586b."
+    },
+    {
+      "round": 2,
+      "reviewer": "ds",
+      "verdict": "FAIL",
+      "finding": "맨 duration-200 은 특이도 (0,1,0) 이라 data-[state=open]:animate-in 이 만드는 (0,2,0) 규칙의 150ms 한테 진다. 모달이 step-3 부터 150ms 로 떠 있었다. select.tsx 가 dialog.tsx 의 같은 결함을 복제.",
+      "fix": "dialog.tsx(overlay·content)·select.tsx 세 곳에서 맨 duration-200 을 빼고 data-[state=open]:duration-200 data-[state=closed]:duration-200 으로 교체. 생성 CSS 로 순서·특이도 확인. 커밋 ef8b44d."
+    },
+    {
+      "round": 3,
+      "reviewer": "ds",
+      "verdict": "보완",
+      "finding": "tooltip.tsx 의 닫힘 모션에 같은 결함이 남아 있다(열림 200ms / 닫힘 150ms). 마크업 스코프 가드로는 그 화면에 안 뜬 컴포넌트를 못 잡는다.",
+      "fix": "tooltip.tsx 에 data-[state=closed]:duration-200 추가. harness 가드를 src/shared/components/ui/**.tsx 소스 스캔으로 확장(variant animate ↔ variant duration 짝 검사)."
+    }
+  ],
+  "open_questions": [
+    {
+      "tag": "spec-gap",
+      "text": "서버의 academicYear 가 현재 연도 ±2 밖일 때 동작이 명세에 없다. 01 §7-1 은 '연도 옵션 = 현재 연도 ±2' 와 '초기값 = 현재 설정값' 을 동시에 요구하고, 03 §4-2 는 연도 범위를 클라이언트 UI 제약으로만 규정해 서버가 범위 밖 값을 들고 있을 수 있다. 지금은 매칭 옵션이 없어 트리거가 빈칸이 되고 isDirty=false 라 [저장]도 꺼진다. 명세 밖이라 임의로 채우지 않았다."
+    }
+  ],
+  "verify": "harness/verify/step-5-1.mjs 40건 (전체 182건)"
+}
