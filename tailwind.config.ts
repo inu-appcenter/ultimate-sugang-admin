@@ -102,6 +102,13 @@ export default {
         sm: 'calc(var(--radius) - 4px)',
       },
 
+      /**
+       * Tailwind 기본 aria 목록에 invalid 가 없다(busy·checked·disabled·expanded·hidden·
+       * pressed·readonly·required·selected 9개뿐). 이걸 안 넣으면 입력창 에러 링
+       * (DS-01 §6-1)이 클래스 자체로 생성되지 않는다.
+       */
+      aria: { invalid: 'invalid="true"' },
+
       // DS-01 §4-2 — 카드에 보더를 쓰지 않고 그림자로 층을 만든다.
       boxShadow: {
         card: '0 2px 10px rgba(32, 38, 50, 0.05)',

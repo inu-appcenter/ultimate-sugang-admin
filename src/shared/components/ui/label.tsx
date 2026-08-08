@@ -10,10 +10,8 @@ const Label = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <LabelPrimitive.Root
     ref={ref}
-    className={cn(
-      'text-body text-fg-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
-      className,
-    )}
+    // shadcn 기본의 peer-disabled:* 는 뺐다 — 라벨이 입력창 앞에 오는 구조라 peer 매칭이 성립하지 않는다.
+    className={cn('text-body text-fg-secondary', className)}
     {...props}
   />
 ));
