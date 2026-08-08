@@ -16,7 +16,7 @@ export function Header({ right }: { right?: ReactNode }) {
       <div className="h-full px-8">
         <div className="mx-auto flex h-full max-w-content items-center justify-between">
           <Link
-            to={ROUTES.SYNC_MAIN}
+            to={ROUTES.HOME}
             className="text-h3 text-foreground transition-colors hover:text-primary"
           >
             USS 관리자
