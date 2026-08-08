@@ -287,6 +287,107 @@ export async function focusBlockedUpdateButton(settleMs = 2500) {
   return { settled, focused, hasWrapper: wrapper !== undefined };
 }
 
+/** React 는 value 를 직접 대입해도 모른다. 네이티브 setter 로 넣고 input 이벤트를 태운다. */
+function typeInto(input: HTMLInputElement, value: string) {
+  const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+  setter?.call(input, value);
+  input.dispatchEvent(new window.Event('input', { bubbles: true }));
+}
+
+/**
+ * M2 에서 [다음] 을 눌러 확인 모달(M3·M4·최초 적재)까지 간다.
+ * `confirmText` 는 M4 Strict Match 입력, `actionLabel` 은 실행 버튼 라벨이다.
+ */
+export async function runSyncConfirmFlow({
+  termLabel = null,
+  confirmText = null,
+  actionLabel = null,
+  reopen = false,
+  settleMs = 200,
+} = {}) {
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const root = createRoot(container);
+
+  await act(async () => {
+    root.render(
+      <Providers>
+        <RouterProvider
+          router={createMemoryRouter([{ path: '/', element: <SyncMainPage /> }], {
+            initialEntries: ['/'],
+          })}
+        />
+      </Providers>,
+    );
+  });
+  await act(async () => {
+    await sleep(settleMs);
+  });
+
+  const openTarget = async () => {
+    await act(async () => {
+      buttonByText(container, '데이터 업데이트')?.click();
+    });
+    await act(async () => {
+      await sleep(settleMs);
+    });
+    if (termLabel !== null) await chooseOption('sync-target-term', termLabel, settleMs);
+    const dialog = openDialog();
+    await act(async () => {
+      if (dialog !== null) buttonByText(dialog, '다음')?.click();
+    });
+    await act(async () => {
+      await sleep(settleMs);
+    });
+  };
+
+  await openTarget();
+  const confirmDialog = dialogHtml();
+
+  let reopened = '';
+  if (reopen) {
+    const dialog = openDialog();
+    await act(async () => {
+      if (dialog !== null) buttonByText(dialog, '취소')?.click();
+    });
+    await act(async () => {
+      await sleep(settleMs);
+    });
+    await openTarget();
+    reopened = dialogHtml();
+  }
+  const reopenedInput = (document.getElementById('sync-replace-confirm') as HTMLInputElement | null)
+    ?.value;
+
+  if (confirmText !== null) {
+    const input = document.getElementById('sync-replace-confirm');
+    await act(async () => {
+      if (input !== null) typeInto(input as HTMLInputElement, confirmText);
+    });
+    await act(async () => {
+      await sleep(settleMs);
+    });
+  }
+  const typed = dialogHtml();
+
+  if (actionLabel !== null) {
+    const dialog = openDialog();
+    await act(async () => {
+      if (dialog !== null) buttonByText(dialog, actionLabel)?.click();
+    });
+    await act(async () => {
+      await sleep(settleMs);
+    });
+  }
+  const afterAction = document.body.innerHTML;
+
+  await act(async () => {
+    root.unmount();
+  });
+  container.remove();
+  return { confirmDialog, reopened, reopenedInput, typed, afterAction };
+}
+
 /** 훅을 실제로 마운트해 mutate 를 돌린다. invalidation 범위(D10)를 캐시에서 직접 본다. */
 export async function runDisplaySemesterUpdate(body: DisplaySemester, settleMs = 300) {
   let mutate: ((value: DisplaySemester) => void) | null = null;

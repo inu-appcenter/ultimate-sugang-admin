@@ -1,9 +1,12 @@
 import {
   coursesSummarySchema,
   syncJobPageSchema,
+  syncJobCreatedSchema,
   syncPreflightSchema,
   type CoursesSummary,
   type SemesterRef,
+  type SyncJobCreated,
+  type SyncJobCreateRequest,
   type SyncJobPage,
   type SyncPreflight,
 } from '@/features/sync/schemas';
@@ -22,4 +25,9 @@ export async function fetchSyncJobs(page: number): Promise<SyncJobPage> {
 export async function requestSyncPreflight(target: SemesterRef): Promise<SyncPreflight> {
   const { data } = await apiClient.post('/sync/preflight', target);
   return syncPreflightSchema.parse(data);
+}
+
+export async function createSyncJob(body: SyncJobCreateRequest): Promise<SyncJobCreated> {
+  const { data } = await apiClient.post('/sync/jobs', body);
+  return syncJobCreatedSchema.parse(data);
 }

@@ -73,10 +73,17 @@ section('preflight 는 DB 를 바꾸지 않는다 (03 §6-1)');
   eq('summary 그대로', await fetchCoursesSummary(), before);
 }
 
-section('D4 — 클라이언트가 전략을 계산하지 않는다');
+section('D4 — 클라이언트가 전략 값을 만들어내지 않는다');
 {
-  // 전략 리터럴로 분기하는 코드가 features/pages 에 있으면 판정을 흉내 낸 것이다.
-  const decide = /(?:===|!==|\?|:)\s*['"](INITIAL|UPSERT|REPLACE)['"]/;
+  // 서버가 준 strategy 를 읽고 모달을 고르는 건 03 §6-1 "클라이언트 분기" 가 시키는 일이다.
+  // 막아야 하는 건 클라이언트가 전략 값을 스스로 **생산**하는 것 — 대입·반환·삼항 결과.
+  const STRATEGY = "(?:INITIAL|UPSERT|REPLACE)";
+  const produces = [
+    new RegExp(`(?<![=!<>])=\\s*['"]${STRATEGY}['"]`),
+    new RegExp(`return\\s+['"]${STRATEGY}['"]`),
+    new RegExp(`\\?\\s*['"]${STRATEGY}['"]`),
+    /expectedStrategy:\s*['"]/,
+  ];
   const offenders = [];
 
   const walk = (dir) => {
@@ -87,13 +94,27 @@ section('D4 — 클라이언트가 전략을 계산하지 않는다');
         continue;
       }
       if (!/\.tsx?$/.test(name)) continue;
-      if (decide.test(readFileSync(path, 'utf8'))) offenders.push(path.replace(process.cwd(), ''));
+      const source = readFileSync(path, 'utf8');
+      if (produces.some((rule) => rule.test(source))) offenders.push(path.replace(process.cwd(), ''));
     }
   };
   walk(join(process.cwd(), 'src/features'));
   walk(join(process.cwd(), 'src/pages'));
 
-  eq('전략 리터럴로 분기하는 파일', offenders, []);
+  eq('전략 값을 만들어내는 파일', offenders, []);
+  // 가드가 살아 있는지 확인 — 위 규칙이 실제 위반을 잡아야 한다.
+  check(
+    '가드가 대입을 잡는다',
+    produces.some((rule) => rule.test("const strategy = 'REPLACE';")),
+  );
+  check(
+    '가드가 expectedStrategy 하드코딩을 잡는다',
+    produces.some((rule) => rule.test("{ expectedStrategy: 'UPSERT' }")),
+  );
+  check(
+    '서버 값 비교는 통과시킨다',
+    !produces.some((rule) => rule.test("preflight.strategy === 'REPLACE'")),
+  );
 }
 
 section('M2 마크업 — [데이터 업데이트] 로 연다 (01 §7-2)');
