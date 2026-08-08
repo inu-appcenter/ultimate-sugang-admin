@@ -4,12 +4,6 @@ import * as React from 'react';
 
 import { cn } from '@/shared/lib/cn';
 
-/**
- * shadcn/ui Button 을 DS-01 로 맞춘 것.
- *  - radius 는 rounded-btn(10px). shadcn 기본 6px 를 쓰지 않는다 (DS-01 §4-1).
- *  - variant 는 DS-01 §5-5 의 4종뿐이다. secondary·link 는 USS 에 사용처가 없어 뺐다.
- *  - focus 는 ring-2 + primary-subtle, disabled 는 opacity 50 (DS-01 §6).
- */
 const buttonVariants = cva(
   'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-btn font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-subtle disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0',
   {

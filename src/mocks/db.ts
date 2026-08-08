@@ -1,9 +1,3 @@
-/**
- * MSW in-memory 상태 (04 §11).
- * 백엔드 9개 엔드포인트가 전부 미구현이라 여기서 서버를 흉내 낸다.
- * ⚠️ 응답 모양은 `03` 계약과 1:1 이어야 한다 — 어긋나면 VITE_USE_MSW=false 로 바꾸는 순간 전부 깨진다.
- */
-
 export type Term = 'FIRST' | 'SECOND' | 'SUMMER' | 'WINTER';
 export type Strategy = 'INITIAL' | 'UPSERT' | 'REPLACE';
 export type JobStatus = 'RUNNING' | 'SUCCESS' | 'FAILED';
@@ -50,15 +44,9 @@ export interface DetailRecord {
   reason: string | null;
 }
 
-// ── 시각 ──────────────────────────────────────────────────────
 const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
 const pad2 = (n: number) => String(n).padStart(2, '0');
 
-/**
- * epoch ms → `"YYYY-MM-DDTHH:mm:ss"` (KST 로컬, 오프셋·Z 없음 — 03 §2-6).
- * Date 파싱도 toISOString 도 쓰지 않는다. 둘 다 UTC 로 새기 쉬워서 계약이 깨진다.
- * 날짜 역산은 Howard Hinnant 의 civil-from-days 다.
- */
 export function toKstLocalString(epochMs: number): string {
   const totalSeconds = Math.floor((epochMs + KST_OFFSET_MS) / 1000);
   const days = Math.floor(totalSeconds / 86400);
@@ -84,7 +72,6 @@ export function toKstLocalString(epochMs: number): string {
 
 export const nowKst = () => toKstLocalString(Date.now());
 
-// ── 시드 ──────────────────────────────────────────────────────
 const ADMIN_NAME = '김학사';
 
 const successJob = (
@@ -113,13 +100,12 @@ const successJob = (
   ...overrides,
 });
 
-/** startedAt 내림차순(최신 우선). 12건이라 페이지네이션(10행)이 2페이지가 된다. */
 const seedJobs = (): JobRecord[] => [
   successJob(41, '2026-08-05T14:22:00', {
     createdCount: 12,
     updatedCount: 45,
     closedCount: 3,
-    warningCount: 2, // D12 — 경고가 있어도 상태는 SUCCESS 다
+    warningCount: 2,
   }),
   {
     jobId: 40,
@@ -179,7 +165,6 @@ const UPDATED_SAMPLES: Array<[string, string, string, string, string]> = [
   ['0000018117', '영상처리', 'area', '핵심교양', '일반교양'],
 ];
 
-/** Job 41 상세. [더 보기]가 눌리도록 수정 탭을 10건 넘게 채운다. */
 const seedDetails = (): DetailRecord[] => [
   ...UPDATED_SAMPLES.map(([haksuCode, courseName, field, before, after]) => ({
     changeType: 'UPDATED' as const,
@@ -212,24 +197,20 @@ const seedDetails = (): DetailRecord[] => [
   {
     changeType: 'WARNING',
     haksuCode: '0000017912',
-    courseName: null, // 적재 실패로 과목명을 확보하지 못한 경우 (03 §6-5)
+    courseName: null,
     changedFields: null,
     reason: '미등록 단과대학 코드: 77',
   },
 ];
 
-// ── 상태 ──────────────────────────────────────────────────────
 interface MockState {
-  /** 표시 학기. 카드 1 용이며 적재 데이터와 완전히 독립이다 (D10). */
   displaySemester: SemesterRef | null;
-  /** 적재 데이터. courses 는 항상 단일 학기다 (D9). */
   loadedSemester: SemesterRef | null;
   courseCount: number;
   scheduleCount: number;
   jobs: JobRecord[];
   details: Map<number, DetailRecord[]>;
   validTokens: Set<string>;
-  /** QA 스위치 — 켜면 `/auth/refresh` 가 401 을 준다(재발급 실패 → /login 흐름 확인용). */
   refreshBlocked: boolean;
   nextJobId: number;
   nextTokenId: number;
@@ -250,8 +231,6 @@ const initialState = (): MockState => ({
 
 let state = initialState();
 
-// ── Job 진행 시뮬레이션 (04 §11-2) ─────────────────────────────
-/** ⚠️ t=0 의 `total: null` 구간을 반드시 지난다 — 이게 없으면 `{단계} 중…` 분기가 검증되지 않는다. */
 const JOB_TIMELINE: Array<{ atMs: number; progress: JobProgress }> = [
   { atMs: 0, progress: { phase: 'COURSE_FETCH', current: 0, total: null } },
   { atMs: 2_000, progress: { phase: 'COURSE_FETCH', current: 1, total: 12 } },
@@ -290,7 +269,6 @@ function runJob(job: JobRecord): void {
   }, JOB_FINISH_MS);
 }
 
-// ── 조작 API ──────────────────────────────────────────────────
 export const mockDb = {
   get state() {
     return state;
@@ -300,7 +278,6 @@ export const mockDb = {
     state = initialState();
   },
 
-  // 인증
   issueToken: () => {
     const token = `mock-access-token-${state.nextTokenId}`;
     state.nextTokenId += 1;
@@ -308,20 +285,16 @@ export const mockDb = {
     return token;
   },
   isValidToken: (token: string) => state.validTokens.has(token),
-  /** QA 용. 발급된 토큰을 전부 무효로 만든다 → 다음 요청이 401 이 되어 재발급 흐름을 탄다. */
   expireTokens: () => {
     state.validTokens.clear();
   },
-  /** QA 용. 재발급까지 실패시켜 강제 로그아웃 경로를 확인한다. */
   setRefreshBlocked: (blocked: boolean) => {
     state.refreshBlocked = blocked;
   },
 
-  // Sync
   findJob: (jobId: number) => state.jobs.find((job) => job.jobId === jobId),
   findRunningJob: () => state.jobs.find((job) => job.status === 'RUNNING'),
 
-  /** D4 — 전략은 서버가 판정한다. 클라이언트가 고르지 않는다. */
   decideStrategy: (target: SemesterRef): Strategy => {
     const current = state.loadedSemester;
     if (current === null) return 'INITIAL';
@@ -329,7 +302,6 @@ export const mockDb = {
     return same ? 'UPSERT' : 'REPLACE';
   },
 
-  /** REPLACE 일 때만 실제 삭제 예정 건수가 나온다. 나머지는 전부 0 (03 §6-1). */
   deleteCounts: (strategy: Strategy) =>
     strategy === 'REPLACE'
       ? { courses: state.courseCount, schedules: state.scheduleCount, carts: 87, registrations: 41 }

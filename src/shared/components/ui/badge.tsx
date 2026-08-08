@@ -3,14 +3,6 @@ import * as React from 'react';
 
 import { cn } from '@/shared/lib/cn';
 
-/**
- * DS-01 §6-2 의 variant 만 둔다. shadcn 기본(default·secondary·destructive·outline)은
- * USS 에 대응하는 의미가 없어 뺐다.
- *
- * ⚠️ REPLACE(교체)가 neutral-strong 인 건 색을 늘리지 않고 **명도**로만 강조하기 때문이다
- * (DS-00 §4-1 원칙 4). `01 §6-4` 의 (info)/(accent) 표기는 DS-01 이 두 색을 제거하기 전
- * Gravit 서술이 남은 것이다.
- */
 const badgeVariants = cva(
   'inline-flex items-center rounded-btn px-2 py-0.5 text-caption font-medium',
   {

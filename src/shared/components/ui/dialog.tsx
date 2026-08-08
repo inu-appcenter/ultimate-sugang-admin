@@ -4,13 +4,6 @@ import * as React from 'react';
 
 import { cn } from '@/shared/lib/cn';
 
-/**
- * shadcn/ui Dialog 를 DS-01 로 맞춘 것.
- *  - radius 는 rounded-modal(16px), 그림자는 shadow-modal, 보더 없음 (DS-01 §4).
- *  - 내부 padding 24 (DS-01 §3). 폭은 쓰는 쪽이 max-w-modal(400) / max-w-modal-wide(480) 로 준다.
- *  - 반응형이 없으므로 sm: breakpoint 를 전부 걷어냈다.
- *  - 닫는 방법은 ESC · 바깥 클릭 · X 셋 다 살려둔다 (rules/ui-conventions.md).
- */
 const Dialog = DialogPrimitive.Root;
 const DialogTrigger = DialogPrimitive.Trigger;
 const DialogPortal = DialogPrimitive.Portal;
@@ -66,7 +59,6 @@ const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
 );
 DialogFooter.displayName = 'DialogFooter';
 
-/** 모달 타이틀은 h3(16/SemiBold) — DS-01 §2. */
 const DialogTitle = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>

@@ -12,19 +12,12 @@ import { formatNumber } from '@/shared/lib/formatNumber';
 import { formatSemesterCompact } from '@/shared/lib/formatSemester';
 import { formatDateTime } from '@/shared/lib/formatDateTime';
 
-/**
- * 카운트는 SUCCESS 가 아니면 null 이다.
- * null 을 0 으로 덮지 않는다 — 둘은 뜻이 다르다. 화면에는 `-` 로 보여준다 (04 §9-1).
- */
 const countCell = (value: number | null) => (value === null ? '-' : formatNumber(value));
 
-/** 01 §6-4 가 정한 컬럼 폭(px). 합계 640 이라 콘텐츠 1024 안에 여유롭게 들어간다. */
 const columns: Array<DataTableColumn<SyncJobListItem>> = [
   {
     key: 'startedAt',
     header: '일시',
-    // 01 §6-4 컬럼 표가 정한 `YYYY-MM-DD HH:mm`. 150px 폭도 이 형식 기준이다.
-    // (§6-1 와이어프레임은 박스 폭에 맞춰 줄여 그린 예시라 근거로 쓰지 않는다 — 사용자 확정)
     width: 150,
     render: (job) => formatDateTime(job.startedAt),
   },
@@ -56,10 +49,6 @@ interface SyncJobTableProps {
   onPageChange: (page: number) => void;
 }
 
-/**
- * 이력 테이블 (01 §6-4). 테이블도 **카드로 감싸되** 안쪽 행 높이는 표준을 지킨다 (DS-00 §5-3).
- * 행 클릭 → 인라인 확장은 Step 6 에서 붙인다.
- */
 export function SyncJobTable({ page, onPageChange }: SyncJobTableProps) {
   const { data, isPending, isError, error, refetch } = useSyncJobs(page);
 
@@ -69,8 +58,6 @@ export function SyncJobTable({ page, onPageChange }: SyncJobTableProps) {
 
       {isPending && <LoadingSkeleton rows={5} className="mt-4" />}
 
-      {/* 이미 받아둔 데이터가 있으면 그걸 계속 보여준다. 재조회 실패는 전역 토스트가 알린다 —
-          Error State 와 본문이 같이 뜨면 화면이 깨진다. 카드 1·2 도 같은 규칙이다. */}
       {isError && data === undefined && (
         <ErrorState message={getErrorMessage(error)} onRetry={() => void refetch()} />
       )}

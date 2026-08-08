@@ -7,10 +7,6 @@ const TooltipProvider = TooltipPrimitive.Provider;
 const Tooltip = TooltipPrimitive.Root;
 const TooltipTrigger = TooltipPrimitive.Trigger;
 
-/**
- * 배경은 Primary 가 아니라 `bg-foreground` 다 — Primary 는 CTA·활성 탭에만 쓰고
- * 화면의 5~10%를 넘기지 않는다 (DS-01 §1-1). 안내용 말풍선은 명도로 처리한다.
- */
 const TooltipContent = React.forwardRef<
   React.ElementRef<typeof TooltipPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>

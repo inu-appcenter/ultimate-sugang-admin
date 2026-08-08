@@ -5,7 +5,6 @@ import { Toaster } from 'sonner';
 import { queryClient } from '@/shared/api/queryClient';
 import { TooltipProvider } from '@/shared/components/ui/tooltip';
 
-/** 토스트는 우상단, 3초 뒤 사라진다 (DS-01 §5-6). 색은 DS 토큰만 쓴다. */
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>

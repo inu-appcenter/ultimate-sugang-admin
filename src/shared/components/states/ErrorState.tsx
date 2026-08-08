@@ -7,7 +7,6 @@ interface ErrorStateProps {
   onRetry: () => void;
 }
 
-/** DS-01 §5-6 — 경고 아이콘 48px + 메시지 + [다시 시도]. */
 export function ErrorState({ message, onRetry }: ErrorStateProps) {
   return (
     <div className="flex flex-col items-center gap-3 py-12">
