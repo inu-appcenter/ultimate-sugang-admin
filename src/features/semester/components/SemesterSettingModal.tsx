@@ -5,7 +5,6 @@ import { toast } from 'sonner';
 
 import { useUpdateDisplaySemester } from '@/features/semester/queries';
 import { displaySemesterSchema, type DisplaySemester } from '@/features/semester/schemas';
-import { showErrorToast } from '@/shared/api/errorHandler';
 import { FieldRow } from '@/shared/components/form/FieldRow';
 import { Button } from '@/shared/components/ui/button';
 import {
@@ -72,7 +71,6 @@ function SemesterSettingForm({
         toast.success('표시 학기를 변경했어요.');
         onClose();
       },
-      onError: showErrorToast,
     });
   });
 
