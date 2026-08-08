@@ -166,7 +166,9 @@ section('RUNNING — 버튼 비활성 + 툴팁 (01 §6-3)');
   mockDb.reset();
   mockDb.createJob({ academicYear: 2026, term: 'FIRST' }, 'UPSERT', '김학사');
   const { settled } = await render();
-  check('업데이트 버튼 disabled', /<button[^>]*disabled[^>]*>[^<]*데이터 업데이트/.test(settled));
+  // class 의 `disabled:` 변형에 걸려 항상 통과하지 않도록 속성 자리를 본다.
+  const updateTag = /<button[^>]*(?=>\s*데이터 업데이트\s*<\/button>)/.exec(settled)?.[0] ?? '';
+  check('업데이트 버튼 disabled', /\sdisabled(?:=|\s|$)/.test(updateTag), updateTag.slice(-40));
   check('진행 중 배지', text(settled).includes('진행 중'));
 }
 

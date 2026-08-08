@@ -23,11 +23,15 @@ const { result, check, eq, section } = createChecker();
 
 const text = (html) => html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
 
-const nextButtonTag = (html) => {
-  const element = /<button[^>]*>(?:(?!<\/button>)[\s\S])*?다음\s*<\/button>/.exec(html)?.[0];
+const buttonTag = (html, label) => {
+  const pattern = new RegExp(`<button[^>]*>(?:(?!</button>)[\\s\\S])*?${label}\\s*</button>`);
+  const element = pattern.exec(html)?.[0];
   return element === undefined ? '' : (/<button[^>]*>/.exec(element)?.[0] ?? '');
 };
+// class 에 Tailwind 의 `disabled:` 변형이 들어 있어서 속성 자리인지까지 봐야 한다.
 const isDisabled = (tag) => /\sdisabled(?:=|\s|$)/.test(tag);
+const nextButtonTag = (html) => buttonTag(html, '다음');
+const updateButtonTag = (html) => buttonTag(html, '데이터 업데이트');
 
 const PREFLIGHT_URL = 'http://localhost:8080/api/v1/admin/sync/preflight';
 const ZERO_COUNTS = { courses: 0, schedules: 0, carts: 0, registrations: 0 };
@@ -179,6 +183,40 @@ section('판정 실패 — 토스트 + 모달 유지 (04 §9-2)');
   check('모달은 열린 채로 둔다', body.includes('적재할 학기를 골라주세요.'));
 
   server.resetHandlers();
+  queryClient.clear();
+}
+
+section('초기값을 못 정하면 [데이터 업데이트] 를 잠근다 (사용자 결정 · 01 §6-3 보완)');
+{
+  mockDb.reset();
+  mockDb.state.loadedSemester = null;
+  mockDb.state.courseCount = 0;
+  mockDb.state.scheduleCount = 0;
+  queryClient.clear();
+  server.use(
+    http.get('http://localhost:8080/api/v1/admin/semesters/display', () =>
+      HttpResponse.json({ code: 5100, message: '표시 학기 설정이 없습니다.' }, { status: 404 }),
+    ),
+  );
+
+  const { settled, focused, hasWrapper } = await probe.focusBlockedUpdateButton();
+  check('버튼을 span 으로 감싸 툴팁을 붙였다', hasWrapper);
+  check('[데이터 업데이트] 비활성', isDisabled(updateButtonTag(settled)));
+  check('툴팁 문구', text(focused).includes('학기 정보를 불러온 뒤에 시작할 수 있어요.'));
+  check('RUNNING 문구를 쓰지 않는다', !text(focused).includes('업데이트가 진행 중이에요.'));
+
+  server.resetHandlers();
+  queryClient.clear();
+}
+
+section('초기값이 있으면 [데이터 업데이트] 는 활성이다');
+{
+  mockDb.reset();
+  queryClient.clear();
+  const { settled } = await probe.renderSyncMain(300);
+  const tag = updateButtonTag(settled);
+  check('버튼을 찾았다', tag !== '');
+  check('비활성이 아니다', !isDisabled(tag), tag.slice(-40));
   queryClient.clear();
 }
 

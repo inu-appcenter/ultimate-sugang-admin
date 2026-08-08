@@ -63,9 +63,21 @@ function SummaryBody({ summary }: { summary: CoursesSummary }) {
   );
 }
 
-export function CourseSummaryCard({ onUpdateClick }: { onUpdateClick: () => void }) {
+export function CourseSummaryCard({
+  targetReady,
+  onUpdateClick,
+}: {
+  targetReady: boolean;
+  onUpdateClick: () => void;
+}) {
   const { data, isPending, isError, error, refetch } = useCoursesSummary();
   const isJobRunning = data !== undefined && data.runningJobId !== null;
+
+  const blockedReason = isJobRunning
+    ? '업데이트가 진행 중이에요.'
+    : targetReady
+      ? null
+      : '학기 정보를 불러온 뒤에 시작할 수 있어요.';
 
   return (
     <Card>
@@ -81,14 +93,14 @@ export function CourseSummaryCard({ onUpdateClick }: { onUpdateClick: () => void
         <>
           <SummaryBody summary={data} />
           <div className="mt-6 flex justify-end">
-            {isJobRunning ? (
+            {blockedReason !== null ? (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span tabIndex={0}>
                     <Button disabled>데이터 업데이트</Button>
                   </span>
                 </TooltipTrigger>
-                <TooltipContent>업데이트가 진행 중이에요.</TooltipContent>
+                <TooltipContent>{blockedReason}</TooltipContent>
               </Tooltip>
             ) : (
               <Button onClick={onUpdateClick}>데이터 업데이트</Button>
