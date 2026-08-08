@@ -20,7 +20,7 @@
   "retry": {},
   "manual_review": [],
   "checklist": [
-    { "id": "step-1:setup",            "status": "TODO", "note": "Vite+TS+Tailwind+shadcn, DS-01 토큰 배선, alias, env(Zod), 빈 라우터 2개" },
+    { "id": "step-1:setup",            "status": "IN_PROGRESS", "note": "Vite+TS+Tailwind+shadcn, DS-01 토큰 배선, alias, env(Zod), 빈 라우터 2개" },
     { "id": "step-2:infra",            "status": "TODO", "note": "apiClient(1개)·tokenManager·refreshQueue·errorHandler·constants·lib·MSW 셋업" },
     { "id": "step-3:ADMIN_LOGIN",      "status": "TODO", "note": "LoginLayout·로그인 폼(RHF+Zod)·auth store·protectedLoader" },
     { "id": "step-4:SYNC_MAIN_shell",  "status": "TODO", "note": "MainLayout+Header·카드1·카드2·이력 테이블·4상태·Pagination(10행)" },
@@ -31,6 +31,17 @@
     { "id": "step-6:expand_detail",    "status": "TODO", "note": "Expandable Row·Tab Group·더보기(useInfiniteQuery)·FieldDiff·실패 Job" },
     { "id": "step-7:qa",               "status": "TODO", "note": "시나리오 14개 + DS 일관성 점검" }
   ],
-  "notes": [],
+  "notes": [
+    {
+      "tag": "human-step",
+      "item": "step-1:setup",
+      "text": ".env.development 을 사람이 만들어야 한다. PreToolUse 훅이 .env* 쓰기를 차단한다(우회하지 않음). 내용 2줄: VITE_API_HOST=http://localhost:8080 / VITE_USE_MSW=true. Step 2 에서 apiClient 가 src/env.ts 를 import 하는 순간부터 없으면 런타임에서 throw 한다."
+    },
+    {
+      "tag": "decision",
+      "item": "step-1:setup",
+      "text": "shadcn 별칭 토큰(--accent, --destructive)은 새 값을 만들지 않고 DS-01 토큰을 가리키게 했다. accent=bg-hover(shadcn 의 중립 hover 표면이며 DS-01 이 제거한 보라 의미색과 다름), destructive=danger-bg / destructive-foreground=danger-text (ui-conventions 의 `bg-danger-bg`(≡`bg-destructive`) 매핑을 그대로 따름)."
+    }
+  ],
   "log": []
 }

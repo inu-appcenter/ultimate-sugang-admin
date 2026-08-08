@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * DS-01 토큰 정의 파일. 색 값은 여기와 tailwind.config.ts 에만 둔다.
+ * 값은 HSL 3요소(H S% L%)로 적는다 — shadcn/ui 가 `hsl(var(--x) / <alpha>)` 로 소비한다.
+ *
+ * 라이트 모드 전용이다. `.dark` 블록도 prefers-color-scheme 도 만들지 않는다. (DS-01 · ui-conventions)
+ * 제거 토큰(sidebar-width·menu-gap·border-active-menu·border-changed-input·primary-bg-badge·
+ * info-*·accent-*(의미색)·display)은 정의하지 않는다. (DS-01 §1-3, §3, §4-4)
+ */
+@layer base {
+  :root {
+    /* ── Brand (DS-01 §1-1) ─────────────────────────────── */
+    --primary: 216.5 100% 50%; /* #0064FF */
+    --primary-hover: 216.5 100% 41%; /* #0052D1 */
+    --primary-foreground: 0 0% 100%; /* #FFFFFF */
+
+    /* ── Neutral / Blue Tint (DS-01 §1-2) ───────────────── */
+    --foreground: 220 22% 16.1%; /* #202632  text-primary */
+    --fg-secondary: 225 11.8% 40%; /* #5A6072  text-secondary */
+    --muted-foreground: 223.6 10.5% 58.8%; /* #8B91A1  text-muted */
+    --fg-disabled: 222.4 12.8% 73.9%; /* #B4B9C5  text-disabled */
+    --border: 222 23.8% 91.8%; /* #E5E8EF  헤더 하단·테이블 divider 전용 */
+    --surface: 0 0% 100%; /* #FFFFFF  카드·헤더 배경 */
+    --page: 216 33.3% 97.1%; /* #F5F7FA  페이지 전체 배경 */
+    --hover: 222.9 30.4% 95.5%; /* #F0F2F7  행 hover·입력창 기본 배경 */
+
+    /* ── Semantic (DS-01 §1-3) ──────────────────────────── */
+    --success-text: 146.7 78.3% 27.1%; /* #0F7B3F */
+    --success-bg: 146.3 47.1% 93.3%; /* #E6F6ED */
+    --warning-text: 34.3 100% 31.6%; /* #A15C00 */
+    --warning-bg: 38.7 100% 93.9%; /* #FFF4E0 */
+    --danger-text: 4.3 75% 43.9%; /* #C4281C */
+    --danger-bg: 6.3 82.6% 95.5%; /* #FDECEA */
+    --muted-ds-text: 225 11.8% 40%; /* #5A6072 */
+    --muted-ds-bg: 222.9 25.9% 94.7%; /* #EEF0F5 */
+    /* neutral-strong(교체 배지)은 새 토큰이 아니라 bg-foreground + text-primary-foreground 조합이다. */
+
+    /* ── shadcn/ui 가 요구하는 별칭 ─────────────────────────
+     * 값을 새로 만들지 않고 위 DS-01 토큰을 그대로 가리킨다.
+     * `accent` 는 shadcn 의 중립 hover 표면이며 DS-01 이 제거한 보라색 의미색과 다르다 → bg-hover 로 매핑.
+     */
+    --background: var(--surface);
+    --card: var(--surface);
+    --card-foreground: var(--foreground);
+    --popover: var(--surface);
+    --popover-foreground: var(--foreground);
+    --secondary: var(--hover);
+    --secondary-foreground: var(--foreground);
+    --muted: var(--hover);
+    --accent: var(--hover);
+    --accent-foreground: var(--foreground);
+    --destructive: var(--danger-bg);
+    --destructive-foreground: var(--danger-text);
+    --input: var(--border);
+    --ring: var(--primary);
+
+    /* ── 모서리 (DS-01 §4-1) ─────────────────────────────
+     * shadcn 기본 6px 를 버리고 버튼·입력 기준 10px 로 재정의한다.
+     * 카드 14 / 모달 16 은 rounded-card · rounded-modal 로 따로 쓴다.
+     */
+    --radius: 10px;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    /* 데스크톱 1280px 이상 단일 폭. 반응형·다크 모드 없음. */
+    @apply min-w-viewport bg-page font-sans text-body text-foreground antialiased;
+  }
+}
