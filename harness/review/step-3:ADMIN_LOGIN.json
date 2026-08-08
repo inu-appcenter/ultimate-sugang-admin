@@ -50,7 +50,7 @@
       "where": "src/shared/api/refreshQueue.ts, src/app/router.tsx",
       "text": "재발급 401 을 인터셉터(하드 이동)와 protectedLoader(redirect)가 둘 다 처리해 만료 안내가 사라질 수 있다.",
       "resolution": "인터셉터는 reject 만 하고 정리는 부른 쪽이 한다. 표식은 '1' 만 저장하고 문구는 상수 한 곳. 어서션 추가. (cce66cd)"
-    }
+    },
     {
       "reviewer": "user",
       "round": 3,
