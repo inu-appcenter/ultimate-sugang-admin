@@ -209,6 +209,30 @@ section('초기값을 못 정하면 [데이터 업데이트] 를 잠근다 (사�
   queryClient.clear();
 }
 
+section('차단 사유가 겹치면 RUNNING 이 이긴다 (01 §6-3 문구가 명세다)');
+{
+  mockDb.reset();
+  mockDb.state.loadedSemester = null;
+  mockDb.createJob({ academicYear: 2026, term: 'FIRST' }, 'INITIAL', '김학사');
+  queryClient.clear();
+  server.use(
+    http.get('http://localhost:8080/api/v1/admin/semesters/display', () =>
+      HttpResponse.json({ code: 5100, message: '표시 학기 설정이 없습니다.' }, { status: 404 }),
+    ),
+  );
+
+  const { settled, focused } = await probe.focusBlockedUpdateButton();
+  check('[데이터 업데이트] 비활성', isDisabled(updateButtonTag(settled)));
+  check('RUNNING 문구가 나온다', text(focused).includes('업데이트가 진행 중이에요.'));
+  check(
+    '초기값 문구에 덮이지 않는다',
+    !text(focused).includes('학기 정보를 불러온 뒤에 시작할 수 있어요.'),
+  );
+
+  server.resetHandlers();
+  queryClient.clear();
+}
+
 section('초기값이 있으면 [데이터 업데이트] 는 활성이다');
 {
   mockDb.reset();

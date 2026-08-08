@@ -2,9 +2,9 @@
   "id": "step-5-2:M2_preflight",
   "spec": "PASS",
   "ds": "PASS",
-  "commit": "624f90e",
-  "ts": "2026-08-08",
-  "rounds": { "spec": 2, "ds": 2 },
+  "commit": "0561b28",
+  "ts": "2026-08-09",
+  "rounds": { "spec": 3, "ds": 3 },
   "diffs": [
     {
       "round": 1,
@@ -26,6 +26,13 @@
       "verdict": "FAIL",
       "finding": "'현재 적재' 라벨이 두 줄로 접혔다. text-caption(13px)에서 자연 폭 48.22px 가 w-12(48px)를 넘긴다. FieldRow 는 text-body(15px) 기준이라 '연도'·'학기' 는 한 줄이었고 그 폭을 그대로 가져온 게 원인. items-center 라 행 높이도 40px 로 떴다.",
       "fix": "임의 값 없이 whitespace-nowrap 으로 해결. 값 컬럼은 여전히 64px 에서 시작해 FieldRow 와 정렬이 맞는다. 커밋 624f90e."
+    },
+    {
+      "round": 3,
+      "reviewer": "both",
+      "verdict": "PASS",
+      "finding": "사용자 결정(죽은 버튼 → 비활성 + 툴팁) 반영분 재리뷰. 위반 없음. 구현 중 발견 — `<button[^>]*disabled[^>]*>` 정규식이 class 의 disabled:pointer-events-none 에 걸려 버튼이 활성이어도 통과했다. step-4 의 RUNNING 비활성 검사가 그동안 무의미했다.",
+      "fix": "step-4·step-5-2 모두 속성 자리(\\sdisabled(?:=|\\s|$))를 보도록 교체. 활성 케이스 섹션을 따로 둬 '무조건 disabled 로 만들면 통과' 하는 퇴행도 막았다. 리뷰어 제안대로 RUNNING 이 초기값 사유를 이기는 우선순위도 검사로 고정했다."
     }
   ],
   "self_judgements_accepted": [
@@ -34,15 +41,23 @@
     "초기값을 SyncMainPage 가 두 쿼리로 합성한다 — features/sync 가 features/semester 를 직접 import 할 수 없다(architecture).",
     "strategy 미소비는 하위단계 경계다 — tsconfig 의 noUnusedLocals 때문에 소비자 없이 보관하면 typecheck 가 깨진다. onPreflight 가 응답 객체 전체를 넘기므로 5-3 이 재요청·재계산할 이유가 없다(D4 보존)."
   ],
-  "open_questions": [
+  "open_questions": [],
+  "resolved_questions": [
     {
       "tag": "spec-gap",
-      "text": "적재 데이터가 없고(summary.semester === null) 표시 학기 조회가 실패하면 initialTarget 이 null 이라 M2 를 렌더하지 않는다 → [데이터 업데이트] 가 죽은 버튼이 된다. 01 §6-3 은 데이터가 없을 때도 버튼이 M2 를 연다고 하지만 그 상황의 초기값은 명세에 없다. 대안(빈 Select 로 열기 · 버튼 비활성+툴팁) 모두 명세에 없는 문구를 지어내야 해서 손대지 않았다. 두 리뷰어 모두 비차단으로 넘겼다."
+      "question": "적재 데이터가 없고 표시 학기 조회도 실패하면 initialTarget 이 null 이라 M2 를 렌더하지 않는다 → [데이터 업데이트] 가 죽은 버튼이 됐다. 01 §6-3 은 데이터가 없을 때도 버튼이 M2 를 연다고 하지만 그 상황의 초기값은 명세에 없다.",
+      "decision": "사용자가 '버튼 비활성 + 툴팁' 을 선택했다(2026-08-09). 문구는 구현자가 지었다 — '학기 정보를 불러온 뒤에 시작할 수 있어요.'(24자, 구어체). 원인을 단정하지 않은 이유는 이 상태가 조회 실패일 수도, 아직 로딩 중일 수도 있어서다.",
+      "commit": "0561b28",
+      "scope": "잠기는 조건은 명세가 상정한 '데이터 없음' 보다 좁다. 적재 학기가 없어도 표시 학기가 있으면 버튼은 활성이고 M2 가 열린다(01 §7-2 폴백 그대로). 03 §4-1 이 semester_setting 을 Flyway 시드로 보장하므로 정상 운영에서는 도달하지 않는 상태다. 카드 1 의 [다시 시도] 로 즉시 풀린다.",
+      "reviewers": "spec=PASS(3라운드) · ds=PASS(3라운드)"
     }
   ],
   "deferred": [
     "M1 에러 경로에도 토스트 개수 검사를 두면 대칭이 맞는다(현재는 5-2 만 센다). 코드 경로는 전역 handler 하나라 중복 위험은 없다.",
-    "'현재 적재' 라벨 컬럼을 FieldRow 같은 공용 컴포넌트로 뽑으면 폰트 폴백 시 오버플로가 커지는 문제를 한 곳에서 관리할 수 있다."
+    "'현재 적재' 라벨 컬럼을 FieldRow 같은 공용 컴포넌트로 뽑으면 폰트 폴백 시 오버플로가 커지는 문제를 한 곳에서 관리할 수 있다.",
+    "[step-7:qa] tooltip.tsx 가 쓰는 bg-foreground + text-primary-foreground 는 DS-01 에서 strategy REPLACE('교체') 배지용으로 정의된 neutral-strong 페어다. 카드 2 툴팁과 이력의 교체 배지가 한 화면에 같이 뜰 수 있다. DS 일관성 점검 대상.",
+    "[step-7:qa] a11y — Radix 가 aria-describedby 를 래퍼 span 에 붙여서 disabled 버튼에 도달한 스크린리더는 차단 사유를 못 읽는다.",
+    "표시 학기 쿼리가 in-flight 인 동안 적재 학기가 없으면 버튼이 잠깐 잠긴다. 01 §9 로딩 처리표에 없는 상태다. 실사용에서 거슬리면 5-4 에서 다시 본다."
   ],
-  "verify": "harness/verify/step-5-2.mjs 33건 (전체 215건)"
+  "verify": "harness/verify/step-5-2.mjs 42건 (전체 224건)"
 }
