@@ -65,7 +65,7 @@ const buttonByText = (scope: ParentNode, label: string) =>
  * M1 은 카드의 [학기 설정] 로만 열린다. 카드→모달 배선까지 같이 보려고 SyncMainPage 에서 눌러 연다.
  * Radix Dialog 는 body 로 portal 하므로 마크업은 document.body 에서 읽는다.
  */
-export async function openDisplaySemesterModal(settleMs = 200) {
+export async function openSemesterSettingModal(settleMs = 200) {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const root = createRoot(container);
@@ -140,7 +140,7 @@ export async function changeDisplaySemesterTerm(optionLabel: string, settleMs = 
     await sleep(settleMs);
   });
 
-  const trigger = document.getElementById('display-semester-term');
+  const trigger = document.getElementById('semester-setting-term');
   trigger?.focus();
   await act(async () => {
     trigger?.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { DisplaySemesterModal } from '@/features/semester/components/DisplaySemesterModal';
+import { SemesterSettingModal } from '@/features/semester/components/SemesterSettingModal';
 import { useDisplaySemester } from '@/features/semester/queries';
 import { getErrorMessage } from '@/shared/api/errorHandler';
 import { ErrorState } from '@/shared/components/states/ErrorState';
@@ -39,7 +39,7 @@ export function DisplaySemesterCard() {
             </Button>
           </div>
 
-          <DisplaySemesterModal
+          <SemesterSettingModal
             open={settingsOpen}
             onOpenChange={setSettingsOpen}
             current={data}
