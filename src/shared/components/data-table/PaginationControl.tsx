@@ -4,13 +4,11 @@ import { Button } from '@/shared/components/ui/button';
 import { cn } from '@/shared/lib/cn';
 
 interface PaginationControlProps {
-  /** 1부터 센다 (03 §2-4). */
   page: number;
   totalPages: number;
   onChange: (page: number) => void;
 }
 
-/** 한 번에 보여줄 페이지 번호 개수. 명세에 없어 스스로 정한 값이다. */
 const WINDOW = 5;
 
 function pageWindow(page: number, totalPages: number): number[] {
@@ -19,7 +17,6 @@ function pageWindow(page: number, totalPages: number): number[] {
   return Array.from({ length: count }, (_, index) => start + index);
 }
 
-/** 01 §6-1 — [‹ 이전] 1 2 3 [다음 ›]. 페이지 크기는 서버가 10 으로 고정한다. */
 export function PaginationControl({ page, totalPages, onChange }: PaginationControlProps) {
   if (totalPages <= 1) return null;
 

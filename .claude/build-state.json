@@ -38,6 +38,11 @@
       "text": ".env.development 을 사람이 만들어야 한다. PreToolUse 훅이 .env* 쓰기를 차단한다(우회하지 않음). 내용 2줄: VITE_API_HOST=http://localhost:8080 / VITE_USE_MSW=true. Step 2 에서 apiClient 가 src/env.ts 를 import 하는 순간부터 없으면 런타임에서 throw 한다."
     },
     {
+      "tag": "trap",
+      "item": "all",
+      "text": "src/ 주석을 사용자 요청으로 전부 제거했다. 코드에 있던 함정 경고가 사라졌으므로 여기 보관한다. (1) ui/table.tsx — 마지막 행 보더 제거를 TableRow 에 last 변형으로 걸면 thead 의 tr 도 :last-child 라 특이도(0,2,0)가 헤더 divider(0,1,1)를 이겨 헤더 선이 사라진다. 반드시 TableBody 에 `[&_tr:last-child]:border-0` 로 건다. (2) shared/lib/cn.ts — DS-01 커스텀 토큰을 extendTailwindMerge 로 등록하지 않으면 tailwind-merge 가 text-body 를 색으로 오인해 text-primary-foreground 를 지운다. tailwind.config.ts 에 토큰을 추가하면 cn.ts 에도 등록한다. (3) shared/lib/formatSemester.ts 의 formatSemesterCompact 는 이력 표기(01 §6-4)와 M4 Strict Match 기대값(04 §10-3)을 겸한다 — 표기가 바뀌면 비가역 작업의 확인 문구가 따라 움직인다. 갈라지면 즉시 분리. (4) tailwind.config.ts 의 theme.extend.aria.invalid — 없으면 입력창 에러 링이 CSS 로 생성조차 안 된다. (5) uss-contract-lint 는 한 줄짜리 `/** */` 주석도 검사한다. 주석에 `?? 0` 이나 Authorization/Bearer 를 쓰면 걸린다. (6) Tailwind 는 주석 문자열도 스캔한다 — 주석에 클래스명을 적으면 아무도 안 쓰는 죽은 CSS 규칙이 생성된다."
+    },
+    {
       "tag": "human-step",
       "item": "step-4:SYNC_MAIN_shell",
       "text": "spec 정정 필요 — 01 §6-1 와이어프레임의 `08-05 14:22` 와 04 §9-3 의 formatShortDateTime '(이력 테이블)' 주석이 확정(긴 형식)과 어긋난다. 코드는 이미 긴 형식이고 formatShortDateTime 은 제거했다. spec 은 읽기 전용이라 사람이 고쳐야 한다. 안 고치면 컨텍스트 압축 뒤 04 §9-3 을 다시 읽는 순간 formatShortDateTime 이 되살아난다."

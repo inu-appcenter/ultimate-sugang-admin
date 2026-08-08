@@ -1,4 +1,3 @@
-/** 04 §9-2 · 03 §9. code 는 정수다. 백오피스 전용 대역은 5000번대. */
 export const ERROR_CODE = {
   MISSING_ACCESS_TOKEN: 1000,
   INVALID_ACCESS_TOKEN: 1001,
@@ -18,7 +17,6 @@ export const ERROR_CODE = {
   SYNC_JOB_NOT_FOUND: 5202,
 } as const;
 
-/** 재사용 코드 자체 문구 (서버 격식체 → 구어체 재작성). */
 export const REUSED_CODE_MESSAGE: Record<number, string> = {
   7777: '입력값을 다시 확인해주세요.',
   8888: '처리할 수 없는 값이 있어요.',

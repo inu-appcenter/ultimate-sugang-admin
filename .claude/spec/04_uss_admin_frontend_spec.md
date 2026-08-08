@@ -639,10 +639,6 @@ export const REUSED_CODE_MESSAGE: Record<number, string> = {
 export const formatDateTime = (iso: string) =>
   `${iso.slice(0, 10)} ${iso.slice(11, 16)}`;
 
-/** "2026-08-05T14:22:00" → "08-05 14:22" (이력 테이블) */
-export const formatShortDateTime = (iso: string) =>
-  `${iso.slice(5, 10)} ${iso.slice(11, 16)}`;
-
 // shared/lib/formatDuration.ts
 /** 107 → "00:01:47" */
 export const formatDuration = (sec: number) => {

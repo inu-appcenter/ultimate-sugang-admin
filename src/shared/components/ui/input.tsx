@@ -2,11 +2,6 @@ import * as React from 'react';
 
 import { cn } from '@/shared/lib/cn';
 
-/**
- * DS-01 §6-1 — 입력창은 **Fill 방식**이다. Outline 이 아니다.
- *   기본 bg-hover + 보더 없음 / focus bg-surface + ring-2 primary-subtle
- *   error ring-2 danger (aria-invalid 로 켠다) / disabled text-disabled
- */
 const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<'input'>>(
   ({ className, type, ...props }, ref) => (
     <input

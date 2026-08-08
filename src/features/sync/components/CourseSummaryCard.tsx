@@ -11,11 +11,9 @@ import { formatDateTime } from '@/shared/lib/formatDateTime';
 import { formatNumber } from '@/shared/lib/formatNumber';
 import { formatSemesterLong } from '@/shared/lib/formatSemester';
 
-/** DS-01 §2 위계 — 라벨보다 숫자가 먼저 읽혀야 한다. 수치는 text-metric(32/Bold). */
 function Metric({ label, value }: { label: string; value: number }) {
   return (
     <div>
-      {/* DS-01 §1-2 — 라벨은 text-secondary 다. text-muted 는 메타 정보용. */}
       <p className="text-caption text-fg-secondary">{label}</p>
       <p className="text-metric text-foreground">{formatNumber(value)}건</p>
     </div>
@@ -52,7 +50,6 @@ function SummaryBody({ summary }: { summary: CoursesSummary }) {
             </span>
             <JobStatusBadge status={lastJob.status} />
           </div>
-          {/* 카운트 3종은 SUCCESS 가 아니면 null 이다. null 을 0 으로 덮지 않고 행 자체를 숨긴다 (04 §10-2). */}
           {lastJob.createdCount !== null &&
             lastJob.updatedCount !== null &&
             lastJob.closedCount !== null && (
@@ -66,7 +63,6 @@ function SummaryBody({ summary }: { summary: CoursesSummary }) {
   );
 }
 
-/** 카드 2 — 적재 데이터 (01 §6-3 · 04 §10-2). 화면에서 채워진 Primary 버튼은 이것 하나다. */
 export function CourseSummaryCard({ onUpdateClick }: { onUpdateClick: () => void }) {
   const { data, isPending, isError, error, refetch } = useCoursesSummary();
   const isJobRunning = data !== undefined && data.runningJobId !== null;
@@ -77,7 +73,6 @@ export function CourseSummaryCard({ onUpdateClick }: { onUpdateClick: () => void
 
       {isPending && <LoadingSkeleton rows={3} className="mt-4" />}
 
-      {/* 재조회 실패 때는 Error State 를 띄우지 않는다 — 카드 1·이력과 같은 규칙. */}
       {isError && data === undefined && (
         <ErrorState message={getErrorMessage(error)} onRetry={() => void refetch()} />
       )}
@@ -88,7 +83,6 @@ export function CourseSummaryCard({ onUpdateClick }: { onUpdateClick: () => void
           <div className="mt-6 flex justify-end">
             {isJobRunning ? (
               <Tooltip>
-                {/* disabled 버튼은 포인터 이벤트를 안 받아서 span 으로 감싼다. */}
                 <TooltipTrigger asChild>
                   <span tabIndex={0}>
                     <Button disabled>데이터 업데이트</Button>

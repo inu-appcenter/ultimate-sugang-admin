@@ -10,7 +10,6 @@ interface FormFieldProps {
   children: ReactNode;
 }
 
-/** 라벨 + 입력 + 에러 caption 한 묶음. 입력 자체는 쓰는 쪽이 넣는다. */
 export function FormField({ id, label, error, children }: FormFieldProps) {
   return (
     <div className="flex flex-col gap-2">
