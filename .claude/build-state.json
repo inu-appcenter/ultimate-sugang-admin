@@ -21,8 +21,8 @@
   "manual_review": [],
   "checklist": [
     { "id": "step-1:setup",            "status": "COMPLETED", "note": "Vite+TS+Tailwind+shadcn, DS-01 토큰 배선, alias, env(Zod), 빈 라우터 2개" },
-    { "id": "step-2:infra",            "status": "IN_PROGRESS", "note": "apiClient(1개)·tokenManager·refreshQueue·errorHandler·constants·lib·MSW 셋업" },
-    { "id": "step-3:ADMIN_LOGIN",      "status": "TODO", "note": "LoginLayout·로그인 폼(RHF+Zod)·auth store·protectedLoader" },
+    { "id": "step-2:infra",            "status": "COMPLETED", "note": "apiClient(1개)·tokenManager·refreshQueue·errorHandler·constants·lib·MSW 셋업" },
+    { "id": "step-3:ADMIN_LOGIN",      "status": "IN_PROGRESS", "note": "LoginLayout·로그인 폼(RHF+Zod)·auth store·protectedLoader" },
     { "id": "step-4:SYNC_MAIN_shell",  "status": "TODO", "note": "MainLayout+Header·카드1·카드2·이력 테이블·4상태·Pagination(10행)" },
     { "id": "step-5-1:M1_semester",    "status": "TODO", "note": "표시 학기 조회/변경. 카드2 무영향(D10)" },
     { "id": "step-5-2:M2_preflight",   "status": "TODO", "note": "학기 선택 + preflight + strategy 보관" },
@@ -51,6 +51,22 @@
       "gate": "--full OK",
       "retry": 0,
       "text": "Vite8+React19+TS·Tailwind3.4+shadcn 배선·DS-01 토큰 전체·env.ts·04 §4 폴더·라우터 2개. 리뷰어 대상 아님(step-3~6만)."
+    },
+    {
+      "id": "step-1:setup",
+      "ts": "2026-08-08",
+      "commit": "751c662",
+      "gate": "--full OK",
+      "retry": 0,
+      "text": "후속 수정 — Node 20.11.1 에서 Vite 8(rolldown)이 node:util styleText 로 죽어 .nvmrc 22 + engines 추가."
+    },
+    {
+      "id": "step-2:infra",
+      "ts": "2026-08-08",
+      "commit": "9a32ad7",
+      "gate": "--full OK",
+      "retry": 0,
+      "text": "apiClient 1개·tokenManager·refreshQueue·errorHandler·types·schemas·queryClient, constants 4종, lib 3종, providers, MSW 9개 핸들러+Job 타임라인. Vite SSR + msw/node 로 42건 검증 전부 통과. 리뷰어 대상 아님(step-3~6만)."
     }
   ]
 }

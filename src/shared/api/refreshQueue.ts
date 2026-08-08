@@ -15,6 +15,8 @@ import { ROUTES } from '@/shared/constants/routes';
  * 서버가 서명만 보고 새 토큰을 준다 (03 §3-2).
  */
 const REFRESH_PATH = '/auth/refresh';
+/** 로그인 401 은 "비밀번호가 틀렸다"는 뜻이다. 재발급 대상이 아니라 화면이 인라인으로 보여준다 (04 §7-1). */
+const LOGIN_PATH = '/auth/login';
 
 type RetriableConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
@@ -45,6 +47,8 @@ export function installRefreshInterceptor(): void {
       if (error.response?.status !== 401 || !original || original._retry) {
         return Promise.reject(error);
       }
+
+      if (original.url?.includes(LOGIN_PATH)) return Promise.reject(error);
 
       // 재발급 요청 자체가 401 이면 되살릴 방법이 없다.
       if (original.url?.includes(REFRESH_PATH)) {
