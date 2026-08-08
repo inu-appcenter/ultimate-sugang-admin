@@ -23,7 +23,7 @@
     { "id": "step-1:setup",            "status": "COMPLETED", "note": "Vite+TS+Tailwind+shadcn, DS-01 토큰 배선, alias, env(Zod), 빈 라우터 2개" },
     { "id": "step-2:infra",            "status": "COMPLETED", "note": "apiClient(1개)·tokenManager·refreshQueue·errorHandler·constants·lib·MSW 셋업" },
     { "id": "step-3:ADMIN_LOGIN",      "status": "COMPLETED", "note": "LoginLayout·로그인 폼(RHF+Zod)·auth store·protectedLoader" },
-    { "id": "step-4:SYNC_MAIN_shell",  "status": "IN_PROGRESS", "note": "MainLayout+Header·카드1·카드2·이력 테이블·4상태·Pagination(10행)" },
+    { "id": "step-4:SYNC_MAIN_shell",  "status": "COMPLETED", "note": "MainLayout+Header·카드1·카드2·이력 테이블·4상태·Pagination(10행)" },
     { "id": "step-5-1:M1_semester",    "status": "TODO", "note": "표시 학기 조회/변경. 카드2 무영향(D10)" },
     { "id": "step-5-2:M2_preflight",   "status": "TODO", "note": "학기 선택 + preflight + strategy 보관" },
     { "id": "step-5-3:M3_M4_execute",  "status": "TODO", "note": "M3/M4/최초적재 변형 + POST jobs + 409 2종. M4 격식체 유지" },
@@ -36,6 +36,11 @@
       "tag": "human-step",
       "item": "step-1:setup",
       "text": ".env.development 을 사람이 만들어야 한다. PreToolUse 훅이 .env* 쓰기를 차단한다(우회하지 않음). 내용 2줄: VITE_API_HOST=http://localhost:8080 / VITE_USE_MSW=true. Step 2 에서 apiClient 가 src/env.ts 를 import 하는 순간부터 없으면 런타임에서 throw 한다."
+    },
+    {
+      "tag": "human-step",
+      "item": "step-4:SYNC_MAIN_shell",
+      "text": "spec 정정 필요 — 01 §6-1 와이어프레임의 `08-05 14:22` 와 04 §9-3 의 formatShortDateTime '(이력 테이블)' 주석이 확정(긴 형식)과 어긋난다. 코드는 이미 긴 형식이고 formatShortDateTime 은 제거했다. spec 은 읽기 전용이라 사람이 고쳐야 한다. 안 고치면 컨텍스트 압축 뒤 04 §9-3 을 다시 읽는 순간 formatShortDateTime 이 되살아난다."
     },
     {
       "tag": "decision",
@@ -90,7 +95,16 @@
       "gate": "--full OK",
       "review": "spec=PASS · ds=PASS (2라운드)",
       "retry": 0,
-      "text": "LoginLayout·로그인 폼(RHF+Zod)·auth store·protectedLoader·MainLayout+Header·M5. shadcn 4종을 DS-01 로 재정의. 리뷰 1라운드에서 둘 다 FAIL — aria-invalid 미생성(입력 에러 링이 죽어 있었음), 고아 jsdom, 04 §8 구조 이탈. 전부 수정 후 2라운드 PASS. 검증 하네스(harness/verify + npm run verify) 도입, 88건 통과."
+      "text": "LoginLayout·로그인 폼(RHF+Zod)·auth store·protectedLoader·MainLayout+Header·M5. shadcn 4종을 DS-01 로 재정의. 리뷰 1라운드에서 둘 다 FAIL — aria-invalid 미생성(입력 에러 링이 죽어 있었음), 고아 jsdom, 04 §8 구조 이탈. 전부 수정 후 2라운드 PASS. 검증 하네스(harness/verify + npm run verify) 도입, 88건 통과. 이후 사용자 육안 확인으로 cn()/tailwind-merge 사고 발견(fd50c3f)."
+    },
+    {
+      "id": "step-4:SYNC_MAIN_shell",
+      "ts": "2026-08-08",
+      "commit": "c212d0c",
+      "gate": "--full OK",
+      "review": "spec=PASS · ds=PASS (2라운드)",
+      "retry": 0,
+      "text": "카드 1(표시 학기)·카드 2(적재 데이터)·이력 테이블 + 4상태 + 페이지네이션(10행). shadcn 5종(table·badge·skeleton·tooltip·card)을 DS-01 로 재정의. 리뷰 1라운드 둘 다 FAIL — 헤더 divider 가 특이도 싸움으로 안 그려지던 건, 4상태 비배타(재조회 실패 시 Error State 와 본문 동시 노출), 일시 형식을 다수결로 정한 절차 오류. 전부 수정 후 2라운드 PASS. 검증 142건 통과."
     }
   ]
 }
