@@ -75,7 +75,8 @@ paths:
 |---|---|---|
 | `success-text/bg` | `text-success-text` / `bg-success-bg` | Job `SUCCESS` = 성공 |
 | `warning-text/bg` | `text-warning-text` / `bg-warning-bg` | Job `RUNNING` = 진행 중 |
-| `danger-text/bg` | `text-danger-text` / `bg-danger-bg` (≡ `bg-destructive`) | Job `FAILED` = 실패, M4, 검증 에러 |
+| `danger-text/bg` | `text-danger-text` / `bg-danger-bg` | Job `FAILED` = 실패 배지, 검증 에러 |
+| `danger-text` (면) | `bg-destructive` + `text-destructive-foreground` | **M4 [삭제 후 적재] 버튼** — 면이 `danger-text`(#C4281C), 글씨는 흰색 |
 | `muted-ds` | `text-muted-ds-text` / `bg-muted-ds-bg` | strategy `UPSERT` = **갱신**, 비활성 탭, `-` 표기 |
 | `neutral-strong` | `text-primary-foreground` / `bg-foreground` | strategy `REPLACE` = **교체** |
 

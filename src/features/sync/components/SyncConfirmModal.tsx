@@ -54,7 +54,7 @@ export function SyncConfirmModal({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{copy.title}</DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-body text-foreground">
             {`${formatSemesterLong(target.academicYear, target.term)} 데이터를 ${copy.lead}`}
           </DialogDescription>
         </DialogHeader>
