@@ -105,6 +105,8 @@ section('M2 마크업 — [데이터 업데이트] 로 연다 (01 §7-2)');
   check('학기 라벨', body.includes('학기'));
   check('초기값 = 현재 적재 학기', body.includes('2026') && body.includes('1학기'));
   check('현재 적재 행', body.includes('현재 적재') && body.includes('2026학년도 1학기'));
+  // 13px 에서 "현재 적재" 는 w-12(48px)를 0.2px 넘겨 두 줄로 접힌다.
+  check('현재 적재 라벨은 한 줄', /<span class="[^"]*whitespace-nowrap[^"]*">현재 적재</.test(opened));
   check('[취소]', body.includes('취소'));
   check('[다음]', body.includes('다음'));
   check('[다음] 은 처음부터 활성', !isDisabled(nextButtonTag(openedDialog)));
