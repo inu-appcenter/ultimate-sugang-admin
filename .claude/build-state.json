@@ -25,7 +25,7 @@
     { "id": "step-3:ADMIN_LOGIN",      "status": "COMPLETED", "note": "LoginLayout·로그인 폼(RHF+Zod)·auth store·protectedLoader" },
     { "id": "step-4:SYNC_MAIN_shell",  "status": "COMPLETED", "note": "MainLayout+Header·카드1·카드2·이력 테이블·4상태·Pagination(10행)" },
     { "id": "step-5-1:M1_semester",    "status": "COMPLETED", "note": "표시 학기 조회/변경. 카드2 무영향(D10)" },
-    { "id": "step-5-2:M2_preflight",   "status": "TODO", "note": "학기 선택 + preflight + strategy 보관" },
+    { "id": "step-5-2:M2_preflight",   "status": "IN_PROGRESS", "note": "학기 선택 + preflight + strategy 보관" },
     { "id": "step-5-3:M3_M4_execute",  "status": "TODO", "note": "M3/M4/최초적재 변형 + POST jobs + 409 2종. M4 격식체 유지" },
     { "id": "step-5-4:polling",        "status": "TODO", "note": "refetchInterval 조건부·runningJobId 재개·total null 분기·PERSIST 단위 건" },
     { "id": "step-6:expand_detail",    "status": "TODO", "note": "Expandable Row·Tab Group·더보기(useInfiniteQuery)·FieldDiff·실패 Job" },

@@ -61,6 +61,10 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const buttonByText = (scope: ParentNode, label: string) =>
   [...scope.querySelectorAll('button')].find((node) => node.textContent?.trim() === label);
 
+/** 이력 테이블 페이지네이션에도 [다음] 이 있다. 모달 안에서만 찾도록 스코프를 좁힌다. */
+const openDialog = () => document.querySelector('[role="dialog"]');
+const dialogHtml = () => openDialog()?.outerHTML ?? '';
+
 /**
  * M1 은 카드의 [학기 설정] 로만 열린다. 카드→모달 배선까지 같이 보려고 SyncMainPage 에서 눌러 연다.
  * Radix Dialog 는 body 로 portal 하므로 마크업은 document.body 에서 읽는다.
@@ -111,9 +115,33 @@ export async function openSemesterSettingModal(settleMs = 200) {
 }
 
 /**
- * 학기 드롭다운을 열어 값을 바꾸고 [저장] 까지 누른다.
- * 열기는 키보드로 한다 — jsdom 에는 PointerEvent 가 없어 Radix 의 포인터 경로가 돌지 않는다.
+ * Radix Select 를 키보드로 연다 — jsdom 에는 PointerEvent 가 없어 포인터 경로가 돌지 않는다.
+ * 목록에 뜬 라벨을 돌려준다.
  */
+async function chooseOption(triggerId: string, optionLabel: string, settleMs: number) {
+  const trigger = document.getElementById(triggerId);
+  trigger?.focus();
+  await act(async () => {
+    trigger?.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+  });
+  await act(async () => {
+    await sleep(settleMs);
+  });
+
+  const options = [...document.querySelectorAll('[role="option"]')];
+  const optionLabels = options.map((node) => node.textContent ?? '');
+  await act(async () => {
+    options
+      .find((node) => node.textContent === optionLabel)
+      ?.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+  });
+  await act(async () => {
+    await sleep(settleMs);
+  });
+  return optionLabels;
+}
+
+/** 학기 드롭다운을 열어 값을 바꾸고 [저장] 까지 누른다. */
 export async function changeDisplaySemesterTerm(optionLabel: string, settleMs = 200) {
   const container = document.createElement('div');
   document.body.appendChild(container);
@@ -140,25 +168,7 @@ export async function changeDisplaySemesterTerm(optionLabel: string, settleMs = 
     await sleep(settleMs);
   });
 
-  const trigger = document.getElementById('semester-setting-term');
-  trigger?.focus();
-  await act(async () => {
-    trigger?.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
-  });
-  await act(async () => {
-    await sleep(settleMs);
-  });
-
-  const options = [...document.querySelectorAll('[role="option"]')];
-  const optionLabels = options.map((node) => node.textContent ?? '');
-  await act(async () => {
-    options
-      .find((node) => node.textContent === optionLabel)
-      ?.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-  });
-  await act(async () => {
-    await sleep(settleMs);
-  });
+  const optionLabels = await chooseOption('semester-setting-term', optionLabel, settleMs);
   const dirty = document.body.innerHTML;
 
   await act(async () => {
@@ -176,6 +186,62 @@ export async function changeDisplaySemesterTerm(optionLabel: string, settleMs = 
   });
   container.remove();
   return { optionLabels, dirty, saving, afterSave };
+}
+
+/**
+ * M2 를 [데이터 업데이트] 로 열고, 필요하면 학기를 바꾼 뒤 [다음] 까지 누른다.
+ * `termLabel` 이 없으면 초기값 그대로 판정을 요청한다.
+ */
+export async function openSyncTargetModal({ termLabel = null, settleMs = 200 } = {}) {
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const root = createRoot(container);
+
+  await act(async () => {
+    root.render(
+      <Providers>
+        <RouterProvider
+          router={createMemoryRouter([{ path: '/', element: <SyncMainPage /> }], {
+            initialEntries: ['/'],
+          })}
+        />
+      </Providers>,
+    );
+  });
+  await act(async () => {
+    await sleep(settleMs);
+  });
+
+  const trigger = buttonByText(container, '데이터 업데이트');
+  await act(async () => {
+    trigger?.click();
+  });
+  await act(async () => {
+    await sleep(settleMs);
+  });
+  const opened = document.body.innerHTML;
+  const openedDialog = dialogHtml();
+
+  if (termLabel !== null) {
+    await chooseOption('sync-target-term', termLabel, settleMs);
+  }
+
+  const dialog = openDialog();
+  await act(async () => {
+    if (dialog !== null) buttonByText(dialog, '다음')?.click();
+  });
+  const judgingDialog = dialogHtml();
+
+  await act(async () => {
+    await sleep(settleMs);
+  });
+  const afterNext = document.body.innerHTML;
+
+  await act(async () => {
+    root.unmount();
+  });
+  container.remove();
+  return { opened, openedDialog, judgingDialog, afterNext };
 }
 
 /** 훅을 실제로 마운트해 mutate 를 돌린다. invalidation 범위(D10)를 캐시에서 직접 본다. */

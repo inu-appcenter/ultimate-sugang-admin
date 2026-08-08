@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
-import { fetchCoursesSummary, fetchSyncJobs } from '@/features/sync/api';
+import { fetchCoursesSummary, fetchSyncJobs, requestSyncPreflight } from '@/features/sync/api';
 
 export const syncKeys = {
   all: ['sync'] as const,
@@ -13,6 +13,10 @@ export function useCoursesSummary() {
     queryKey: syncKeys.summary(),
     queryFn: fetchCoursesSummary,
   });
+}
+
+export function useSyncPreflight() {
+  return useMutation({ mutationFn: requestSyncPreflight });
 }
 
 export function useSyncJobs(page: number) {

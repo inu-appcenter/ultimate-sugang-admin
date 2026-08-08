@@ -31,6 +31,22 @@ export const coursesSummarySchema = z.object({
 });
 export type CoursesSummary = z.infer<typeof coursesSummarySchema>;
 
+export const deleteCountsSchema = z.object({
+  courses: z.number(),
+  schedules: z.number(),
+  carts: z.number(),
+  registrations: z.number(),
+});
+export type DeleteCounts = z.infer<typeof deleteCountsSchema>;
+
+export const syncPreflightSchema = z.object({
+  strategy: syncStrategySchema,
+  currentSemester: semesterRefSchema.nullable(),
+  targetSemester: semesterRefSchema,
+  deleteCounts: deleteCountsSchema,
+});
+export type SyncPreflight = z.infer<typeof syncPreflightSchema>;
+
 export const syncJobListItemSchema = z.object({
   jobId: z.number(),
   academicYear: z.number(),
