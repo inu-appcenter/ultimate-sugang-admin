@@ -24,7 +24,7 @@
     { "id": "step-2:infra",            "status": "COMPLETED", "note": "apiClient(1개)·tokenManager·refreshQueue·errorHandler·constants·lib·MSW 셋업" },
     { "id": "step-3:ADMIN_LOGIN",      "status": "COMPLETED", "note": "LoginLayout·로그인 폼(RHF+Zod)·auth store·protectedLoader" },
     { "id": "step-4:SYNC_MAIN_shell",  "status": "COMPLETED", "note": "MainLayout+Header·카드1·카드2·이력 테이블·4상태·Pagination(10행)" },
-    { "id": "step-5-1:M1_semester",    "status": "IN_PROGRESS", "note": "표시 학기 조회/변경. 카드2 무영향(D10)" },
+    { "id": "step-5-1:M1_semester",    "status": "COMPLETED", "note": "표시 학기 조회/변경. 카드2 무영향(D10)" },
     { "id": "step-5-2:M2_preflight",   "status": "TODO", "note": "학기 선택 + preflight + strategy 보관" },
     { "id": "step-5-3:M3_M4_execute",  "status": "TODO", "note": "M3/M4/최초적재 변형 + POST jobs + 409 2종. M4 격식체 유지" },
     { "id": "step-5-4:polling",        "status": "TODO", "note": "refetchInterval 조건부·runningJobId 재개·total null 분기·PERSIST 단위 건" },
@@ -56,6 +56,16 @@
       "tag": "decision",
       "item": "step-4:SYNC_MAIN_shell",
       "text": "명세 빈칸을 스스로 채운 값 — (1) 03 §8 계약 enum 을 shared/api/schemas.ts 에 뒀다(04 §9-1 샘플은 features/sync 인라인이지만 CourseTerm 을 semester·sync 가 공유하고 features 간 import 가 금지라 중복 선언 대신 상향). (2) PaginationControl 의 번호 창 5개. (3) 테이블 컬럼 폭을 colgroup style 로 주고 table-fixed 로 비율을 결정적으로 만든다 — 01 §6-4 의 px 합 640 은 카드 폭 976 에서 그대로 유지되지 않는다. (4) 재조회 실패 시에는 Error State 대신 기존 데이터 유지 + 전역 토스트(카드 1·2·이력 공통 규칙)."
+    },
+    {
+      "tag": "trap",
+      "item": "all",
+      "text": "Tailwind 모션 특이도 — 맨 `duration-200` 은 (0,1,0) 이라 `data-[state=open]:animate-in` 이 만드는 (0,2,0) 규칙의 150ms 를 못 이긴다. variant animate 를 쓰면 duration 도 반드시 variant 로 건다(`data-[state=open]:duration-200`). step-3 부터 모달이 150ms 로 떠 있었고 step-5-1 리뷰에서 잡혔다. harness/verify/step-5-1.mjs 의 'shared/ui 모션' 섹션이 src/shared/components/ui/**.tsx 를 소스 스캔해 짝을 강제한다 — 새 shadcn 컴포넌트를 넣을 때 여기서 걸린다."
+    },
+    {
+      "tag": "decision",
+      "item": "step-5-1:M1_semester",
+      "text": "명세 빈칸을 스스로 채운 값 — (1) 현재 연도를 `new Date()` 없이 구한다(`shared/lib/academicYearOptions.ts`). uss-contract-lint 의 date-parse 가 막기도 하지만, Intl 로 timeZone:'Asia/Seoul' 을 박는 편이 브라우저 로컬 시간대에 흔들리지 않아 KST 고정 계약에 맞다. (2) M1 은 폼 검증이 성립하지 않아(닫힌 값 집합 드롭다운 2개) 인라인 에러가 없고 서버 실패는 토스트로만 알린다. 모달은 닫지 않아 재시도가 된다. (3) 라벨+컨트롤 가로 배치는 `shared/components/form/FieldRow.tsx`(04 §4 트리에 없는 파일). 세로 배치인 FormField 는 로그인용으로 남긴다 — M2 도 FieldRow 를 쓴다."
     },
     {
       "tag": "carry-forward",
@@ -110,6 +120,15 @@
       "review": "spec=PASS · ds=PASS (2라운드)",
       "retry": 0,
       "text": "카드 1(표시 학기)·카드 2(적재 데이터)·이력 테이블 + 4상태 + 페이지네이션(10행). shadcn 5종(table·badge·skeleton·tooltip·card)을 DS-01 로 재정의. 리뷰 1라운드 둘 다 FAIL — 헤더 divider 가 특이도 싸움으로 안 그려지던 건, 4상태 비배타(재조회 실패 시 Error State 와 본문 동시 노출), 일시 형식을 다수결로 정한 절차 오류. 전부 수정 후 2라운드 PASS. 검증 142건 통과."
+    },
+    {
+      "id": "step-5-1:M1_semester",
+      "ts": "2026-08-08",
+      "commit": "ef8b44d",
+      "gate": "--full OK",
+      "review": "spec=PASS(2라운드) · ds=PASS(3라운드)",
+      "retry": 0,
+      "text": "M1 표시 학기 설정 모달 + shadcn Select 도입. PUT /semesters/display, RHF+zodResolver, isDirty 로 [저장] 비활성, 성공 토스트, D10 격리(semester 키만 invalidate). spec 1라운드 FAIL — 모달 파일명이 04 §4 트리와 달랐다. ds 1라운드 FAIL — 저장 중 spinner 누락. ds 2라운드 FAIL — 모달 모션이 특이도에 져서 step-3 부터 150ms 로 떠 있었다(dialog·select·tooltip 3파일 수정). 검증 40건 추가(총 182건). jsdom 에서 Radix 를 돌리려고 env.mjs 에 전역 생성자와 pointer capture·ResizeObserver 스텁 추가."
     }
   ]
 }

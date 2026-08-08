@@ -1,4 +1,7 @@
 /** step-5-1:M1_semester — 표시 학기 조회/변경 모달. 계약·옵션·마크업·D10 격리. */
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { delay, http, HttpResponse } from 'msw';
 
 import { createChecker, createRuntime, installDom } from './env.mjs';
@@ -179,6 +182,26 @@ section('변경 → [저장] (01 §7-1 · 04 §10-7)');
   check('모달이 닫힌다', !text(afterSave).includes('표시 학기 설정'));
   check('카드가 새 값을 보여준다', text(afterSave).includes('2026학년도 겨울계절학기'));
   queryClient.clear();
+}
+
+section('shared/ui 모션 — variant animate 에는 variant duration 을 짝지운다');
+{
+  // 렌더 마크업만 보면 그 화면에 안 뜬 컴포넌트를 영영 못 잡는다. 소스를 직접 훑는다.
+  const uiDir = join(process.cwd(), 'src/shared/components/ui');
+  const missing = { open: [], closed: [] };
+
+  for (const name of readdirSync(uiDir).filter((file) => file.endsWith('.tsx'))) {
+    const source = readFileSync(join(uiDir, name), 'utf8');
+    for (const state of ['open', 'closed']) {
+      const animate = state === 'open' ? 'animate-in' : 'animate-out';
+      if (!source.includes(`data-[state=${state}]:${animate}`)) continue;
+      if (source.includes(`data-[state=${state}]:duration-`)) continue;
+      missing[state].push(name);
+    }
+  }
+
+  eq('열림 모션에 duration 이 빠진 파일', missing.open, []);
+  eq('닫힘 모션에 duration 이 빠진 파일', missing.closed, []);
 }
 
 await close();
