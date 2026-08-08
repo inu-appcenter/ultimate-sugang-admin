@@ -83,6 +83,7 @@ section('D4 — 클라이언트가 전략 값을 만들어내지 않는다');
     new RegExp(`return\\s+['"]${STRATEGY}['"]`),
     new RegExp(`\\?\\s*['"]${STRATEGY}['"]`),
     new RegExp(`:\\s*['"]${STRATEGY}['"]`),
+    new RegExp(`\\(\\s*['"]${STRATEGY}['"]`),
     /expectedStrategy:\s*['"]/,
   ];
   const offenders = [];
@@ -101,6 +102,7 @@ section('D4 — 클라이언트가 전략 값을 만들어내지 않는다');
   };
   walk(join(process.cwd(), 'src/features'));
   walk(join(process.cwd(), 'src/pages'));
+  walk(join(process.cwd(), 'src/shared'));
 
   eq('전략 값을 만들어내는 파일', offenders, []);
   // 가드가 살아 있는지 확인 — 위 규칙이 실제 위반을 잡아야 한다.
@@ -115,6 +117,14 @@ section('D4 — 클라이언트가 전략 값을 만들어내지 않는다');
   check(
     '가드가 삼항 alternate 를 잡는다',
     produces.some((rule) => rule.test("const s = cond ? compute() : 'REPLACE';")),
+  );
+  check(
+    '가드가 호출 인자를 잡는다',
+    produces.some((rule) => rule.test("setStrategy('REPLACE')")),
+  );
+  check(
+    'z.enum 배열은 통과시킨다',
+    !produces.some((rule) => rule.test("z.enum(['INITIAL', 'UPSERT', 'REPLACE'])")),
   );
   check(
     '서버 값 비교는 통과시킨다',

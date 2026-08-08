@@ -26,8 +26,8 @@
     { "id": "step-4:SYNC_MAIN_shell",  "status": "COMPLETED", "note": "MainLayout+Header·카드1·카드2·이력 테이블·4상태·Pagination(10행)" },
     { "id": "step-5-1:M1_semester",    "status": "COMPLETED", "note": "표시 학기 조회/변경. 카드2 무영향(D10)" },
     { "id": "step-5-2:M2_preflight",   "status": "COMPLETED", "note": "학기 선택 + preflight. 응답은 onPreflight 로 올린다" },
-    { "id": "step-5-3:M3_M4_execute",  "status": "IN_PROGRESS", "note": "preflight 응답 보관 + M3/M4/최초적재 변형 + POST jobs + 409 2종. M4 격식체 유지" },
-    { "id": "step-5-4:polling",        "status": "TODO", "note": "refetchInterval 조건부·runningJobId 재개·total null 분기·PERSIST 단위 건" },
+    { "id": "step-5-3:M3_M4_execute",  "status": "COMPLETED", "note": "preflight 응답 보관 + M3/M4/최초적재 변형 + POST jobs + 409 2종. M4 격식체 유지" },
+    { "id": "step-5-4:polling",        "status": "TODO", "note": "202 jobId 를 onSuccess 에서 보관해 폴링 시작 · refetchInterval 조건부 · runningJobId 재개 · total null 분기 · PERSIST 단위 건" },
     { "id": "step-6:expand_detail",    "status": "TODO", "note": "Expandable Row·Tab Group·더보기(useInfiniteQuery)·FieldDiff·실패 Job" },
     { "id": "step-7:qa",               "status": "TODO", "note": "시나리오 14개 + DS 일관성 점검" }
   ],
@@ -78,9 +78,14 @@
       "text": "명세 빈칸을 스스로 채운 값 — (1) 현재 연도를 `new Date()` 없이 구한다(`shared/lib/academicYearOptions.ts`). uss-contract-lint 의 date-parse 가 막기도 하지만, Intl 로 timeZone:'Asia/Seoul' 을 박는 편이 브라우저 로컬 시간대에 흔들리지 않아 KST 고정 계약에 맞다. (2) M1 은 폼 검증이 성립하지 않아(닫힌 값 집합 드롭다운 2개) 인라인 에러가 없고 서버 실패는 토스트로만 알린다. 모달은 닫지 않아 재시도가 된다. (3) 라벨+컨트롤 가로 배치는 `shared/components/form/FieldRow.tsx`(04 §4 트리에 없는 파일). 세로 배치인 FormField 는 로그인용으로 남긴다 — M2 도 FieldRow 를 쓴다."
     },
     {
+      "tag": "decision",
+      "item": "step-5-3:M3_M4_execute",
+      "text": "명세 빈칸을 스스로 채운 값 — (1) 409(5200·5201)만 모달을 닫는다. 400·500 은 명세가 침묵하고 재시도 금지는 409 한정이라 모달을 열어 둬 재시도할 수 있게 했다. (2) summary 재조회는 useCreateSyncJob 의 onSettled 에서 syncKeys.all 무효화로 성공·409 를 한 곳에서 처리한다. (3) M4 에 인라인 검증 에러 문구를 만들지 않았다 — 01 §7-4 는 '정확 일치 시 활성' 만 정한다. 지어내면 그게 위반이다. step-5-1 에서 이월된 '에러 표시 모양 통일' 숙제는 M4 에 해당 사항이 없어 종료됐다. (4) M3 리드 문장만 DialogDescription 기본값(text-caption)을 text-body/foreground 로 덮는다. 기본값은 안 건드렸다 — M1·M2 는 폼 컨트롤이 본문 급을 잡아준다."
+    },
+    {
       "tag": "carry-forward",
       "item": "step-5-3:M3_M4_execute",
-      "text": "[Step 5 로 이월] 에러 표시 모양을 셋이 통일해야 한다: 필드 인라인 에러(FieldError, 아이콘 없음) · 로그인 401 카드 에러(AlertTriangle) · M4 Strict Match 입력 검증 에러. DS 리뷰어가 Step 5 에서 제각각이면 위반으로 잡겠다고 예고했다. 또 헤더 로그아웃 버튼이 size=sm(32px)에 아이콘 20px 라 답답해 보이면 아이콘을 줄이지 말고 버튼 높이를 올린다(20px 이 DS-01 §7 값)."
+      "text": "[해소됨 — step-5-3] 에러 표시 모양 통일 건은 종료됐다. M4 에는 인라인 검증 에러가 없다(01 §7-4 는 '정확 일치 시 실행 버튼 활성' 만 정하고 에러 문구를 정하지 않는다). 남은 둘(FieldError 아이콘 없음 · 로그인 401 카드 에러 AlertTriangle)은 서로 역할이 달라 그대로 둔다. 아직 유효한 항목: 헤더 로그아웃 버튼이 size=sm(32px)에 아이콘 20px 라 답답해 보이면 아이콘을 줄이지 말고 버튼 높이를 올린다(20px 이 DS-01 §7 값)."
     },
     {
       "tag": "decision",
@@ -147,7 +152,16 @@
       "gate": "--full OK",
       "review": "spec=PASS(3라운드) · ds=PASS(3라운드)",
       "retry": 0,
-      "text": "M2 학기 선택 모달 + POST /sync/preflight. 3전략 판정은 전부 서버 몫이고 응답 4필드를 Zod 로 파싱해 onPreflight 로 올린다(D4). 초기값 = 적재 학기 ?? 표시 학기 를 SyncMainPage 가 합성. spec 1라운드 FAIL — 에러 토스트 중복(전역 MutationCache + 호출부). ds 1라운드 FAIL — '현재 적재' 라벨이 w-12 를 0.22px 넘겨 두 줄. 3라운드 — 패킷 §F 질문에 사용자가 '비활성 + 툴팁' 을 골라 반영(0561b28). 그 과정에서 `<button[^>]*disabled[^>]*>` 정규식이 class 의 disabled: 변형에 걸려 활성 버튼도 통과하던 걸 발견해 step-4 것까지 고쳤다. 검증 42건 추가(총 224건). 하네스에 D4 소스 스캔 가드(features/pages 에서 전략 리터럴 분기 금지) 추가. 리뷰어 2종을 처음으로 병렬 실행했다가 세션 한도로 둘 다 죽어 순차로 재실행했고, 3라운드는 병렬로 성공했다."
+      "text": "M2 학기 선택 모달 + POST /sync/preflight. (step-5-3 에서 D4 가드를 두 번 손봤다 — 완화 1회·구멍 메우기 2회) 3전략 판정은 전부 서버 몫이고 응답 4필드를 Zod 로 파싱해 onPreflight 로 올린다(D4). 초기값 = 적재 학기 ?? 표시 학기 를 SyncMainPage 가 합성. spec 1라운드 FAIL — 에러 토스트 중복(전역 MutationCache + 호출부). ds 1라운드 FAIL — '현재 적재' 라벨이 w-12 를 0.22px 넘겨 두 줄. 3라운드 — 패킷 §F 질문에 사용자가 '비활성 + 툴팁' 을 골라 반영(0561b28). 그 과정에서 `<button[^>]*disabled[^>]*>` 정규식이 class 의 disabled: 변형에 걸려 활성 버튼도 통과하던 걸 발견해 step-4 것까지 고쳤다. 검증 42건 추가(총 224건). 하네스에 D4 소스 스캔 가드(features/pages 에서 전략 리터럴 분기 금지) 추가. 리뷰어 2종을 처음으로 병렬 실행했다가 세션 한도로 둘 다 죽어 순차로 재실행했고, 3라운드는 병렬로 성공했다."
+    },
+    {
+      "id": "step-5-3:M3_M4_execute",
+      "ts": "2026-08-09",
+      "commit": "8aa6436",
+      "gate": "--full OK",
+      "review": "spec=PASS(2라운드) · ds=PASS(2라운드)",
+      "retry": 0,
+      "text": "M3(UPSERT)·M3 변형(INITIAL)·M4(REPLACE) + POST /sync/jobs + 409 2종. expectedStrategy 는 preflight 응답을 그대로 되돌려 보내고(D4) 하네스가 요청 바디를 캡처해 확인한다. M4 Strict Match·격식체·480px·닫으면 입력 초기화까지 검사. spec 1라운드 PASS(가드 구멍 지적), ds 1라운드 FAIL 4건 — 그중 destructive 가 연분홍이라 비가역 버튼이 M3 보다 약해 보이던 게 핵심이었고 사용자 결정으로 진한 빨강이 됐다. 검증 54건 추가(총 285건)."
     }
   ]
 }

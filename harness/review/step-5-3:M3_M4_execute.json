@@ -1,0 +1,67 @@
+{
+  "id": "step-5-3:M3_M4_execute",
+  "spec": "PASS",
+  "ds": "PASS",
+  "commit": "8aa6436",
+  "ts": "2026-08-09",
+  "rounds": { "spec": 2, "ds": 2 },
+  "diffs": [
+    {
+      "round": 1,
+      "reviewer": "spec",
+      "verdict": "PASS",
+      "finding": "D4 가드(step-5-2.mjs)가 삼항 alternate `cond ? compute() : 'REPLACE'` 를 놓친다. uss-contract-lint 에 D4 규칙이 없어 이 하네스가 유일한 기계 검사다.",
+      "fix": "`:\\s*['\"]STRATEGY['\"]` 규칙 추가. 2라운드 지적으로 호출 인자 `(\\s*['\"]STRATEGY['\"]` 도 추가하고 walk 대상에 src/shared 를 넣었다. false positive 0(z.enum 배열·전략 키 맵·서버 값 비교 모두 통과)."
+    },
+    {
+      "round": 1,
+      "reviewer": "ds",
+      "verdict": "FAIL",
+      "finding": "M4 [삭제 후 적재]가 연분홍이었다. --destructive 가 danger-bg(#FDECEA)를 가리켜 비가역 버튼이 M3 의 파란 [갱신]보다 약해 보였고, 입력 전 disabled(opacity-50)까지 겹치면 거의 흰 판이었다. hover 도 밝아지는 방향(bg-danger-bg/70)이었다.",
+      "fix": "사용자 결정으로 진한 빨강 채우기. --destructive=danger-text(#C4281C), --destructive-foreground=primary-foreground(흰색), hover:brightness-90. 흰 글자 대비 5.7:1 AA 통과. rules/ui-conventions.md 매핑 줄과 build-state step-1 노트도 갱신. 하네스가 globals.css 를 소스 검사해 되돌림을 막는다."
+    },
+    {
+      "round": 1,
+      "reviewer": "ds",
+      "verdict": "FAIL",
+      "finding": "M4 삭제 건수가 좌측 정렬이고 모달에서 가장 작은 글자였다(caption). 01 §7-4 는 숫자 끝 컬럼 우측 정렬, DS-00 §4-1 원칙 1 은 라벨보다 숫자가 먼저다.",
+      "fix": "dd 에 ml-auto + text-body/foreground, dt 는 caption/fg-secondary. w-16 고정폭 제거."
+    },
+    {
+      "round": 1,
+      "reviewer": "ds",
+      "verdict": "FAIL",
+      "finding": "M3 는 모달 안에 text-foreground 가 하나도 없어 리드 문장과 불릿 4줄이 같은 급이었다(둘 다 13px 보조색).",
+      "fix": "리드 문장만 DialogDescription 에 text-body/foreground 오버라이드. 불릿은 caption 유지. DialogDescription 기본값은 안 건드렸다 — M1·M2 는 폼 컨트롤이 본문 급을 잡아주고 이미 리뷰를 통과했다. DS 2라운드가 이 판단을 인정했다."
+    },
+    {
+      "round": 1,
+      "reviewer": "ds",
+      "verdict": "FAIL",
+      "finding": "w-8(현재/변경 라벨) 고정폭이 15px 2글자에 여유가 1~2px 뿐이라 폰트 폴백에서 붙는다.",
+      "fix": "고정폭 제거. ml-auto 로 정렬을 잡아 필요가 없어졌다."
+    },
+    {
+      "round": 2,
+      "reviewer": "both",
+      "verdict": "PASS",
+      "finding": "destructive 변경이 다른 곳으로 번지지 않았는지 확인. bg-destructive 소비자는 button.tsx 하나뿐이고 그 variant 를 쓰는 건 M4 실행 버튼뿐이다. FAILED 배지·에러 토스트·검증 에러는 danger-* 를 직접 참조해 영향권 밖.",
+      "fix": "없음."
+    }
+  ],
+  "self_judgements_accepted": [
+    "409(5200·5201)만 모달을 닫는다. 400·500 은 명세가 침묵하고 '재시도 금지' 는 409 한정이라 모달을 열어 둬 재시도할 수 있게 했다.",
+    "summary 재조회를 useCreateSyncJob 의 onSettled 에서 syncKeys.all 무효화로 처리했다. 성공(새 RUNNING Job)과 409(summary 재조회)를 한 곳에서 다룬다.",
+    "M4 에 인라인 검증 에러 문구를 만들지 않았다. 01 §7-4 는 '정확 일치 시 활성' 만 정하고 에러 문구를 정하지 않는다 — 지어냈으면 그게 위반이다. step-5-1 에서 이월된 '에러 표시 모양 통일' 숙제는 M4 에 해당 사항이 없는 것으로 종료.",
+    "D4 가드 완화는 정당하다. preflight.strategy 로 모달을 고르는 건 03 §6-1 '클라이언트 분기' 표가 시키는 일이고, 이제 전략 값을 생산하는 것만 막는다."
+  ],
+  "open_questions": [],
+  "deferred": [
+    "[step-5-4] 202 의 jobId 를 onSuccess 에서 보관해 폴링을 시작해야 한다(04 §10-3). 지금은 summary 재조회로 runningJobId 를 주워 오는 경로뿐이라 실행 직후 한 틱 늦다.",
+    "[step-6/7 · 사용자 승인 필요] DialogDescription 기본값이 text-caption 인데 호출부 4곳 중 2곳(M3·M4)이 text-body 로 덮는다. DS-03 §1-1 은 모달 설명을 14px regular(=USS body)로 준다. 기본을 text-body text-fg-secondary 로 올리고 M1·M2 는 색만 유지하는 쪽이 맞지만 M1·M2 시각이 바뀌므로 승인이 필요하다.",
+    "[step-7:qa] hover:brightness-90 은 filter 라 흰 라벨과 Loader2 스피너까지 10% 어두워지고, transition-colors 가 filter 를 보간하지 않아 hover 전환이 순간이다(다른 variant 는 150ms). danger-hover 토큰 신설이 금지라 현 선택이 현실적이지만 육안 확인 대상.",
+    "[step-7:qa] M4 삭제 건수의 ml-auto 가 480px 모달 오른쪽 끝까지 숫자를 민다. 01 §7-4 와이어프레임은 라벨 바로 옆이다. DS 는 수치 우측 정렬로 통과시켰고 spec 은 계약 위반이 아니라고 봤지만, 라벨-숫자 간격이 리더 도트 없이 읽히는지는 실제 화면에서 봐야 한다.",
+    "[step-5-4 이후] 같은 '라벨 + 값' 패턴이 M2(w-12 고정폭, 둘 다 caption)와 M4(고정폭 없음, caption/body)로 갈렸다. 값이 데이터인 M4 쪽이 원칙 1 기준으로 맞다."
+  ],
+  "verify": "harness/verify/step-5-3.mjs 54건 + step-5-2 가드 보강 (전체 285건)"
+}
