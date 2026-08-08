@@ -131,7 +131,7 @@ function SyncTargetForm({
 
       {loadedSemester !== null && (
         <div className="flex items-center gap-4 text-caption">
-          <span className="w-12 shrink-0 text-fg-secondary">현재 적재</span>
+          <span className="w-12 shrink-0 whitespace-nowrap text-fg-secondary">현재 적재</span>
           <span className="text-foreground">
             {formatSemesterLong(loadedSemester.academicYear, loadedSemester.term)}
           </span>
