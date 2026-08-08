@@ -14,6 +14,7 @@ const { consumeSessionExpiredFlag, SESSION_EXPIRED_MESSAGE } = await load(
 const { useAuthStore } = await load('/src/features/auth/store.ts');
 const { loginFormSchema } = await load('/src/features/auth/schemas.ts');
 const { router } = await load('/src/app/router.tsx');
+const { cn } = await load('/src/shared/lib/cn.ts');
 const probe = await load('/harness/verify/probe.tsx');
 
 installRefreshInterceptor();
@@ -101,6 +102,19 @@ section('로그인 (03 §3-1)');
   check('재발급 응답 { accessToken, name }', reissued.name === '김학사');
 }
 
+section('cn() 이 DS-01 토큰을 안 지우는지 (tailwind-merge 그룹 등록)');
+{
+  // 사고 기록: text-body 를 색으로 오인해 text-primary-foreground 를 지우면
+  // Primary 버튼 글자가 파란 배경 위에 어둡게 뜬다.
+  const primary = cn('bg-primary text-primary-foreground', 'text-body');
+  check('Primary 글자색이 살아남는다', primary.includes('text-primary-foreground'), primary);
+  const ghost = cn('text-fg-secondary', 'text-caption');
+  check('Ghost 글자색이 살아남는다', ghost.includes('text-fg-secondary'), ghost);
+  eq('같은 크기 토큰끼리는 뒤가 이긴다', cn('text-h1', 'text-h2'), 'text-h2');
+  eq('모달 폭은 덮어쓰기가 된다', cn('max-w-modal', 'max-w-modal-wide'), 'max-w-modal-wide');
+  eq('radius 도 덮어쓰기가 된다', cn('rounded-btn', 'rounded-card'), 'rounded-card');
+}
+
 section('화면 (01 §4·§5 · DS-01)');
 {
   const loginHtml = probe.renderLoginScreen();
@@ -108,6 +122,7 @@ section('화면 (01 §4·§5 · DS-01)');
   check('제목', loginHtml.includes('USS 관리자') && loginHtml.includes('강의 데이터 관리 시스템'));
   check('라벨 아이디·비밀번호', loginHtml.includes('>아이디<') && loginHtml.includes('>비밀번호<'));
   check('로그인 버튼', loginHtml.includes('로그인'));
+  check('Primary 버튼 글자가 흰색(text-primary-foreground)', loginHtml.includes('text-primary-foreground'));
   check('LoginLayout 이 카드 폭 400 을 준다', loginHtml.includes('max-w-login-card'));
   check('카드 보더 없음 + shadow-card + radius 14', loginHtml.includes('rounded-card bg-surface p-6 shadow-card'));
   check('입력창 Fill (bg-hover)', loginHtml.includes('bg-hover'));
