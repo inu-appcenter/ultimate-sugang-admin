@@ -25,7 +25,7 @@
     { "id": "step-3:ADMIN_LOGIN",      "status": "COMPLETED", "note": "LoginLayout·로그인 폼(RHF+Zod)·auth store·protectedLoader" },
     { "id": "step-4:SYNC_MAIN_shell",  "status": "COMPLETED", "note": "MainLayout+Header·카드1·카드2·이력 테이블·4상태·Pagination(10행)" },
     { "id": "step-5-1:M1_semester",    "status": "COMPLETED", "note": "표시 학기 조회/변경. 카드2 무영향(D10)" },
-    { "id": "step-5-2:M2_preflight",   "status": "IN_PROGRESS", "note": "학기 선택 + preflight. 응답은 onPreflight 로 올린다" },
+    { "id": "step-5-2:M2_preflight",   "status": "COMPLETED", "note": "학기 선택 + preflight. 응답은 onPreflight 로 올린다" },
     { "id": "step-5-3:M3_M4_execute",  "status": "TODO", "note": "preflight 응답 보관 + M3/M4/최초적재 변형 + POST jobs + 409 2종. M4 격식체 유지" },
     { "id": "step-5-4:polling",        "status": "TODO", "note": "refetchInterval 조건부·runningJobId 재개·total null 분기·PERSIST 단위 건" },
     { "id": "step-6:expand_detail",    "status": "TODO", "note": "Expandable Row·Tab Group·더보기(useInfiniteQuery)·FieldDiff·실패 Job" },
@@ -61,6 +61,16 @@
       "tag": "trap",
       "item": "all",
       "text": "Tailwind 모션 특이도 — 맨 `duration-200` 은 (0,1,0) 이라 `data-[state=open]:animate-in` 이 만드는 (0,2,0) 규칙의 150ms 를 못 이긴다. variant animate 를 쓰면 duration 도 반드시 variant 로 건다(`data-[state=open]:duration-200`). step-3 부터 모달이 150ms 로 떠 있었고 step-5-1 리뷰에서 잡혔다. harness/verify/step-5-1.mjs 의 'shared/ui 모션' 섹션이 src/shared/components/ui/**.tsx 를 소스 스캔해 짝을 강제한다 — 새 shadcn 컴포넌트를 넣을 때 여기서 걸린다."
+    },
+    {
+      "tag": "trap",
+      "item": "all",
+      "text": "에러 토스트는 queryClient 의 QueryCache/MutationCache onError 가 전역에서 띄운다. mutate 호출부에 `onError: showErrorToast` 를 또 걸면 같은 문구가 두 개 쌓인다(04 §9-2 위반). 호출부에는 onSuccess 만 둔다. 존재 검사(includes)로는 안 잡히므로 하네스는 개수를 센다 — harness/verify/step-5-2.mjs 의 '판정 실패' 섹션."
+    },
+    {
+      "tag": "decision",
+      "item": "step-5-2:M2_preflight",
+      "text": "명세 빈칸을 스스로 채운 값 — (1) 적재 데이터가 없으면 M2 의 '현재 적재' 행을 숨긴다(01 §7-2 에 그때 문구가 없다. 나중에 넣는다면 카드 2 의 '아직 적재된 데이터가 없어요.' 로 맞추는 게 일관적이다). (2) [다음] 은 판정 중에만 비활성 — dirty 로 막으면 UPSERT 경로가 통째로 막힌다. (3) 초기값(적재 학기 ?? 표시 학기)은 SyncMainPage 가 합성해 내려준다. (4) 라벨 폭 함정 — FieldRow 의 w-12 는 text-body(15px) 기준이라 text-caption(13px) 한글 4자는 48px 를 0.22px 넘겨 두 줄이 된다. whitespace-nowrap 으로 푼다."
     },
     {
       "tag": "decision",
@@ -128,7 +138,16 @@
       "gate": "--full OK",
       "review": "spec=PASS(2라운드) · ds=PASS(3라운드)",
       "retry": 0,
-      "text": "M1 표시 학기 설정 모달 + shadcn Select 도입. PUT /semesters/display, RHF+zodResolver, isDirty 로 [저장] 비활성, 성공 토스트, D10 격리(semester 키만 invalidate). spec 1라운드 FAIL — 모달 파일명이 04 §4 트리와 달랐다. ds 1라운드 FAIL — 저장 중 spinner 누락. ds 2라운드 FAIL — 모달 모션이 특이도에 져서 step-3 부터 150ms 로 떠 있었다(dialog·select·tooltip 3파일 수정). 검증 40건 추가(총 182건). jsdom 에서 Radix 를 돌리려고 env.mjs 에 전역 생성자와 pointer capture·ResizeObserver 스텁 추가."
+      "text": "M1 표시 학기 설정 모달 + shadcn Select 도입. (step-5-2 에서 호출부 onError 중복이 발견돼 한 줄 제거됨) PUT /semesters/display, RHF+zodResolver, isDirty 로 [저장] 비활성, 성공 토스트, D10 격리(semester 키만 invalidate). spec 1라운드 FAIL — 모달 파일명이 04 §4 트리와 달랐다. ds 1라운드 FAIL — 저장 중 spinner 누락. ds 2라운드 FAIL — 모달 모션이 특이도에 져서 step-3 부터 150ms 로 떠 있었다(dialog·select·tooltip 3파일 수정). 검증 40건 추가(총 182건). jsdom 에서 Radix 를 돌리려고 env.mjs 에 전역 생성자와 pointer capture·ResizeObserver 스텁 추가."
+    },
+    {
+      "id": "step-5-2:M2_preflight",
+      "ts": "2026-08-08",
+      "commit": "624f90e",
+      "gate": "--full OK",
+      "review": "spec=PASS(2라운드) · ds=PASS(2라운드)",
+      "retry": 0,
+      "text": "M2 학기 선택 모달 + POST /sync/preflight. 3전략 판정은 전부 서버 몫이고 응답 4필드를 Zod 로 파싱해 onPreflight 로 올린다(D4). 초기값 = 적재 학기 ?? 표시 학기 를 SyncMainPage 가 합성. spec 1라운드 FAIL — 에러 토스트 중복(전역 MutationCache + 호출부). ds 1라운드 FAIL — '현재 적재' 라벨이 w-12 를 0.22px 넘겨 두 줄. 검증 33건 추가(총 215건). 하네스에 D4 소스 스캔 가드(features/pages 에서 전략 리터럴 분기 금지) 추가. 리뷰어 2종을 처음으로 병렬 실행했다가 세션 한도로 둘 다 죽어 순차로 재실행했다."
     }
   ]
 }
