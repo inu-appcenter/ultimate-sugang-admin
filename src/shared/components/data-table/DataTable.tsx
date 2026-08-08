@@ -1,6 +1,5 @@
-import { Fragment, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
-import { cn } from '@/shared/lib/cn';
 import {
   Table,
   TableBody,
@@ -9,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/shared/components/ui/table';
+import { cn } from '@/shared/lib/cn';
 
 export interface DataTableColumn<T> {
   key: string;
@@ -23,20 +23,10 @@ interface DataTableProps<T> {
   columns: Array<DataTableColumn<T>>;
   rows: T[];
   rowKey: (row: T) => string | number;
-  onRowClick?: (row: T) => void;
-  /** 행 아래에 붙일 것(인라인 확장). Step 6 에서 쓴다. */
-  renderRowDetail?: (row: T) => ReactNode;
 }
 
-export function DataTable<T>({
-  columns,
-  rows,
-  rowKey,
-  onRowClick,
-  renderRowDetail,
-}: DataTableProps<T>) {
-  const clickable = onRowClick !== undefined;
-
+/** 행 클릭 → 인라인 확장은 Step 6 에서 붙인다. 지금 필요 없는 통로는 만들어두지 않는다. */
+export function DataTable<T>({ columns, rows, rowKey }: DataTableProps<T>) {
   return (
     <Table>
       <colgroup>
@@ -54,33 +44,15 @@ export function DataTable<T>({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {rows.map((row) => {
-          const detail = renderRowDetail?.(row);
-          return (
-            <Fragment key={rowKey(row)}>
-              <TableRow
-                onClick={clickable ? () => onRowClick(row) : undefined}
-                className={cn(clickable && 'cursor-pointer hover:bg-hover')}
-              >
-                {columns.map((column) => (
-                  <TableCell
-                    key={column.key}
-                    className={cn(column.align === 'right' && 'text-right')}
-                  >
-                    {column.render(row)}
-                  </TableCell>
-                ))}
-              </TableRow>
-              {detail !== undefined && detail !== null && (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-auto p-0">
-                    {detail}
-                  </TableCell>
-                </TableRow>
-              )}
-            </Fragment>
-          );
-        })}
+        {rows.map((row) => (
+          <TableRow key={rowKey(row)}>
+            {columns.map((column) => (
+              <TableCell key={column.key} className={cn(column.align === 'right' && 'text-right')}>
+                {column.render(row)}
+              </TableCell>
+            ))}
+          </TableRow>
+        ))}
       </TableBody>
     </Table>
   );

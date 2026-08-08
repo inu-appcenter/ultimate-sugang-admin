@@ -15,7 +15,8 @@ import { formatSemesterLong } from '@/shared/lib/formatSemester';
 function Metric({ label, value }: { label: string; value: number }) {
   return (
     <div>
-      <p className="text-caption text-muted-foreground">{label}</p>
+      {/* DS-01 §1-2 — 라벨은 text-secondary 다. text-muted 는 메타 정보용. */}
+      <p className="text-caption text-fg-secondary">{label}</p>
       <p className="text-metric text-foreground">{formatNumber(value)}건</p>
     </div>
   );
@@ -76,7 +77,10 @@ export function CourseSummaryCard({ onUpdateClick }: { onUpdateClick: () => void
 
       {isPending && <LoadingSkeleton rows={3} className="mt-4" />}
 
-      {isError && <ErrorState message={getErrorMessage(error)} onRetry={() => void refetch()} />}
+      {/* 재조회 실패 때는 Error State 를 띄우지 않는다 — 카드 1·이력과 같은 규칙. */}
+      {isError && data === undefined && (
+        <ErrorState message={getErrorMessage(error)} onRetry={() => void refetch()} />
+      )}
 
       {data !== undefined && (
         <>

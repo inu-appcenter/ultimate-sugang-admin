@@ -38,6 +38,16 @@
       "text": ".env.development 을 사람이 만들어야 한다. PreToolUse 훅이 .env* 쓰기를 차단한다(우회하지 않음). 내용 2줄: VITE_API_HOST=http://localhost:8080 / VITE_USE_MSW=true. Step 2 에서 apiClient 가 src/env.ts 를 import 하는 순간부터 없으면 런타임에서 throw 한다."
     },
     {
+      "tag": "decision",
+      "item": "step-4:SYNC_MAIN_shell",
+      "text": "사용자 확정 2건 — (1) 이력 테이블 일시는 **긴 형식** `2026-08-05 14:22` (01 §6-4 컬럼 표가 규범이고 150px 폭도 이 형식 기준. §6-1 와이어프레임의 짧은 표기는 박스 폭에 맞춘 예시로 본다). 이에 따라 shared/lib/formatShortDateTime 을 제거했다. (2) '업데이트 이력' 제목은 **카드 안쪽**(DS-01 §2 가 h2 카드 타이틀 셋에 이 문구를 포함)."
+    },
+    {
+      "tag": "decision",
+      "item": "step-4:SYNC_MAIN_shell",
+      "text": "명세 빈칸을 스스로 채운 값 — (1) 03 §8 계약 enum 을 shared/api/schemas.ts 에 뒀다(04 §9-1 샘플은 features/sync 인라인이지만 CourseTerm 을 semester·sync 가 공유하고 features 간 import 가 금지라 중복 선언 대신 상향). (2) PaginationControl 의 번호 창 5개. (3) 테이블 컬럼 폭을 colgroup style 로 주고 table-fixed 로 비율을 결정적으로 만든다 — 01 §6-4 의 px 합 640 은 카드 폭 976 에서 그대로 유지되지 않는다. (4) 재조회 실패 시에는 Error State 대신 기존 데이터 유지 + 전역 토스트(카드 1·2·이력 공통 규칙)."
+    },
+    {
       "tag": "carry-forward",
       "item": "step-5-3:M3_M4_execute",
       "text": "[Step 5 로 이월] 에러 표시 모양을 셋이 통일해야 한다: 필드 인라인 에러(FieldError, 아이콘 없음) · 로그인 401 카드 에러(AlertTriangle) · M4 Strict Match 입력 검증 에러. DS 리뷰어가 Step 5 에서 제각각이면 위반으로 잡겠다고 예고했다. 또 헤더 로그아웃 버튼이 size=sm(32px)에 아이콘 20px 라 답답해 보이면 아이콘을 줄이지 말고 버튼 높이를 올린다(20px 이 DS-01 §7 값)."
