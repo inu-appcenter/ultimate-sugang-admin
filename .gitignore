@@ -5,6 +5,7 @@
 node_modules/
 dist/
 .vite/
+*.tsbuildinfo
 
 # 환경 변수 (비밀값은 커밋하지 않는다)
 .env
