@@ -97,8 +97,10 @@ section('진입 시 자동 재개 + 진행률 표기 (01 §8-1 · 03 §7 · 04 �
   check('total null 이면 분모 없이', text(first).includes('강의 수집 중…'));
   check('분모를 0 으로 뭉개지 않는다', !text(first).includes('강의 수집 0/0'));
 
-  check('수집 단위는 페이지', text(fetching).includes('강의 수집 3/12페이지'));
-  check('적재 단위는 건', text(persisting).includes('적재 450/1,203건'));
+  // 03 §7-2 는 수집만 띄어쓰고(3/12 페이지) 적재는 붙여 쓴다(450/1,203건). 통일하면 오답이다.
+  check('수집은 띄어쓴 페이지', text(fetching).includes('강의 수집 3/12 페이지'));
+  check('붙여쓴 페이지가 아니다', !text(fetching).includes('3/12페이지'));
+  check('적재는 붙여쓴 건', text(persisting).includes('적재 450/1,203건'));
   check('건수에 천단위 콤마', text(persisting).includes('1,203건'));
 
   check('종료되면 진행률이 사라진다', !text(finished).includes('업데이트 진행 중'));
@@ -200,6 +202,69 @@ section('실행 직후에는 202 의 jobId 로 시작한다 (04 §10-3)');
 
   await probe.runSyncConfirmFlow({ actionLabel: '갱신', settleMs: 600 });
   check('summary 가 몰라도 폴링이 시작된다', polls >= 1, `polls=${polls}`);
+
+  server.resetHandlers();
+  queryClient.clear();
+}
+
+section('끝난 Job 이 남의 RUNNING Job 을 가리지 않는다 (04 §10-4)');
+{
+  // 내 Job 이 끝난 뒤 다른 관리자가 돌린 Job 을 summary 가 알려주면 그쪽으로 넘어가야 한다.
+  mockDb.reset();
+  queryClient.clear();
+  const mine = 41;
+  const theirs = 77;
+  let runningJobId = null;
+  const polled = [];
+
+  server.use(
+    http.get('http://localhost:8080/api/v1/admin/courses/summary', () =>
+      HttpResponse.json({
+        semester: { academicYear: 2026, term: 'FIRST' },
+        courseCount: 1203,
+        scheduleCount: 2847,
+        lastJob: null,
+        runningJobId,
+      }),
+    ),
+    http.post('http://localhost:8080/api/v1/admin/sync/jobs', () =>
+      HttpResponse.json({ jobId: mine }, { status: 202 }),
+    ),
+    http.get('http://localhost:8080/api/v1/admin/sync/jobs/:jobId', ({ params }) => {
+      const jobId = Number(params.jobId);
+      polled.push(jobId);
+      return HttpResponse.json({
+        jobId,
+        academicYear: 2026,
+        term: 'FIRST',
+        strategy: 'UPSERT',
+        status: jobId === mine ? 'SUCCESS' : 'RUNNING',
+        executedBy: '김학사',
+        startedAt: '2026-08-09T10:00:00',
+        finishedAt: jobId === mine ? '2026-08-09T10:02:00' : null,
+        durationSeconds: jobId === mine ? 120 : null,
+        fetchedCourseCount: null,
+        fetchedScheduleCount: null,
+        createdCount: null,
+        updatedCount: null,
+        closedCount: null,
+        warningCount: null,
+        progress: jobId === mine ? null : { phase: 'PERSIST', current: 10, total: 20 },
+        partiallyApplied: false,
+        failureReason: null,
+      });
+    }),
+  );
+
+  await probe.runSyncConfirmFlow({ actionLabel: '갱신', settleMs: 600 });
+  check('내 Job 을 먼저 폴링한다', polled.includes(mine), `polled=${polled}`);
+
+  runningJobId = theirs;
+  queryClient.clear();
+  const [snapshot] = await probe.renderSyncMainSteps([{ wait: 800 }]);
+
+  check('남의 RUNNING Job 으로 넘어간다', polled.includes(theirs), `polled=${polled}`);
+  check('진행률이 단계까지 나온다', text(snapshot).includes('적재 10/20건'));
 
   server.resetHandlers();
   queryClient.clear();
