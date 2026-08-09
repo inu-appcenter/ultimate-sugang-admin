@@ -1,5 +1,6 @@
+import { SyncProgressText } from '@/features/sync/components/SyncProgressText';
 import { useCoursesSummary } from '@/features/sync/queries';
-import type { CoursesSummary } from '@/features/sync/schemas';
+import type { CoursesSummary, SyncProgress } from '@/features/sync/schemas';
 import { getErrorMessage } from '@/shared/api/errorHandler';
 import { JobStatusBadge } from '@/shared/components/badge/StatusBadge';
 import { ErrorState } from '@/shared/components/states/ErrorState';
@@ -65,9 +66,11 @@ function SummaryBody({ summary }: { summary: CoursesSummary }) {
 
 export function CourseSummaryCard({
   targetReady,
+  runningProgress,
   onUpdateClick,
 }: {
   targetReady: boolean;
+  runningProgress: SyncProgress | null;
   onUpdateClick: () => void;
 }) {
   const { data, isPending, isError, error, refetch } = useCoursesSummary();
@@ -91,6 +94,7 @@ export function CourseSummaryCard({
 
       {data !== undefined && (
         <>
+          {isJobRunning && <SyncProgressText progress={runningProgress} />}
           <SummaryBody summary={data} />
           <div className="mt-6 flex justify-end">
             {blockedReason !== null ? (

@@ -7,7 +7,7 @@ import { SyncConfirmModal } from '@/features/sync/components/SyncConfirmModal';
 import { SyncJobTable } from '@/features/sync/components/SyncJobTable';
 import { SyncReplaceModal } from '@/features/sync/components/SyncReplaceModal';
 import { SyncTargetModal } from '@/features/sync/components/SyncTargetModal';
-import { useCoursesSummary } from '@/features/sync/queries';
+import { useCoursesSummary, useSyncJobPolling } from '@/features/sync/queries';
 import type { SyncPreflight } from '@/features/sync/schemas';
 
 export function SyncMainPage() {
@@ -15,12 +15,15 @@ export function SyncMainPage() {
   const [targetOpen, setTargetOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [preflight, setPreflight] = useState<SyncPreflight | null>(null);
+  const [launchedJobId, setLaunchedJobId] = useState<number | null>(null);
 
   const { data: displaySemester } = useDisplaySemester();
   const { data: summary } = useCoursesSummary();
 
   const loadedSemester = summary?.semester ?? null;
   const initialTarget = loadedSemester ?? displaySemester ?? null;
+
+  const { data: job } = useSyncJobPolling(launchedJobId ?? summary?.runningJobId ?? null);
 
   const openConfirm = (result: SyncPreflight) => {
     setTargetOpen(false);
@@ -36,6 +39,7 @@ export function SyncMainPage() {
         <DisplaySemesterCard />
         <CourseSummaryCard
           targetReady={initialTarget !== null}
+          runningProgress={job?.status === 'RUNNING' ? job.progress : null}
           onUpdateClick={() => setTargetOpen(true)}
         />
         <SyncJobTable page={page} onPageChange={setPage} />
@@ -57,6 +61,7 @@ export function SyncMainPage() {
             open={confirmOpen}
             onOpenChange={setConfirmOpen}
             preflight={preflight}
+            onLaunched={setLaunchedJobId}
           />
         ) : (
           <SyncConfirmModal
@@ -64,6 +69,7 @@ export function SyncMainPage() {
             onOpenChange={setConfirmOpen}
             target={preflight.targetSemester}
             strategy={preflight.strategy}
+            onLaunched={setLaunchedJobId}
           />
         ))}
     </div>
