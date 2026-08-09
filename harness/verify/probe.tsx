@@ -58,6 +58,43 @@ export const renderSyncMain = (settleMs = 100) =>
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+/**
+ * 폴링용. 스냅샷 사이에 `before` 로 mock 상태를 바꿔 진행 단계를 결정적으로 만든다.
+ * mockDb.createJob 의 22초 타임라인을 기다리지 않으려는 것이다.
+ */
+export async function renderSyncMainSteps(steps: Array<{ wait: number; before?: () => void }>) {
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const root = createRoot(container);
+
+  await act(async () => {
+    root.render(
+      <Providers>
+        <RouterProvider
+          router={createMemoryRouter([{ path: '/', element: <SyncMainPage /> }], {
+            initialEntries: ['/'],
+          })}
+        />
+      </Providers>,
+    );
+  });
+
+  const snapshots: string[] = [];
+  for (const step of steps) {
+    step.before?.();
+    await act(async () => {
+      await sleep(step.wait);
+    });
+    snapshots.push(container.innerHTML);
+  }
+
+  await act(async () => {
+    root.unmount();
+  });
+  container.remove();
+  return snapshots;
+}
+
 const buttonByText = (scope: ParentNode, label: string) =>
   [...scope.querySelectorAll('button')].find((node) => node.textContent?.trim() === label);
 

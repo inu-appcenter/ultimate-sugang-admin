@@ -47,6 +47,38 @@ export const syncPreflightSchema = z.object({
 });
 export type SyncPreflight = z.infer<typeof syncPreflightSchema>;
 
+export const syncPhaseSchema = z.enum(['COURSE_FETCH', 'TIMETABLE_FETCH', 'PERSIST']);
+export type SyncPhase = z.infer<typeof syncPhaseSchema>;
+
+export const syncProgressSchema = z.object({
+  phase: syncPhaseSchema,
+  current: z.number(),
+  total: z.number().nullable(),
+});
+export type SyncProgress = z.infer<typeof syncProgressSchema>;
+
+export const syncJobDetailSchema = z.object({
+  jobId: z.number(),
+  academicYear: z.number(),
+  term: courseTermSchema,
+  strategy: syncStrategySchema,
+  status: syncJobStatusSchema,
+  executedBy: z.string(),
+  startedAt: z.string(),
+  finishedAt: z.string().nullable(),
+  durationSeconds: z.number().nullable(),
+  fetchedCourseCount: z.number().nullable(),
+  fetchedScheduleCount: z.number().nullable(),
+  createdCount: z.number().nullable(),
+  updatedCount: z.number().nullable(),
+  closedCount: z.number().nullable(),
+  warningCount: z.number().nullable(),
+  progress: syncProgressSchema.nullable(),
+  partiallyApplied: z.boolean(),
+  failureReason: z.string().nullable(),
+});
+export type SyncJobDetail = z.infer<typeof syncJobDetailSchema>;
+
 export const syncJobCreateRequestSchema = semesterRefSchema.extend({
   expectedStrategy: syncStrategySchema,
 });

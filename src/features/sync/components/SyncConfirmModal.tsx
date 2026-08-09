@@ -39,6 +39,7 @@ interface SyncConfirmModalProps {
   onOpenChange: (open: boolean) => void;
   target: SemesterRef;
   strategy: Exclude<SyncStrategy, 'REPLACE'>;
+  onLaunched: (jobId: number) => void;
 }
 
 export function SyncConfirmModal({
@@ -46,6 +47,7 @@ export function SyncConfirmModal({
   onOpenChange,
   target,
   strategy,
+  onLaunched,
 }: SyncConfirmModalProps) {
   const copy = CONFIRM_COPY[strategy];
 
@@ -73,6 +75,7 @@ export function SyncConfirmModal({
           target={target}
           strategy={strategy}
           actionLabel={copy.action}
+          onLaunched={onLaunched}
           onClose={() => onOpenChange(false)}
         />
       </DialogContent>
@@ -84,11 +87,13 @@ function ConfirmActions({
   target,
   strategy,
   actionLabel,
+  onLaunched,
   onClose,
 }: {
   target: SemesterRef;
   strategy: Exclude<SyncStrategy, 'REPLACE'>;
   actionLabel: string;
+  onLaunched: (jobId: number) => void;
   onClose: () => void;
 }) {
   const { mutate, isPending } = useCreateSyncJob();
@@ -97,7 +102,10 @@ function ConfirmActions({
     mutate(
       { ...target, expectedStrategy: strategy },
       {
-        onSuccess: onClose,
+        onSuccess: (created) => {
+          onLaunched(created.jobId);
+          onClose();
+        },
         onError: (error) => {
           if (isSyncConflictError(error)) onClose();
         },

@@ -33,6 +33,9 @@ export function installDom() {
   globalThis.sessionStorage = dom.window.sessionStorage;
   globalThis.history = dom.window.history;
   globalThis.getComputedStyle = dom.window.getComputedStyle;
+  // sonner 가 3초 뒤 자동 dismiss 할 때 쓴다. 폴링처럼 오래 도는 케이스에서만 도달한다.
+  globalThis.requestAnimationFrame = dom.window.requestAnimationFrame.bind(dom.window);
+  globalThis.cancelAnimationFrame = dom.window.cancelAnimationFrame.bind(dom.window);
 
   /**
    * Radix 는 전역 생성자를 그냥 참조한다 — Dialog 의 FocusScope 는 MutationObserver,

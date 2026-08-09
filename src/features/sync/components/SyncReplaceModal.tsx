@@ -31,22 +31,40 @@ interface SyncReplaceModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   preflight: SyncPreflight;
+  onLaunched: (jobId: number) => void;
 }
 
-export function SyncReplaceModal({ open, onOpenChange, preflight }: SyncReplaceModalProps) {
+export function SyncReplaceModal({
+  open,
+  onOpenChange,
+  preflight,
+  onLaunched,
+}: SyncReplaceModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-modal-wide">
         <DialogHeader>
           <DialogTitle>기존 데이터를 모두 삭제합니다</DialogTitle>
         </DialogHeader>
-        <ReplaceBody preflight={preflight} onClose={() => onOpenChange(false)} />
+        <ReplaceBody
+          preflight={preflight}
+          onLaunched={onLaunched}
+          onClose={() => onOpenChange(false)}
+        />
       </DialogContent>
     </Dialog>
   );
 }
 
-function ReplaceBody({ preflight, onClose }: { preflight: SyncPreflight; onClose: () => void }) {
+function ReplaceBody({
+  preflight,
+  onLaunched,
+  onClose,
+}: {
+  preflight: SyncPreflight;
+  onLaunched: (jobId: number) => void;
+  onClose: () => void;
+}) {
   const [confirmText, setConfirmText] = useState('');
   const { mutate, isPending } = useCreateSyncJob();
 
@@ -58,7 +76,10 @@ function ReplaceBody({ preflight, onClose }: { preflight: SyncPreflight; onClose
     mutate(
       { ...targetSemester, expectedStrategy: strategy },
       {
-        onSuccess: onClose,
+        onSuccess: (created) => {
+          onLaunched(created.jobId);
+          onClose();
+        },
         onError: (error) => {
           if (isSyncConflictError(error)) onClose();
         },

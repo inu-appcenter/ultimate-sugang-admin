@@ -27,7 +27,7 @@
     { "id": "step-5-1:M1_semester",    "status": "COMPLETED", "note": "표시 학기 조회/변경. 카드2 무영향(D10)" },
     { "id": "step-5-2:M2_preflight",   "status": "COMPLETED", "note": "학기 선택 + preflight. 응답은 onPreflight 로 올린다" },
     { "id": "step-5-3:M3_M4_execute",  "status": "COMPLETED", "note": "preflight 응답 보관 + M3/M4/최초적재 변형 + POST jobs + 409 2종. M4 격식체 유지" },
-    { "id": "step-5-4:polling",        "status": "TODO", "note": "202 jobId 를 onSuccess 에서 보관해 폴링 시작 · refetchInterval 조건부 · runningJobId 재개 · total null 분기 · PERSIST 단위 건" },
+    { "id": "step-5-4:polling",        "status": "IN_PROGRESS", "note": "202 jobId 를 onSuccess 에서 보관해 폴링 시작 · refetchInterval 조건부 · runningJobId 재개 · total null 분기 · PERSIST 단위 건" },
     { "id": "step-6:expand_detail",    "status": "TODO", "note": "Expandable Row·Tab Group·더보기(useInfiniteQuery)·FieldDiff·실패 Job" },
     { "id": "step-7:qa",               "status": "TODO", "note": "시나리오 14개 + DS 일관성 점검" }
   ],
