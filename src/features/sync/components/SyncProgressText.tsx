@@ -8,7 +8,7 @@ function progressText(progress: SyncProgress): string {
   const label = phaseLabels[progress.phase];
   if (progress.total === null) return `${label} 중…`;
 
-  const unit = progress.phase === 'PERSIST' ? '건' : '페이지';
+  const unit = progress.phase === 'PERSIST' ? '건' : ' 페이지';
   return `${label} ${formatNumber(progress.current)}/${formatNumber(progress.total)}${unit}`;
 }
 

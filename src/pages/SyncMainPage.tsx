@@ -23,7 +23,7 @@ export function SyncMainPage() {
   const loadedSemester = summary?.semester ?? null;
   const initialTarget = loadedSemester ?? displaySemester ?? null;
 
-  const { data: job } = useSyncJobPolling(launchedJobId ?? summary?.runningJobId ?? null);
+  const { data: job } = useSyncJobPolling(summary?.runningJobId ?? launchedJobId ?? null);
 
   const openConfirm = (result: SyncPreflight) => {
     setTargetOpen(false);
