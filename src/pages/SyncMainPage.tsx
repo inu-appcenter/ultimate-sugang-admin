@@ -15,7 +15,6 @@ export function SyncMainPage() {
   const [targetOpen, setTargetOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [preflight, setPreflight] = useState<SyncPreflight | null>(null);
-  const [launchedJobId, setLaunchedJobId] = useState<number | null>(null);
 
   const { data: displaySemester } = useDisplaySemester();
   const { data: summary } = useCoursesSummary();
@@ -23,7 +22,7 @@ export function SyncMainPage() {
   const loadedSemester = summary?.semester ?? null;
   const initialTarget = loadedSemester ?? displaySemester ?? null;
 
-  const { data: job } = useSyncJobPolling(summary?.runningJobId ?? launchedJobId ?? null);
+  const { job, trackLaunchedJob } = useSyncJobPolling(summary?.runningJobId ?? null);
 
   const openConfirm = (result: SyncPreflight) => {
     setTargetOpen(false);
@@ -61,7 +60,7 @@ export function SyncMainPage() {
             open={confirmOpen}
             onOpenChange={setConfirmOpen}
             preflight={preflight}
-            onLaunched={setLaunchedJobId}
+            onLaunched={trackLaunchedJob}
           />
         ) : (
           <SyncConfirmModal
@@ -69,7 +68,7 @@ export function SyncMainPage() {
             onOpenChange={setConfirmOpen}
             target={preflight.targetSemester}
             strategy={preflight.strategy}
-            onLaunched={setLaunchedJobId}
+            onLaunched={trackLaunchedJob}
           />
         ))}
     </div>

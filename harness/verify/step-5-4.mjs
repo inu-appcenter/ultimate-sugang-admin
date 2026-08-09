@@ -207,64 +207,137 @@ section('실행 직후에는 202 의 jobId 로 시작한다 (04 §10-3)');
   queryClient.clear();
 }
 
-section('끝난 Job 이 남의 RUNNING Job 을 가리지 않는다 (04 §10-4)');
+section('한 마운트 안에서 — 남의 Job 인계 + 끝난 Job 되살아나지 않기 (04 §10-4 · §9-2)');
 {
-  // 내 Job 이 끝난 뒤 다른 관리자가 돌린 Job 을 summary 가 알려주면 그쪽으로 넘어가야 한다.
+  // ⚠️ 마운트를 갈면 launchedJobId 가 null 로 리셋돼 버그가 재현되지 않는다.
+  // 실행부터 관측까지 한 마운트에서 이어 붙인다.
   mockDb.reset();
   queryClient.clear();
-  const mine = 41;
-  const theirs = 77;
+  const MINE = 41;
+  const THEIRS = 77;
+  const status = { [MINE]: 'RUNNING', [THEIRS]: 'RUNNING' };
   let runningJobId = null;
+  let postCalls = 0;
   const polled = [];
+  const summaryCalls = [];
+
+  const jobBody = (jobId) => ({
+    jobId,
+    academicYear: 2026,
+    term: 'FIRST',
+    strategy: 'UPSERT',
+    status: status[jobId],
+    executedBy: '김학사',
+    startedAt: '2026-08-09T10:00:00',
+    finishedAt: status[jobId] === 'RUNNING' ? null : '2026-08-09T10:02:00',
+    durationSeconds: status[jobId] === 'RUNNING' ? null : 120,
+    fetchedCourseCount: null,
+    fetchedScheduleCount: null,
+    createdCount: null,
+    updatedCount: null,
+    closedCount: null,
+    warningCount: null,
+    progress: status[jobId] === 'RUNNING' ? { phase: 'PERSIST', current: 10, total: 20 } : null,
+    partiallyApplied: false,
+    failureReason: null,
+  });
 
   server.use(
-    http.get('http://localhost:8080/api/v1/admin/courses/summary', () =>
-      HttpResponse.json({
+    http.get('http://localhost:8080/api/v1/admin/courses/summary', () => {
+      summaryCalls.push(1);
+      return HttpResponse.json({
         semester: { academicYear: 2026, term: 'FIRST' },
         courseCount: 1203,
         scheduleCount: 2847,
         lastJob: null,
         runningJobId,
-      }),
-    ),
-    http.post('http://localhost:8080/api/v1/admin/sync/jobs', () =>
-      HttpResponse.json({ jobId: mine }, { status: 202 }),
-    ),
+      });
+    }),
+    // 두 번째 실행은 남의 Job 때문에 409/5200 이다. summary 는 폴링되지 않으므로
+    // 이 재조회(04 §10-3)가 남의 RUNNING Job 을 클라이언트에 알리는 유일한 경로다.
+    http.post('http://localhost:8080/api/v1/admin/sync/jobs', () => {
+      postCalls += 1;
+      if (postCalls === 1) {
+        runningJobId = MINE;
+        return HttpResponse.json({ jobId: MINE }, { status: 202 });
+      }
+      return HttpResponse.json(
+        { code: 5200, message: '이미 업데이트가 진행 중이에요.' },
+        { status: 409 },
+      );
+    }),
     http.get('http://localhost:8080/api/v1/admin/sync/jobs/:jobId', ({ params }) => {
       const jobId = Number(params.jobId);
-      polled.push(jobId);
-      return HttpResponse.json({
-        jobId,
-        academicYear: 2026,
-        term: 'FIRST',
-        strategy: 'UPSERT',
-        status: jobId === mine ? 'SUCCESS' : 'RUNNING',
-        executedBy: '김학사',
-        startedAt: '2026-08-09T10:00:00',
-        finishedAt: jobId === mine ? '2026-08-09T10:02:00' : null,
-        durationSeconds: jobId === mine ? 120 : null,
-        fetchedCourseCount: null,
-        fetchedScheduleCount: null,
-        createdCount: null,
-        updatedCount: null,
-        closedCount: null,
-        warningCount: null,
-        progress: jobId === mine ? null : { phase: 'PERSIST', current: 10, total: 20 },
-        partiallyApplied: false,
-        failureReason: null,
-      });
+      polled.push(String(jobId));
+      return HttpResponse.json(jobBody(jobId));
     }),
   );
 
-  await probe.runSyncConfirmFlow({ actionLabel: '갱신', settleMs: 600 });
-  check('내 Job 을 먼저 폴링한다', polled.includes(mine), `polled=${polled}`);
+  const snapshots = await probe.renderSyncMainSteps([
+    { wait: 700 },
+    { click: '데이터 업데이트', wait: 400 },
+    { click: '다음', wait: 700 },
+    { click: '갱신', wait: 900 },
+    {
+      wait: 2600,
+      before: () => {
+        status[MINE] = 'SUCCESS';
+        runningJobId = null;
+      },
+    },
+    {
+      wait: 400,
+      before: () => {
+        runningJobId = THEIRS;
+      },
+    },
+    { click: '데이터 업데이트', wait: 400 },
+    { click: '다음', wait: 700 },
+    { click: '갱신', wait: 1200 },
+    { wait: 2600 },
+    {
+      wait: 600,
+      before: () => {
+        status[THEIRS] = 'SUCCESS';
+        runningJobId = null;
+      },
+    },
+    { wait: 600 },
+    { wait: 600 },
+    { wait: 600 },
+    { wait: 600 },
+    { wait: 600 },
+  ]);
 
-  runningJobId = theirs;
-  queryClient.clear();
-  const [snapshot] = await probe.renderSyncMainSteps([{ wait: 800 }]);
+  const afterMine = snapshots[4];
+  const watchingTheirs = snapshots[9];
+  const afterTheirs = snapshots[10];
 
-  check('남의 RUNNING Job 으로 넘어간다', polled.includes(theirs), `polled=${polled}`);
-  check('진행률이 단계까지 나온다', text(snapshot).includes('적재 10/20건'));
+  check('내 Job 을 폴링한다', polled.includes(String(MINE)), 'polled=' + polled);
+  eq('내 Job 종료 토스트 1개', text(afterMine).match(/업데이트를 마쳤어요\./g)?.length, 1);
+
+  check('남의 RUNNING Job 으로 넘어간다', polled.includes(String(THEIRS)), 'polled=' + polled);
+  check('남의 Job 진행률이 뜬다', text(watchingTheirs).includes('적재 10/20건'));
+
+  // 여기서 폴링 대상이 launchedJobId(=MINE, 이미 SUCCESS)로 되돌아간다.
+  // 종료 처리를 id 하나만 기억하면 MINE 이 다시 종료 처리돼 토스트가 두 장 뜬다.
+  // 여기서 폴링 대상이 launchedJobId(=MINE, 이미 SUCCESS)로 되돌아가면 화면이 옛 Job 으로
+  // 갈아타 남의 Job 종료 신호가 통째로 사라진다. 한 번은 보이고, 두 번은 안 보여야 한다.
+  const doneCounts = snapshots
+    .slice(10)
+    .map((snapshot) => text(snapshot).match(/업데이트를 마쳤어요\./g)?.length ?? 0);
+  check('중복으로 쌓이지 않는다', doneCounts.every((count) => count <= 1), `${doneCounts}`);
+
+  // 종료 effect 가 남의 Job 에도 돌았는지는 summary 재조회로 본다. 되살아난 옛 Job 을
+  // 보고 있었다면 그 Job 은 이미 settled 라 effect 가 걸러져 재조회가 없다.
+  const running = snapshots.map((snapshot) => text(snapshot).includes('업데이트 진행 중'));
+  check('남의 Job 이 도는 동안 진행 중으로 보인다', running.slice(8, 10).every(Boolean));
+  check('남의 Job 이 끝나면 진행 중이 걷힌다', !running[10]);
+  check(
+    '남의 Job 종료 뒤 summary 를 다시 부른다',
+    summaryCalls.length >= 5,
+    `summaryCalls=${summaryCalls.length}`,
+  );
 
   server.resetHandlers();
   queryClient.clear();

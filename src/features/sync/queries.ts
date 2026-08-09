@@ -1,5 +1,5 @@
 import { skipToken, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import {
@@ -47,9 +47,12 @@ export function useCreateSyncJob() {
   });
 }
 
-export function useSyncJobPolling(jobId: number | null) {
+export function useSyncJobPolling(runningJobId: number | null) {
   const queryClient = useQueryClient();
-  const settledJobId = useRef<number | null>(null);
+  const settledJobIds = useRef(new Set<number>());
+  const [launchedJobId, setLaunchedJobId] = useState<number | null>(null);
+
+  const jobId = runningJobId ?? launchedJobId;
 
   const query = useQuery({
     queryKey: syncKeys.job(jobId),
@@ -62,9 +65,10 @@ export function useSyncJobPolling(jobId: number | null) {
 
   useEffect(() => {
     if (job === undefined || job.status === 'RUNNING') return;
-    if (settledJobId.current === job.jobId) return;
-    settledJobId.current = job.jobId;
+    if (settledJobIds.current.has(job.jobId)) return;
+    settledJobIds.current.add(job.jobId);
 
+    setLaunchedJobId(null);
     void queryClient.invalidateQueries({ queryKey: syncKeys.summary() });
     void queryClient.invalidateQueries({ queryKey: syncKeys.jobList() });
 
@@ -75,7 +79,7 @@ export function useSyncJobPolling(jobId: number | null) {
     }
   }, [job, queryClient]);
 
-  return query;
+  return { job, trackLaunchedJob: setLaunchedJobId };
 }
 
 export function useSyncJobs(page: number) {

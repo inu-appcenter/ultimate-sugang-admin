@@ -61,8 +61,13 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 /**
  * 폴링용. 스냅샷 사이에 `before` 로 mock 상태를 바꿔 진행 단계를 결정적으로 만든다.
  * mockDb.createJob 의 22초 타임라인을 기다리지 않으려는 것이다.
+ *
+ * ⚠️ 언마운트 없이 한 마운트로 끝까지 간다. 페이지 state(launchedJobId 등)가 걸린
+ * 버그는 마운트를 갈면 재현되지 않는다 — 실행부터 관측까지 `click` 스텝으로 이어 붙인다.
  */
-export async function renderSyncMainSteps(steps: Array<{ wait: number; before?: () => void }>) {
+export async function renderSyncMainSteps(
+  steps: Array<{ wait: number; before?: () => void; click?: string }>,
+) {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const root = createRoot(container);
@@ -82,6 +87,13 @@ export async function renderSyncMainSteps(steps: Array<{ wait: number; before?: 
   const snapshots: string[] = [];
   for (const step of steps) {
     step.before?.();
+    if (step.click !== undefined) {
+      const label = step.click;
+      const scope = openDialog() ?? container;
+      await act(async () => {
+        buttonByText(scope, label)?.click();
+      });
+    }
     await act(async () => {
       await sleep(step.wait);
     });

@@ -85,7 +85,7 @@
     {
       "tag": "trap",
       "item": "all",
-      "text": "폴링 대상은 `summary.runningJobId ?? launchedJobId` 순서다. 뒤집으면(launchedJobId 먼저) 끝난 내 Job 의 id 가 계속 왼쪽에 남아 다른 관리자가 돌린 RUNNING Job 을 영영 못 잡는다 — 카드는 진행 중인데 폴링 대상은 끝난 Job 이라 단계 없는 문구가 무기한 고정된다. launchedJobId 는 202 직후 summary 가 아직 모르는 한 틱만 쓰는 값이다. 202 응답은 곧 그 시점에 RUNNING Job 이 없었다는 뜻이라(5200 이 아니므로) summary 를 먼저 봐도 안전하다. harness/verify/step-5-4.mjs 의 '끝난 Job 이 남의 RUNNING Job 을 가리지 않는다' 섹션이 이걸 고정한다."
+      "text": "폴링 대상 선택은 `useSyncJobPolling` 안에 있다: `runningJobId ?? launchedJobId`, 그리고 **종료 effect 가 launchedJobId 를 즉시 비운다**. 셋 다 필요하다. (1) 순서를 뒤집으면 끝난 내 Job 이 왼쪽에 남아 다른 관리자의 RUNNING Job 을 영영 못 잡는다. (2) 종료 때 안 비우면 남의 Job 이 끝나는 순간 폴링 대상이 끝난 내 Job 으로 되돌아가 화면이 옛 Job 으로 갈아탄다. (3) settledJobIds 는 Set 이어야 한다 — id 하나만 기억하면 A→B→A 로 돌아올 때 A 를 다시 종료 처리한다. 202 응답은 그 시점에 RUNNING Job 이 없었다는 뜻이라(5200 이 아니므로) summary 를 먼저 봐도 내 Job 을 놓치지 않는다. ⚠️ 회귀 검사는 **한 마운트 안에서** 돌려야 한다 — 마운트를 갈면 launchedJobId 가 null 로 리셋돼 옛 코드도 통과한다. harness/verify/step-5-4.mjs 의 '한 마운트 안에서' 섹션이 실행→종료→남의 Job 인계까지 클릭 스텝으로 이어 붙인다."
     },
     {
       "tag": "decision",
