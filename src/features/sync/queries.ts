@@ -68,15 +68,15 @@ export function useSyncJobPolling(runningJobId: number | null) {
     if (settledJobIds.current.has(job.jobId)) return;
     settledJobIds.current.add(job.jobId);
 
-    setLaunchedJobId(null);
-    void queryClient.invalidateQueries({ queryKey: syncKeys.summary() });
-    void queryClient.invalidateQueries({ queryKey: syncKeys.jobList() });
-
     if (job.status === 'SUCCESS') {
       toast.success('업데이트를 마쳤어요.');
     } else {
       toast.error('업데이트에 실패했어요. 이력에서 사유를 확인해주세요.');
     }
+
+    setLaunchedJobId(null);
+    void queryClient.invalidateQueries({ queryKey: syncKeys.summary() });
+    void queryClient.invalidateQueries({ queryKey: syncKeys.jobList() });
   }, [job, queryClient]);
 
   return { job, trackLaunchedJob: setLaunchedJobId };

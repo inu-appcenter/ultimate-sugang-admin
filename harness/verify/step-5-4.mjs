@@ -219,7 +219,15 @@ section('한 마운트 안에서 — 남의 Job 인계 + 끝난 Job 되살아나
   let runningJobId = null;
   let postCalls = 0;
   const polled = [];
-  const summaryCalls = [];
+
+  // 종료 처리 횟수를 직접 센다. 토스트 DOM 개수로는 안 걸린다 — 되살아난 쪽이 17ms
+  // 늦게 떠서 두 장이 동시에 잡히지 않는다.
+  const invalidated = [];
+  const realInvalidate = queryClient.invalidateQueries.bind(queryClient);
+  queryClient.invalidateQueries = (filters, options) => {
+    invalidated.push(JSON.stringify(filters?.queryKey ?? []));
+    return realInvalidate(filters, options);
+  };
 
   const jobBody = (jobId) => ({
     jobId,
@@ -244,7 +252,6 @@ section('한 마운트 안에서 — 남의 Job 인계 + 끝난 Job 되살아나
 
   server.use(
     http.get('http://localhost:8080/api/v1/admin/courses/summary', () => {
-      summaryCalls.push(1);
       return HttpResponse.json({
         semester: { academicYear: 2026, term: 'FIRST' },
         courseCount: 1203,
@@ -319,25 +326,16 @@ section('한 마운트 안에서 — 남의 Job 인계 + 끝난 Job 되살아나
   check('남의 RUNNING Job 으로 넘어간다', polled.includes(String(THEIRS)), 'polled=' + polled);
   check('남의 Job 진행률이 뜬다', text(watchingTheirs).includes('적재 10/20건'));
 
-  // 여기서 폴링 대상이 launchedJobId(=MINE, 이미 SUCCESS)로 되돌아간다.
-  // 종료 처리를 id 하나만 기억하면 MINE 이 다시 종료 처리돼 토스트가 두 장 뜬다.
-  // 여기서 폴링 대상이 launchedJobId(=MINE, 이미 SUCCESS)로 되돌아가면 화면이 옛 Job 으로
-  // 갈아타 남의 Job 종료 신호가 통째로 사라진다. 한 번은 보이고, 두 번은 안 보여야 한다.
-  const doneCounts = snapshots
-    .slice(10)
-    .map((snapshot) => text(snapshot).match(/업데이트를 마쳤어요\./g)?.length ?? 0);
-  check('중복으로 쌓이지 않는다', doneCounts.every((count) => count <= 1), `${doneCounts}`);
-
-  // 종료 effect 가 남의 Job 에도 돌았는지는 summary 재조회로 본다. 되살아난 옛 Job 을
-  // 보고 있었다면 그 Job 은 이미 settled 라 effect 가 걸러져 재조회가 없다.
   const running = snapshots.map((snapshot) => text(snapshot).includes('업데이트 진행 중'));
   check('남의 Job 이 도는 동안 진행 중으로 보인다', running.slice(8, 10).every(Boolean));
   check('남의 Job 이 끝나면 진행 중이 걷힌다', !running[10]);
-  check(
-    '남의 Job 종료 뒤 summary 를 다시 부른다',
-    summaryCalls.length >= 5,
-    `summaryCalls=${summaryCalls.length}`,
-  );
+
+  // 종료 effect 만 summary 를 콕 집어 무효화한다(409 의 onSettled 는 ['sync'] 프리픽스).
+  // Job 이 둘이니 정확히 두 번. 끝난 Job 이 되살아나 재처리되면 세 번이 된다.
+  const settleCount = invalidated.filter((key) => key === '["sync","summary"]').length;
+  eq('종료 처리는 Job 당 한 번', settleCount, 2);
+
+  queryClient.invalidateQueries = realInvalidate;
 
   server.resetHandlers();
   queryClient.clear();
