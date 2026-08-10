@@ -50,5 +50,8 @@ dark: · 반응형 breakpoint · @media · raw hex · [12px] 임의 값
 - ❌ 검사가 실패한 상태로 "완료" 라고 말하기 (Stop 훅이 막는다)
 - ❌ `IN_PROGRESS` 를 2개 이상 두기
 - ❌ `.claude/spec/` 수정하기 (PreToolUse 훅이 막는다)
-- ❌ 되돌릴 수 없는 작업을 직접 실행하기: **REPLACE Job 실제 실행**, 배포·publish, `git push`, `.env` 비밀값 입력 → **코드 구조만 만들고 사람에게 맡긴다**
+- ❌ 되돌릴 수 없는 작업을 직접 실행하기: **REPLACE Job 실제 실행**, 배포·publish, force push, `main` 으로의 push, `.env` 비밀값 입력 → **코드 구조만 만들고 사람에게 맡긴다**
+- ❌ `main` 에 직접 커밋하기. 작업 브랜치(`{type}/{체크리스트항목}`)를 먼저 만든다 → [[git-convention]]
+- ❌ 커밋 제목에 범위 표기(`feat(step-5):`)나 괄호 넣기. `{type}: 내용` 40자 명사형이다
+- ❌ 커밋 본문에 상세 근거를 길게 쓰기. 함정은 `build-state.notes`, 리뷰 지적은 `harness/review` 로 간다
 - ❌ 409/`5201` 을 자동으로 재시도하기. 사용자가 다시 확인해야 한다
