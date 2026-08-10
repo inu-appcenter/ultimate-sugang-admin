@@ -20,14 +20,14 @@
   "spec_edit": false,
   "handoff": {
     "ts": "2026-08-10",
-    "next": "step-5-4:polling — 코드·게이트·검사는 끝났고 리뷰 재확인만 남았다. 새 절차(라운드 상한·deferred 파이프)의 첫 시험대로 쓴다.",
+    "next": "step-6:expand_detail — Step 5 는 네 하위단계 모두 COMPLETED. 리뷰 패킷 승인을 받았으면 step-6 으로 간다.",
     "how": [
-      "spec-conformance-reviewer 1회. 범위는 커밋 349840b 의 두 지적 확인으로 좁힌다 — (1) 종료 처리 횟수를 정확히 세는 회귀 검사(invalidateQueries 2회) (2) 명세에 없어 폐기한 '실행 중인 Job 의 완료 토스트' 검사",
-      "ds-conformance-reviewer 는 부르지 않는다 — 2라운드에서 이미 PASS 고 이후 변경이 queries.ts 로직과 하네스뿐이라 시각이 한 글자도 안 바뀌었다",
-      "PASS 면 harness/review/step-5-4:polling.json 작성(rounds.spec=3, ds=2, deferred 는 build-state.deferred 와 일치시킨다)",
-      "deferred 중 target_item 이 step-5-4 인 5건을 처리하거나 다른 항목으로 옮긴다 — 안 그러면 COMPLETED 로 못 간다(validate-state)",
-      "결정 대기는 없다 — 사용자가 2026-08-10 에 5건을 위임했고 각 deferred 의 decision 필드에 근거와 함께 적혀 있다. 그대로 구현한다",
-      "커밋은 commit-push 스킬로 한다. 작업 브랜치는 fix/step-5-4-polling"
+      "브랜치 fix/step-5-4-polling 이 origin 에 올라가 있다. main 병합은 사람이 한다 — step-6 은 feat/step-6-expand 를 새로 딴다",
+      "phase 문서는 .claude/resource/phases/step-6-expand.md. Expandable Row · Tab Group · 더보기(useInfiniteQuery) · FieldDiff · 실패 Job",
+      "⚠️ FAILED 종료 시 이력 최상단 행 자동 확장(01 §8-1 · 04 §10-4)도 여기서 붙인다 — 5-4 는 토스트까지만 했다. 트리거 자리는 useSyncJobPolling 의 종료 effect 다",
+      "deferred 중 target_item 이 step-6:expand_detail 인 2건을 먼저 읽는다 — academicYear 가 ±2 밖일 때의 처리는 사용자 위임 결정이 적혀 있다",
+      "step-7 로 이월된 항목이 9건이다. QA 때 target_item 으로 다시 훑는다",
+      "리뷰는 spec·ds 둘 다 부른다. 라운드 상한 2 — 3라운드째로 가려면 남은 지적을 review json 의 deferred/open_questions 에 먼저 적는다"
     ],
     "unresolved": "폐기한 시나리오에서 종료 effect 는 실행되는데(invalidateQueries 기록됨) sonner 토스트가 jsdom DOM 에 안 나타났다. 배제한 가설 — sonner 싱글턴 누적(신규 프로세스에서도 재현), 늦은 토스트(10초 뒤 단일 Job 은 정상). 좁혀진 조건 — 같은 마운트에서 M2→M3 모달을 열고 409/5200 을 한 번 맞은 뒤. 범위 밖이라 추적하지 않는다. 실제 브라우저에서 이상하면 step-7 Playwright 에서 본다."
   },
@@ -70,7 +70,13 @@
     { "from": "step-5-3:M3_M4_execute", "target_item": "step-7:qa", "needs": "none", "status": "open",
       "text": "같은 '라벨 + 값' 패턴이 M2(w-12 고정폭, 둘 다 caption)와 M4(고정폭 없음, caption/body)로 갈렸다. 값이 데이터인 M4 쪽이 DS-00 §4-1 원칙 1 기준으로 맞다." },
     { "from": "step-5-2:M2_preflight", "target_item": "step-7:qa", "needs": "none", "status": "open",
-      "text": "'현재 적재' 라벨 컬럼을 공용 컴포넌트로 뽑으면 폰트 폴백 시 오버플로가 커지는 문제를 한 곳에서 관리할 수 있다." }
+      "text": "'현재 적재' 라벨 컬럼을 공용 컴포넌트로 뽑으면 폰트 폴백 시 오버플로가 커지는 문제를 한 곳에서 관리할 수 있다." },
+    { "from": "step-5-4:polling", "target_item": "step-7:qa", "needs": "none", "status": "open",
+      "text": "폴링 주기 2초가 어느 검사에도 고정돼 있지 않다. step-5-4.mjs 의 'RUNNING 동안 여러 번 돈다' 가 부등호(>=3)라 간격이 500ms 로 바뀌어도 통과한다. 소스의 POLL_INTERVAL_MS=2000 은 맞으니 지금 동작은 정상이다. 폴 간 경과시간을 재는 쪽으로 조이거나, 실타이머라 flaky 하면 파일 헤더에서 '2초' 문구를 빼는 편이 정직하다. 근거 03 §7-4 · 01 §8-1." },
+    { "from": "step-5-4:polling", "target_item": "step-7:qa", "needs": "none", "status": "open",
+      "text": "폴링이 첫 응답부터 계속 실패하면 [데이터 업데이트] 가 잠긴 채로 남는다 — launchedJobId 를 비우는 경로가 job 데이터 도착에만 달려 있다. 폴링 토스트를 껐으므로 그 화면엔 '업데이트 진행 중' + 비활성 버튼만 남고 설명이 없다. 01 §9 에 그 상태 규정이 없어 위반은 아니다. 새로고침하면 summary 가 실제 RUNNING 여부를 알려주므로 잠금 자체는 틀린 표시가 아니다. 육안 확인 대상." },
+    { "from": "step-5-4:polling", "target_item": "step-7:qa", "needs": "none", "status": "open",
+      "text": "FAILED 토스트만 개수 검사가 없다(step-5-4.mjs 'FAILED 종료' 섹션). 중복 발화는 SUCCESS 쪽 개수 검사와 settleCount 가 잡으므로 구멍은 아니다. 지금 붙이면 red 를 만들 방법이 없어 — 종료 후 재fetch 가 없어 settledJobIds 가드를 빼도 한 번만 뜬다 — 검사만 늘고 증명이 빈다. 시나리오를 만들 수 있는 step-7 에서 본다." }
   ],
   "checklist": [
     { "id": "step-1:setup",            "status": "COMPLETED", "note": "Vite+TS+Tailwind+shadcn, DS-01 토큰 배선, alias, env(Zod), 빈 라우터 2개" },
@@ -80,7 +86,7 @@
     { "id": "step-5-1:M1_semester",    "status": "COMPLETED", "note": "표시 학기 조회/변경. 카드2 무영향(D10)" },
     { "id": "step-5-2:M2_preflight",   "status": "COMPLETED", "note": "학기 선택 + preflight. 응답은 onPreflight 로 올린다" },
     { "id": "step-5-3:M3_M4_execute",  "status": "COMPLETED", "note": "preflight 응답 보관 + M3/M4/최초적재 변형 + POST jobs + 409 2종. M4 격식체 유지" },
-    { "id": "step-5-4:polling",        "status": "IN_PROGRESS", "note": "202 jobId 를 onSuccess 에서 보관해 폴링 시작 · refetchInterval 조건부 · runningJobId 재개 · total null 분기 · PERSIST 단위 건" },
+    { "id": "step-5-4:polling",        "status": "COMPLETED", "note": "202 jobId 를 onSuccess 에서 보관해 폴링 시작 · refetchInterval 조건부 · runningJobId 재개 · total null 분기 · PERSIST 단위 건" },
     { "id": "step-6:expand_detail",    "status": "TODO", "note": "Expandable Row·Tab Group·더보기(useInfiniteQuery)·FieldDiff·실패 Job. ⚠️ FAILED 종료 시 이력 최상단 행 자동 확장(01 §8-1 · 04 §10-4)도 여기서 붙인다 — 5-4 에서 토스트까지만 했다" },
     { "id": "step-7:qa",               "status": "TODO", "note": "시나리오 14개 + DS 일관성 점검" }
   ],
@@ -232,6 +238,15 @@
       "review": "spec=PASS(2라운드) · ds=PASS(2라운드)",
       "retry": 0,
       "text": "M3(UPSERT)·M3 변형(INITIAL)·M4(REPLACE) + POST /sync/jobs + 409 2종. expectedStrategy 는 preflight 응답을 그대로 되돌려 보내고(D4) 하네스가 요청 바디를 캡처해 확인한다. M4 Strict Match·격식체·480px·닫으면 입력 초기화까지 검사. spec 1라운드 PASS(가드 구멍 지적), ds 1라운드 FAIL 4건 — 그중 destructive 가 연분홍이라 비가역 버튼이 M3 보다 약해 보이던 게 핵심이었고 사용자 결정으로 진한 빨강이 됐다. 검증 54건 추가(총 285건)."
+    },
+    {
+      "id": "step-5-4:polling",
+      "ts": "2026-08-10",
+      "commit": "bd9fb28",
+      "gate": "--full OK",
+      "review": "spec=PASS(4라운드) · ds=PASS(2라운드)",
+      "retry": 0,
+      "text": "2초 폴링·진행률·자동 재개·종료 처리. 리뷰가 네 라운드 간 이유는 전부 '검사가 회귀를 못 잡고 있었다' 였다 — 1라운드 폴링 대상 우선순위, 2라운드 마운트 리셋으로 옛 코드도 통과, 3라운드 존재/부등호 판정이 버그 쪽 값을 통과시킴. 4라운드에서 넘긴 지적 3건(202 직후 버튼 잠금·total null 표기·폴링 에러 토스트)을 반영하고 셋 다 red 를 실측한 뒤 PASS. 검증 31건 추가(총 315건). 넘긴 지적 5건 중 3 해소·1 유지(주황 두 번, 사용자 위임 ⓐ)·1 이동(버튼 잠깐 잠김 → step-7). 새 이월 3건은 전부 step-7."
     }
   ]
 }
