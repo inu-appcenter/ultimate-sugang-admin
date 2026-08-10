@@ -1,3 +1,4 @@
+import { SyncJobDetailPanel } from '@/features/sync/components/SyncJobDetailPanel';
 import { useSyncJobs } from '@/features/sync/queries';
 import type { SyncJobListItem } from '@/features/sync/schemas';
 import { getErrorMessage } from '@/shared/api/errorHandler';
@@ -47,9 +48,16 @@ const columns: Array<DataTableColumn<SyncJobListItem>> = [
 interface SyncJobTableProps {
   page: number;
   onPageChange: (page: number) => void;
+  expandedJobId: number | null;
+  onExpandToggle: (jobId: number) => void;
 }
 
-export function SyncJobTable({ page, onPageChange }: SyncJobTableProps) {
+export function SyncJobTable({
+  page,
+  onPageChange,
+  expandedJobId,
+  onExpandToggle,
+}: SyncJobTableProps) {
   const { data, isPending, isError, error, refetch } = useSyncJobs(page);
 
   return (
@@ -67,7 +75,14 @@ export function SyncJobTable({ page, onPageChange }: SyncJobTableProps) {
           <EmptyState message="업데이트 이력이 없어요." />
         ) : (
           <div className="mt-4">
-            <DataTable columns={columns} rows={data.content} rowKey={(job) => job.jobId} />
+            <DataTable
+              columns={columns}
+              rows={data.content}
+              rowKey={(job) => job.jobId}
+              expandedKey={expandedJobId}
+              onRowToggle={onExpandToggle}
+              renderExpanded={(job) => <SyncJobDetailPanel jobId={job.jobId} />}
+            />
             <PaginationControl
               page={data.page}
               totalPages={data.totalPages}

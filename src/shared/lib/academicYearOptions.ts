@@ -7,7 +7,8 @@ const kstYearFormat = new Intl.DateTimeFormat('en-US', {
 
 export const currentAcademicYear = (): number => Number(kstYearFormat.format(Date.now()));
 
-export const academicYearOptions = (): number[] => {
+export const academicYearOptions = (current: number): number[] => {
   const base = currentAcademicYear();
-  return Array.from({ length: YEAR_SPAN * 2 + 1 }, (_, index) => base - YEAR_SPAN + index);
+  const years = Array.from({ length: YEAR_SPAN * 2 + 1 }, (_, index) => base - YEAR_SPAN + index);
+  return years.includes(current) ? years : [...years, current].sort((a, b) => a - b);
 };

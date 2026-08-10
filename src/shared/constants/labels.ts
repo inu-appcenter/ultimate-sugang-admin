@@ -32,6 +32,8 @@ export const changeTypeLabels = {
   WARNING: '경고',
 } as const;
 
+export const CHANGE_TYPE_ORDER = ['CREATED', 'UPDATED', 'CLOSED', 'WARNING'] as const;
+
 export const fieldLabels: Record<string, string> = {
   titleKr: '과목명(국문)',
   titleEn: '과목명(영문)',

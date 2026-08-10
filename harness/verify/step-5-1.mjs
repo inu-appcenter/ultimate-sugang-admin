@@ -46,7 +46,7 @@ await login({ loginId: 'haksa01', password: 'uss1234!' }).then((token) =>
 
 section('연도 옵션 — 현재 연도 ±2 (01 §7-1)');
 {
-  const years = academicYearOptions();
+  const years = academicYearOptions(kstYear);
   eq('KST 기준 현재 연도', currentAcademicYear(), kstYear);
   eq('5개', years.length, 5);
   eq('현재 연도 ±2', years, [kstYear - 2, kstYear - 1, kstYear, kstYear + 1, kstYear + 2]);

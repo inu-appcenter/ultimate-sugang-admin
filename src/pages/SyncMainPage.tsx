@@ -15,6 +15,7 @@ export function SyncMainPage() {
   const [targetOpen, setTargetOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [preflight, setPreflight] = useState<SyncPreflight | null>(null);
+  const [expandedJobId, setExpandedJobId] = useState<number | null>(null);
 
   const { data: displaySemester } = useDisplaySemester();
   const { data: summary } = useCoursesSummary();
@@ -24,6 +25,7 @@ export function SyncMainPage() {
 
   const { job, launchedJobId, trackLaunchedJob } = useSyncJobPolling(
     summary?.runningJobId ?? null,
+    setExpandedJobId,
   );
   const jobRunning = (summary?.runningJobId ?? null) !== null || launchedJobId !== null;
 
@@ -45,7 +47,12 @@ export function SyncMainPage() {
           runningProgress={job?.status === 'RUNNING' ? job.progress : null}
           onUpdateClick={() => setTargetOpen(true)}
         />
-        <SyncJobTable page={page} onPageChange={setPage} />
+        <SyncJobTable
+          page={page}
+          onPageChange={setPage}
+          expandedJobId={expandedJobId}
+          onExpandToggle={(jobId) => setExpandedJobId((current) => (current === jobId ? null : jobId))}
+        />
       </div>
 
       {initialTarget !== null && (
