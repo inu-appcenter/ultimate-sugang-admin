@@ -63,7 +63,7 @@ resource/ phases/(단계별 절차) · smoke/(Playwright) · HARNESS.md
 
 ## 2. 사실은 어디에 있나 — spec/ 목차
 - **절을 읽을 때**: `node .claude/hooks/checks/spec-map.mjs "03 §6-1"` → `Read` 의 `offset`/`limit` 을 그대로 준다(절 208개 등록).
-  **spec 파일을 통째로 읽지 않는다** — `03`·`04` 는 각 1,000줄이 넘는다. 인용은 하위 절까지 내려 쓴다(`03 §6` 은 354줄, `03 §6-1` 은 수십 줄).
+  **spec 파일을 통째로 읽지 않는다.** 인용은 하위 절까지 내려 쓴다.
 - 목차·약어·문서별 담당 범위: `.claude/spec/00_INDEX.md` (먼저 볼 것)
 - 화면 동작·상태전이·검증: `spec/01_uss_admin_wireframe_spec.md`
 - API 계약: `spec/03_uss_admin_api_spec.md`

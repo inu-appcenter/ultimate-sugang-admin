@@ -28,7 +28,7 @@ shared/   도메인과 무관한 공용          → 외부 라이브러리만 �
 
 > ⚠️ 쿼리 훅 파일은 `queries.ts` 다. `hooks.ts` 가 아니다(`04 §4-2`).
 
-> 이 절과 아래 배치·의존 방향 규칙은 **`uss-contract-lint` 가 결정적으로 막는다**(`hooks-filename`·`module-placement`·`infra-location`·`file-naming`·`shared-to-feature`·`zod-parse`). 위반하면 fast 게이트가 red 다 — 리뷰어를 기다릴 일이 아니다. → [[hooks]]
+> 이 절과 아래 배치·의존 방향 규칙은 **`uss-contract-lint` 가 막는다**(`hooks-filename`·`module-placement`·`infra-location`·`file-naming`·`shared-to-feature`·`zod-parse`). 위반하면 fast 게이트가 red 다. → [[hooks]]
 
 ## 도메인은 3개뿐이다
 ```

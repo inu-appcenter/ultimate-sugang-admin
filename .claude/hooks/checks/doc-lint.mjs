@@ -111,11 +111,7 @@ for (const file of walk(claudeDir)) {
 
 // ── 인용 검사 — 절 번호는 주소다 (rules/source-of-truth.md §5) ─
 // 두 가지를 본다: 존재하지 않는 절을 가리키는 인용, 그리고 하위 절이 있는데 상위만 적은 인용.
-// 후자를 잡는 이유: `03 §6` 은 354줄이고 `03 §6-1` 은 수십 줄이다. 상위만 적으면 읽는 쪽이 열 배를 읽는다.
-//
-// ⚠️ coarse 에 임계를 두는 이유: 임계 없이 돌리면 67건이 나온다. phase 문서의 "읽을 것" 표처럼
-//    한 절 전체를 가리키는 게 맞는 인용이 대부분이라, 전량 보고하면 검사가 통째로 무시당한다.
-//    실제로 비싼 것만 남긴다 — 100줄이 넘는 절.
+// coarse 는 100줄이 넘는 절에만 건다.
 const COARSE_MIN_LINES = 100;
 const mapPath = join(claudeDir, 'resource', 'spec-map.json');
 if (existsSync(mapPath)) {
@@ -126,9 +122,9 @@ if (existsSync(mapPath)) {
 
   for (const file of walk(claudeDir)) {
     const rel = relative(join(claudeDir, '..'), file);
-    // 규약을 정의하는 문서와 map 생성기 자신은 예시로 인용을 든다 — 대상에서 뺀다.
+    // 규약 정의 문서와 map 생성기는 예시로 인용을 든다.
     if (/rules\/source-of-truth\.md$|CLAUDE\.md$|checks\/spec-map\.mjs$/.test(rel)) continue;
-    // spec/ 은 읽기 전용이다. 우리가 고칠 수 없는 것을 보고하지 않는다.
+    // spec/ 은 읽기 전용이다.
     if (rel.replace(/\\/g, '/').includes('.claude/spec/')) continue;
     readFileSync(file, 'utf8')
       .split('\n')

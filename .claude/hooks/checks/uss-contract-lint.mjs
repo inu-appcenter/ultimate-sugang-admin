@@ -200,8 +200,7 @@ if (existsSync(featuresDir)) {
 }
 
 // ── 3) 구조 규칙 (rules/architecture.md · decisions D8) ───────
-// 전부 파일 배치와 이름만 보면 판정되는 것들이다. 판단이 필요 없으므로 리뷰어에게 맡기지 않는다.
-// 2026-08-10 이전에는 architecture-reviewer 가 이 6가지를 매번 소스를 읽어 추론했다.
+// 전부 파일 배치와 이름만 보면 판정된다.
 const INFRA_FILES = ['tokenManager', 'refreshQueue', 'errorHandler', 'client'];
 const MODULE_FILES = ['api.ts', 'schemas.ts', 'queries.ts', 'store.ts'];
 

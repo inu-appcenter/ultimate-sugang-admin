@@ -41,11 +41,11 @@ description: USS 백오피스 빌드의 전체 흐름을 소유한다. "빌드 �
    ```
    순서는 **리스트업 → 계획 → 보고 → 실행** 이다:
    - **리스트업** — 두 리뷰어의 지적을 `findings` 에 전부 적는다. 이 시점에 고치지 않는다.
-   - **계획** — 지적마다 처리 방침을 정한다. `resolution` 은 4개뿐: `fixed`(이번에 고침) · `deferred`(다음 단계로) · `dropped`(근거가 부족해 버림) · `question`(사용자 결정 필요).
+   - **계획** — 지적마다 처리 방침을 정한다. `resolution` 은 4개뿐: `fixed`(이번에 고침) · `deferred`(다음 단계로) · `dropped`(버림) · `question`(사용자 결정 필요).
    - **보고** — §2 사람 게이트에서 `build-review-packet` §E-2 로 지적과 방침을 함께 낸다. **여기서 멈춘다.**
    - **실행** — 승인 후 `fixed` 만 고친다. 고쳤으면 `--full` 재게이트 후 커밋. **재리뷰는 하지 않는다.**
-   - `deferred` 는 **같은 턴에** `build-state.json.deferred` 로 옮긴다(`from` 에 항목 ID). 리뷰 파일에만 두면 아무도 안 읽고, validate-state 가 개수를 대조한다.
-   - **재리뷰는 사용자가 요청할 때만 한다.** PASS 를 받으러 다시 부르지 않는다 — 그 구조가 항목 6개에 리뷰어 실행 29회를 만들었고 지적 37건 중 17건은 결국 밀렸다.
+   - `deferred` 는 **같은 턴에** `build-state.json.deferred` 로 옮긴다(`from` 에 항목 ID). validate-state 가 개수를 대조한다.
+   - **재리뷰는 사용자가 요청할 때만 한다.** PASS 를 받으러 다시 부르지 않는다.
    - validate-state 가 COMPLETED 인 `/^step-[3-6](-\d+)?:/` 항목에 **종결된 리뷰 JSON** 을 요구한다 — **Step 5 하위단계 4개도 각각 필요**. 없거나 미종결이면 fast 게이트가 FAIL(Stop 차단)된다.
 7. 항목 `COMPLETED`(또는 사유와 함께 `SKIPPED`/`manual-review`) 로 갱신, `log` 추가.
 

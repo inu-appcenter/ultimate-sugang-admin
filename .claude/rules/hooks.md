@@ -59,13 +59,12 @@ paths:
 - **uss-contract-lint** — 판단이 필요 없는 계약 위반을 잡는다: 흔한 오답(인증 헤더·refresh 토큰·UTC 변환·페이지 20), 9개 밖의 엔드포인트, `any`, `?? 0`, 금지된 Job 상태, 지운 토큰, 다크·반응형, 상대경로 import, features 간 직접 import, 금지 라이브러리. 예외는 `uss-contract-lint.allow.txt` 에 `경로조각::규칙ID` 로 적는다. → [[antipatterns]]
   - ⚠️ 엔드포인트 9개 목록이 이 스크립트 안에도 있다. [[api-contract]] 의 목록을 바꾸면 스크립트도 같이 바꾼다.
   - `d4-strategy` — 클라이언트가 적재 전략 값을 생산하는 것을 막는다(D4). 대상은 `src/features`·`src/pages`·`src/shared` 이고 `src/mocks` 는 서버 역할이라 제외한다.
-  - **구조 규칙 6종**(2026-08-10 추가) — `shared-to-feature`(역방향 참조) · `hooks-filename`(쿼리 훅은 `queries.ts`) · `module-placement`(api/schemas/queries/store 는 feature 루트) · `infra-location`(tokenManager·refreshQueue·errorHandler·client 는 `shared/api/`) · `file-naming`(PascalCase.tsx · useXxx.ts · camelCase.ts, `src/app/` 은 부트스트랩이라 제외) · `zod-parse`(`features/*/api.ts` 가 `parse`/`safeParse` 를 거치는가).
-    **폐지된 `architecture-reviewer` 가 매번 소스를 읽어 추론하던 6항목이다.** 판단이 필요 없는 항목이라 리뷰어에서 내렸다.
-  - **계약·시각 규칙 4종**(같은 날 추가) — `route-literal`(경로 문자열 대신 `ROUTES`) · `shadcn-radius`(`rounded-sm/md/lg` 대신 `rounded-card`·`rounded-btn`·`rounded-modal`) · `d2-service-owned`(`maxCapacity`·`currentEnrollment`) · `screen-count`(`src/pages` 가 2개 초과, D8).
+  - **구조 규칙 6종** — `shared-to-feature`(역방향 참조) · `hooks-filename`(쿼리 훅은 `queries.ts`) · `module-placement`(api/schemas/queries/store 는 feature 루트) · `infra-location`(tokenManager·refreshQueue·errorHandler·client 는 `shared/api/`) · `file-naming`(PascalCase.tsx · useXxx.ts · camelCase.ts, `src/app/` 제외) · `zod-parse`(`features/*/api.ts` 가 `parse`/`safeParse` 를 거치는가).
+  - **계약·시각 규칙 4종** — `route-literal`(경로 문자열 대신 `ROUTES`) · `shadcn-radius`(`rounded-sm/md/lg` 대신 `rounded-card`·`rounded-btn`·`rounded-modal`) · `d2-service-owned`(`maxCapacity`·`currentEnrollment`) · `screen-count`(`src/pages` 가 2개 초과, D8).
 - **verify**(`npm run verify`) — 렌더·클릭·폴링으로만 드러나는 동작을 본다. **검사를 추가·수정할 때의 규율은 [[verification]] 이 정한다**(red 증명 의무·근거 절 의무·탐색 상한).
 - **validate-state** — `IN_PROGRESS` 가 1개 이하인지, checklist `id` 가 겹치지 않는지, `status` 가 {TODO, IN_PROGRESS, COMPLETED, SKIPPED, manual-review} 안에 있는지 본다.
   - **리뷰를 건너뛰거나 지적을 흘리지 못하게 막는다**: `COMPLETED` 인 화면 항목은 `harness/review/<id>.json` 이 있고, `reviewed.spec`·`reviewed.ds`(각 1회 호출)와 **모든 `findings[].resolution`**(`fixed`·`deferred`·`dropped`·`question`)이 있어야 한다. `deferred` 로 종결한 건수는 `build-state.deferred` 의 같은 `from` 건수와 대조한다. 대상은 **`/^step-[3-6](-\d+)?:/`** — Step 5 하위단계(`step-5-1:M1_semester` 등)까지 포함한다.
-  - 옛 스키마(`spec`·`ds` 가 `'PASS'`)는 그대로 통과시킨다. 지난 기록을 소급해 게이트를 막지 않는다.
+  - 옛 스키마(`spec`·`ds` 가 `'PASS'`)는 그대로 통과시킨다.
 - **spec-presence** — `spec/` 에 필수 문서 6개가 **참조와 같은 이름으로** 있는지, **허용 목록 밖의 문서가 없는지** 본다(허용 목록 방식 — 이름을 나열해 금지하면 목록에 없는 새 문서가 조용히 통과한다).
   - 두 가지로 쓰인다: `checkSpecPresence(specDir)`(SessionStart 가 import 한다. 경고 배열을 돌려주고 막지 않는다)와 직접 실행(`OK`/`FAIL`, 필수 누락이나 허용 목록 밖 문서가 있으면 exit 1).
   - ⚠️ export 이름과 형태는 `session-start.mjs` 와의 약속이다. 바꾸면 SessionStart 가 깨진다.
@@ -76,7 +75,7 @@ paths:
   - spec 을 고쳤으면 **`node .claude/hooks/checks/spec-map.mjs` 로 다시 생성한다.** 안 하면 fast 게이트가 red(`--check`).
   - 왜 만들었나: 손으로 박은 숫자가 실제로 **4줄씩 어긋나 있었다**(`04 §10` 은 726행인데 730으로 박혀 헤딩을 건너뛰고 읽었다). 틀려도 티가 안 나는 종류의 오류다.
 - **doc-lint** — `.claude/**/*.md` 의 용어와 표기를 통일한다. 단어만 바꾸면 되는 건 `--fix` 가 처리하고, 문장을 다시 써야 하는 건 보고만 한다.
-  - **인용 검사**(2026-08-10 추가) — spec-map 과 대조한다. `citation-unknown` 은 **없는 절을 가리키는 인용**(실제로 `decisions.md` 의 `01 §4-1` 이 걸렸다), `citation-coarse` 는 **100줄이 넘는 상위 절만 적은 인용**이다. 임계가 없으면 67건이 나와 검사가 통째로 무시당한다. `.claude/spec/` 은 읽기 전용이라 대상에서 뺀다.
+  - **인용 검사** — spec-map 과 대조한다. `citation-unknown` 은 없는 절을 가리키는 인용, `citation-coarse` 는 100줄이 넘는 상위 절만 적은 인용이다. `.claude/spec/` 은 대상에서 뺀다.
 
 ## 경로 약속 (바꾸면 같이 고칠 것)
 - 상태 파일은 **`.claude/build-state.json`** 하나다. 스크립트는 자기 위치 기준 상대경로로 찾는다(`stop-gate.mjs`·`session-start.mjs` → `../build-state.json`, `validate-state.mjs` → `../../build-state.json`).
@@ -86,8 +85,8 @@ paths:
   - **`probes` 는 원인 탐색 횟수**다. 3회를 넘기면 `notes` 에 `unresolved` 로 적고 넘어간다 → [[verification]] §5.
   - **`deferred` 는 다음 단계로 넘긴 지적**이다. `{ from, target_item, text, needs: "user"|"none", status? }`. `target_item` 이 COMPLETED 인데 `status` 가 `resolved`/`dropped` 가 아니면 validate-state 가 FAIL 한다.
 - **리뷰 기록의 출처는 `harness/review/<id>.json` 하나다.** build-state 에 복제하지 않는다(두 곳에 두면 어긋난다).
-  - **리뷰어는 항목당 각 1회만 부른다. 재리뷰는 사용자가 요청할 때만 한다.** 2026-08-10 이전에는 `spec`·`ds` 가 `PASS` 여야 COMPLETED 로 갈 수 있어서, PASS 를 받으러 다시 부르는 구조였다 — 항목 6개에 리뷰어 실행 **29회**가 들었고 지적 37건 중 17건은 결국 `deferred` 로 밀렸다. 지금은 **한 번 보고 → 지적을 종결시킨다.**
-  - `rounds` 필드는 없어졌다. 라운드 상한도 없다 — 라운드가 하나뿐이라 상한이 필요 없다.
+  - **리뷰어는 항목당 각 1회만 부른다. 재리뷰는 사용자가 요청할 때만 한다.** 한 번 보고 지적을 종결시킨다.
+  - `rounds` 필드와 라운드 상한은 없다.
 - `stop-gate.mjs` 는 같은 디렉토리의 `checks/gate-runner.sh` 를 부른다.
 - 스모크 테스트는 `.claude/resource/smoke/` 에 둔다(`checks/smoke.sh` 가 실행한다). **Step 7 전까지는 비어 있는 게 정상이고**, Playwright 가 없으면 건너뛴다.
 
