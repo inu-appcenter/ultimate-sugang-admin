@@ -31,7 +31,7 @@
     ],
     "unresolved": "폐기한 시나리오에서 종료 effect 는 실행되는데(invalidateQueries 기록됨) sonner 토스트가 jsdom DOM 에 안 나타났다. 배제한 가설 — sonner 싱글턴 누적(신규 프로세스에서도 재현), 늦은 토스트(10초 뒤 단일 Job 은 정상). 좁혀진 조건 — 같은 마운트에서 M2→M3 모달을 열고 409/5200 을 한 번 맞은 뒤. 범위 밖이라 추적하지 않는다. 실제 브라우저에서 이상하면 step-7 Playwright 에서 본다."
   },
-  "retry": {},
+  "retry": {"step-6:expand_detail":1},
   "probes": {},
   "manual_review": [],
   "deferred": [
