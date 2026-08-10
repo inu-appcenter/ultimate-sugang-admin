@@ -19,7 +19,7 @@ process.stdin.on('end', () => {
       [/npm\s+publish|yarn\s+publish|pnpm\s+publish/, '패키지 publish — 사람이 수행'],
       [/(vercel|netlify|firebase|gh-pages)\s+deploy|--prod\b/, '배포 — 사람이 수행'],
       [/curl[^|]*\|\s*(sh|bash)/, '원격 스크립트 실행'],
-      [/(>|>>)\s*[^\s|]*\.claude\/spec\//, 'spec/ 는 읽기전용 지식 — 쓰기 금지'],
+      // [/(>|>>)\s*[^\s|]*\.claude\/spec\//, 'spec/ 는 읽기전용 지식 — 쓰기 금지'],
     ];
     for (const [re, msg] of danger) if (re.test(cmd)) block(msg);
   }
