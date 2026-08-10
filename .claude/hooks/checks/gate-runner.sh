@@ -12,6 +12,7 @@ fails=()
 run() { local name="$1"; shift; if ! "$@" >"/tmp/gate.$name.log" 2>&1; then fails+=("$name"); fi; }
 
 run validate-state     node "$HERE/validate-state.mjs"
+run spec-map           node "$HERE/spec-map.mjs" --check
 run typecheck          bash "$HERE/typecheck.sh"
 run token-lint         node "$HERE/token-lint.mjs"
 run uss-contract-lint  node "$HERE/uss-contract-lint.mjs"
