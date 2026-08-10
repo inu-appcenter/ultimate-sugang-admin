@@ -35,18 +35,21 @@
   "probes": {},
   "manual_review": [],
   "deferred": [
-    { "from": "step-5-2:M2_preflight", "target_item": "step-5-4:polling", "needs": "none", "status": "open",
+    { "from": "step-5-2:M2_preflight", "target_item": "step-5-4:polling", "needs": "none", "status": "resolved",
+      "resolution": "[해소됨 2026-08-10] 처방(`isJobRunning || job?.status === 'RUNNING'`)보다 한 칸 앞을 잠갔다. 그 처방은 창을 좁힐 뿐 닫지 못한다 — 202 직후에는 summary 도 job 도 in-flight 라 둘 다 false 다. SyncMainPage 가 `runningJobId !== null || launchedJobId !== null` 로 판정해 카드에 내려준다. launchedJobId 는 종료 effect 가 비우므로 남지 않는다. 회귀 검사: step-5-4.mjs '202 직후 버튼이 잠긴다'(summary 가 끝까지 runningJobId=null 인 케이스).",
       "text": "202 직후 한 틱 동안 [데이터 업데이트] 가 다시 활성된다. summary 재조회 전까지 runningJobId 가 null 이라 CourseSummaryCard 의 isJobRunning 이 false 다. 게이트를 `isJobRunning || job?.status === 'RUNNING'` 로 넓힌다(job 은 SyncMainPage 가 이미 들고 있다). 다시 눌러도 409/5200 으로 끝나 데이터 손상은 없다." },
-    { "from": "step-5-2:M2_preflight", "target_item": "step-5-4:polling", "needs": "none", "status": "open",
-      "text": "표시 학기 쿼리가 in-flight 인 동안 적재 학기가 없으면 버튼이 잠깐 잠긴다. 01 §9 로딩 처리표에 없는 상태다. 실사용에서 거슬리지 않으면 그대로 둔다." },
-    { "from": "step-5-4:polling", "target_item": "step-5-4:polling", "needs": "none", "status": "open",
+    { "from": "step-5-2:M2_preflight", "target_item": "step-7:qa", "needs": "none", "status": "open",
+      "text": "표시 학기 쿼리가 in-flight 인 동안 적재 학기가 없으면 버튼이 잠깐 잠긴다. 01 §9 로딩 처리표에 없는 상태다. 실사용에서 거슬리지 않으면 그대로 둔다. (step-5-4 에서 step-7 로 옮김 2026-08-10 — 육안 확인이 있어야 판단이 선다)" },
+    { "from": "step-5-4:polling", "target_item": "step-5-4:polling", "needs": "none", "status": "dropped",
       "decision": "ⓐ 그대로 둔다 (사용자 위임 2026-08-10). 01 §8-1 와이어프레임의 축약으로 본다. RUNNING 중이라고 학기·수치·마지막 업데이트를 감추면 명세가 시키지 않은 정보 은닉이 되고, 그 행의 [진행 중] 배지는 lastJob 이 곧 그 Job 이므로 틀린 표시도 아니다. 되돌리기 쉬운 쪽을 고른다.",
       "text": "RUNNING 중 카드 2 에 주황이 두 번 뜬다 — 진행률 줄(text-warning-text)과 `마지막 업데이트 … [진행 중]` 배지가 동시에 보인다. 01 §8-1 와이어프레임은 실행 중 카드에 타이틀·진행률·비활성 버튼만 그린다." },
-    { "from": "step-5-4:polling", "target_item": "step-5-4:polling", "needs": "none", "status": "open",
+    { "from": "step-5-4:polling", "target_item": "step-5-4:polling", "needs": "none", "status": "resolved",
       "decision": "ⓑ total === null 일 때만 접두어를 뺀다 (사용자 위임 2026-08-10). 화면 표기의 담당은 03 §7-3 이고 거기 표기가 `{단계} 중…` 이다. 접두어는 total 이 있을 때만 붙인다.",
+      "resolution": "[해소됨 2026-08-10] progressText 가 세 갈래다 — progress 없음 `업데이트 진행 중` / total null `강의 수집 중…` / total 있음 `업데이트 진행 중 · 강의 수집 3/12 페이지`. 회귀 검사: step-5-4.mjs 'total null 이면 분모 없이'(진행률 줄만 뽑아 문자열 전체를 비교한다).",
       "text": "total === null 일 때 '중'이 두 번 읽힌다 — `업데이트 진행 중 · 강의 수집 중…`. SyncProgressText.tsx" },
-    { "from": "step-5-4:polling", "target_item": "step-5-4:polling", "needs": "none", "status": "open",
+    { "from": "step-5-4:polling", "target_item": "step-5-4:polling", "needs": "none", "status": "resolved",
       "decision": "ⓐ 폴링 쿼리만 전역 에러 토스트에서 제외한다 (사용자 위임 2026-08-10). ⓑ(N회 후 중단)는 명세에 없는 상태를 새로 만든다 — 폴링이 멈춘 화면을 어떻게 보여줄지 01 §9 가 정하지 않는다. 진행률은 다음 성공 응답에서 알아서 따라잡는다.",
+      "resolution": "[해소됨 2026-08-10] 폴링 쿼리에 `meta: { skipErrorToast: true }` 를 달고 QueryCache.onError 가 그 표시만 건너뛴다. Register 인터페이스를 확장해 meta 에 타입을 줬다(오타가 조용히 통과하지 않게). 회귀 검사 2개: '폴링 에러 토스트가 없다' + '현황 조회 실패는 토스트 1개'(예외가 폴링 하나로 좁혀졌는지).",
       "text": "폴링 중 네트워크가 죽으면 2초마다 에러 토스트가 쌓인다. 폴링 쿼리가 마지막 성공 데이터(RUNNING)를 유지해 refetchInterval 이 계속 2000 을 돌려주고 전역 QueryCache.onError 가 매번 띄운다. queryClient.ts" },
     { "from": "step-5-1:M1_semester", "target_item": "step-6:expand_detail", "needs": "none", "status": "open",
       "decision": "서버가 준 academicYear 가 ±2 밖이면 그 값을 옵션에 추가해 표시한다 (사용자 위임 2026-08-10). 01 §7-1 의 두 요구('옵션은 ±2', '초기값은 현재 설정값') 중 초기값 보존이 우선이다 — 트리거가 빈칸이 되면 무엇이 설정돼 있는지 화면에서 사라진다. 옵션을 늘리는 게 값을 감추는 것보다 작은 일탈이다.",
@@ -137,7 +140,12 @@
     {
       "tag": "trap",
       "item": "all",
-      "text": "⚠️ 용어 주의 — 명세에 '다른 관리자의 Job' 이라는 개념이 없다. `GET /courses/summary` 의 `runningJobId` 는 **지금 시스템에 도는 Job** 이고 `01 §8-2` 가 동시 실행을 막아 RUNNING Job 은 전체에 최대 1개다. 누가 시작했는지를 명세는 구분하지 않는다. 요구사항은 하나다 — RUNNING Job 이 있으면 진행률을 보여주고 실행 버튼을 잠근다. ⚠️ 이 trap 의 회귀 검사는 **깨뜨려서 red 가 나는 걸 확인했다**(버그 재도입 시 `종료 처리는 Job 당 한 번 — got 3`). 폴링 대상 선택은 `useSyncJobPolling` 안에 있다: `runningJobId ?? launchedJobId`, 그리고 **종료 effect 가 launchedJobId 를 즉시 비운다**. 셋 다 필요하다. (1) 순서를 뒤집으면 끝난 내 Job 이 왼쪽에 남아 시스템의 RUNNING Job 을 영영 못 잡는다. (2) 종료 때 안 비우면 다음 Job 이 끝나는 순간 폴링 대상이 끝난 Job 으로 되돌아가 화면이 옛 Job 으로 갈아탄다. (3) settledJobIds 는 Set 이어야 한다 — id 하나만 기억하면 A→B→A 로 돌아올 때 A 를 다시 종료 처리한다. 202 응답은 그 시점에 RUNNING Job 이 없었다는 뜻이라(5200 이 아니므로) summary 를 먼저 봐도 내 Job 을 놓치지 않는다. ⚠️ 회귀 검사는 **한 마운트 안에서** 돌려야 한다 — 마운트를 갈면 launchedJobId 가 null 로 리셋돼 옛 코드도 통과한다. harness/verify/step-5-4.mjs 의 '한 마운트 안에서' 섹션이 실행→종료→인계까지 클릭 스텝으로 이어 붙인다."
+      "text": "⚠️ 용어 주의 — 명세에 '다른 관리자의 Job' 이라는 개념이 없다. `GET /courses/summary` 의 `runningJobId` 는 **지금 시스템에 도는 Job** 이고 `01 §8-2` 가 동시 실행을 막아 RUNNING Job 은 전체에 최대 1개다. 누가 시작했는지를 명세는 구분하지 않는다. 요구사항은 하나다 — RUNNING Job 이 있으면 진행률을 보여주고 실행 버튼을 잠근다. ⚠️ 이 trap 의 회귀 검사는 **깨뜨려서 red 가 나는 걸 확인했다**(버그 재도입 시 `종료 처리는 Job 당 한 번 — got 3`). 폴링 대상 선택은 `useSyncJobPolling` 안에 있다: `runningJobId ?? launchedJobId`, 그리고 **종료 effect 가 launchedJobId 를 즉시 비운다**. 셋 다 필요하다. (1) 순서를 뒤집으면 끝난 내 Job 이 왼쪽에 남아 시스템의 RUNNING Job 을 영영 못 잡는다. (2) 종료 때 안 비우면 다음 Job 이 끝나는 순간 폴링 대상이 끝난 Job 으로 되돌아가 화면이 옛 Job 으로 갈아탄다. (3) settledJobIds 는 Set 이어야 한다 — id 하나만 기억하면 A→B→A 로 돌아올 때 A 를 다시 종료 처리한다. 202 응답은 그 시점에 RUNNING Job 이 없었다는 뜻이라(5200 이 아니므로) summary 를 먼저 봐도 내 Job 을 놓치지 않는다. ⚠️ 회귀 검사는 **한 마운트 안에서** 돌려야 한다 — 마운트를 갈면 launchedJobId 가 null 로 리셋돼 옛 코드도 통과한다. harness/verify/step-5-4.mjs 의 '한 마운트 안에서' 섹션이 실행→종료→인계까지 클릭 스텝으로 이어 붙인다. ⚠️ launchedJobId 는 폴링 대상 선택만 하는 게 아니다 — [데이터 업데이트] 잠금도 여기에 걸려 있다(202 직후 summary 가 아직 null 인 구간). 지우면 두 가지가 같이 깨진다."
+    },
+    {
+      "tag": "decision",
+      "item": "step-5-4:polling",
+      "text": "넘긴 지적 5건을 처리하며 정한 것 — (1) 실행 버튼 잠금의 판정자가 SyncMainPage 로 올라갔다. CourseSummaryCard 는 `jobRunning` 을 prop 으로 받는다. 카드가 스스로 summary 를 읽어 판정하던 걸 그대로 두고 조건만 넓히면 판정자가 둘이 되는데, 애초에 이 버그가 그래서 났다. (2) 전역 에러 토스트의 예외 통로는 `meta.skipErrorToast` 하나다. 쿼리별 onError 를 다시 만들지 않는다 — 04 §9-2 의 '한 곳에서 띄운다' 가 그대로 유지된다. 새 예외를 늘리기 전에 정말 2초마다 도는 쿼리인지 본다. (3) 진행률 접두어(`업데이트 진행 중 · `)는 total 이 있을 때만 붙는다(03 §7-3). 표기를 바꾸면 step-5-4.mjs 가 진행률 줄 전체를 문자열 비교하므로 바로 걸린다."
     },
     {
       "tag": "decision",

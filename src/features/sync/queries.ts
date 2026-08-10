@@ -59,6 +59,7 @@ export function useSyncJobPolling(runningJobId: number | null) {
     queryFn: jobId === null ? skipToken : () => fetchSyncJob(jobId),
     refetchInterval: (query) =>
       query.state.data?.status === 'RUNNING' ? POLL_INTERVAL_MS : false,
+    meta: { skipErrorToast: true },
   });
 
   const job = query.data;
@@ -79,7 +80,7 @@ export function useSyncJobPolling(runningJobId: number | null) {
     void queryClient.invalidateQueries({ queryKey: syncKeys.jobList() });
   }, [job, queryClient]);
 
-  return { job, trackLaunchedJob: setLaunchedJobId };
+  return { job, launchedJobId, trackLaunchedJob: setLaunchedJobId };
 }
 
 export function useSyncJobs(page: number) {
