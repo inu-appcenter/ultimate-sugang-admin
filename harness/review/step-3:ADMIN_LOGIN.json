@@ -2,6 +2,10 @@
   "id": "step-3:ADMIN_LOGIN",
   "spec": "PASS",
   "ds": "PASS",
+  "rounds": {
+    "spec": 2,
+    "ds": 2
+  },
   "diffs": [
     {
       "reviewer": "ds",
@@ -60,6 +64,9 @@
       "resolution": "extendTailwindMerge 로 커스텀 토큰 그룹 등록(font-size·rounded·shadow·max-w·min-w·h). 회귀 어서션 6건 추가. (fd50c3f)"
     }
   ],
+  "self_judgements_accepted": [],
+  "open_questions": [],
+  "deferred": [],
   "carry_forward": [
     "Step 5-3: 필드 인라인 에러 · 로그인 401 카드 에러 · M4 Strict Match 검증 에러의 표시 모양을 통일할 것. DS 리뷰어가 제각각이면 위반으로 잡겠다고 예고.",
     "헤더 로그아웃 버튼(size=sm 32px + 아이콘 20px)이 답답해 보이면 아이콘이 아니라 버튼 높이를 올린다."

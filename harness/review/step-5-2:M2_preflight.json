@@ -2,9 +2,10 @@
   "id": "step-5-2:M2_preflight",
   "spec": "PASS",
   "ds": "PASS",
-  "commit": "0561b28",
-  "ts": "2026-08-09",
-  "rounds": { "spec": 3, "ds": 3 },
+  "rounds": {
+    "spec": 3,
+    "ds": 3
+  },
   "diffs": [
     {
       "round": 1,
@@ -42,6 +43,13 @@
     "strategy 미소비는 하위단계 경계다 — tsconfig 의 noUnusedLocals 때문에 소비자 없이 보관하면 typecheck 가 깨진다. onPreflight 가 응답 객체 전체를 넘기므로 5-3 이 재요청·재계산할 이유가 없다(D4 보존)."
   ],
   "open_questions": [],
+  "deferred": [
+    "M1 에러 경로에도 토스트 개수 검사를 두면 대칭이 맞는다(현재는 5-2 만 센다). 코드 경로는 전역 handler 하나라 중복 위험은 없다.",
+    "'현재 적재' 라벨 컬럼을 FieldRow 같은 공용 컴포넌트로 뽑으면 폰트 폴백 시 오버플로가 커지는 문제를 한 곳에서 관리할 수 있다.",
+    "[step-7:qa] tooltip.tsx 가 쓰는 bg-foreground + text-primary-foreground 는 DS-01 에서 strategy REPLACE('교체') 배지용으로 정의된 neutral-strong 페어다. 카드 2 툴팁과 이력의 교체 배지가 한 화면에 같이 뜰 수 있다. DS 일관성 점검 대상.",
+    "[step-7:qa] a11y — Radix 가 aria-describedby 를 래퍼 span 에 붙여서 disabled 버튼에 도달한 스크린리더는 차단 사유를 못 읽는다.",
+    "표시 학기 쿼리가 in-flight 인 동안 적재 학기가 없으면 버튼이 잠깐 잠긴다. 01 §9 로딩 처리표에 없는 상태다. 실사용에서 거슬리면 5-4 에서 다시 본다."
+  ],
   "resolved_questions": [
     {
       "tag": "spec-gap",
@@ -52,12 +60,7 @@
       "reviewers": "spec=PASS(3라운드) · ds=PASS(3라운드)"
     }
   ],
-  "deferred": [
-    "M1 에러 경로에도 토스트 개수 검사를 두면 대칭이 맞는다(현재는 5-2 만 센다). 코드 경로는 전역 handler 하나라 중복 위험은 없다.",
-    "'현재 적재' 라벨 컬럼을 FieldRow 같은 공용 컴포넌트로 뽑으면 폰트 폴백 시 오버플로가 커지는 문제를 한 곳에서 관리할 수 있다.",
-    "[step-7:qa] tooltip.tsx 가 쓰는 bg-foreground + text-primary-foreground 는 DS-01 에서 strategy REPLACE('교체') 배지용으로 정의된 neutral-strong 페어다. 카드 2 툴팁과 이력의 교체 배지가 한 화면에 같이 뜰 수 있다. DS 일관성 점검 대상.",
-    "[step-7:qa] a11y — Radix 가 aria-describedby 를 래퍼 span 에 붙여서 disabled 버튼에 도달한 스크린리더는 차단 사유를 못 읽는다.",
-    "표시 학기 쿼리가 in-flight 인 동안 적재 학기가 없으면 버튼이 잠깐 잠긴다. 01 §9 로딩 처리표에 없는 상태다. 실사용에서 거슬리면 5-4 에서 다시 본다."
-  ],
-  "verify": "harness/verify/step-5-2.mjs 42건 (전체 224건)"
+  "verify": "harness/verify/step-5-2.mjs 42건 (전체 224건)",
+  "commit": "0561b28",
+  "ts": "2026-08-09"
 }
