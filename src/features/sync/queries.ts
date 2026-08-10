@@ -1,14 +1,23 @@
-import { skipToken, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  queryOptions,
+  skipToken,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import {
   createSyncJob,
   fetchCoursesSummary,
+  fetchSyncChanges,
   fetchSyncJob,
   fetchSyncJobs,
   requestSyncPreflight,
 } from '@/features/sync/api';
+import type { SyncChangeType } from '@/features/sync/schemas';
 import { getErrorCode } from '@/shared/api/errorHandler';
 import { ERROR_CODE } from '@/shared/constants/errorCodes';
 
@@ -20,7 +29,18 @@ export const syncKeys = {
   jobList: () => [...syncKeys.all, 'jobs'] as const,
   jobs: (page: number) => [...syncKeys.jobList(), page] as const,
   job: (jobId: number | null) => [...syncKeys.all, 'job', jobId] as const,
+  changes: (jobId: number, changeType: SyncChangeType) =>
+    [...syncKeys.job(jobId), 'changes', changeType] as const,
 };
+
+const syncJobQuery = (jobId: number | null) =>
+  queryOptions({
+    queryKey: syncKeys.job(jobId),
+    queryFn: jobId === null ? skipToken : () => fetchSyncJob(jobId),
+    refetchInterval: (query) =>
+      query.state.data?.status === 'RUNNING' ? POLL_INTERVAL_MS : false,
+    meta: { skipErrorToast: true },
+  });
 
 export function useCoursesSummary() {
   return useQuery({
@@ -47,19 +67,30 @@ export function useCreateSyncJob() {
   });
 }
 
-export function useSyncJobPolling(runningJobId: number | null) {
+export function useSyncJob(jobId: number | null) {
+  return useQuery(syncJobQuery(jobId));
+}
+
+export function useSyncChanges(jobId: number, changeType: SyncChangeType) {
+  return useInfiniteQuery({
+    queryKey: syncKeys.changes(jobId, changeType),
+    queryFn: ({ pageParam }) => fetchSyncChanges(jobId, changeType, pageParam),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => (lastPage.hasNextPage ? lastPage.page + 1 : undefined),
+  });
+}
+
+export function useSyncJobPolling(
+  runningJobId: number | null,
+  onJobFailed: (jobId: number) => void,
+) {
   const queryClient = useQueryClient();
   const settledJobIds = useRef(new Set<number>());
   const [launchedJobId, setLaunchedJobId] = useState<number | null>(null);
 
   const jobId = runningJobId ?? launchedJobId;
 
-  const query = useQuery({
-    queryKey: syncKeys.job(jobId),
-    queryFn: jobId === null ? skipToken : () => fetchSyncJob(jobId),
-    refetchInterval: (query) =>
-      query.state.data?.status === 'RUNNING' ? POLL_INTERVAL_MS : false,
-  });
+  const query = useQuery(syncJobQuery(jobId));
 
   const job = query.data;
 
@@ -72,14 +103,15 @@ export function useSyncJobPolling(runningJobId: number | null) {
       toast.success('업데이트를 마쳤어요.');
     } else {
       toast.error('업데이트에 실패했어요. 이력에서 사유를 확인해주세요.');
+      onJobFailed(job.jobId);
     }
 
     setLaunchedJobId(null);
     void queryClient.invalidateQueries({ queryKey: syncKeys.summary() });
     void queryClient.invalidateQueries({ queryKey: syncKeys.jobList() });
-  }, [job, queryClient]);
+  }, [job, onJobFailed, queryClient]);
 
-  return { job, trackLaunchedJob: setLaunchedJobId };
+  return { job, launchedJobId, trackLaunchedJob: setLaunchedJobId };
 }
 
 export function useSyncJobs(page: number) {

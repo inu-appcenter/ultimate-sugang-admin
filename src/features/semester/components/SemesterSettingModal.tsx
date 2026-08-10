@@ -89,7 +89,7 @@ function SemesterSettingForm({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {academicYearOptions().map((year) => (
+                {academicYearOptions(current.academicYear).map((year) => (
                   <SelectItem key={year} value={String(year)}>
                     {year}
                   </SelectItem>

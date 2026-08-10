@@ -12,7 +12,7 @@
       "reviewer": "spec",
       "verdict": "FAIL",
       "finding": "판정 실패 시 에러 토스트가 두 번 떴다. queryClient 의 MutationCache.onError 가 전역에서 토스트를 띄우는데 호출부에서 onError: showErrorToast 를 또 걸었다. 04 §9-2 는 에러 1건 → 문구 1건. M1(SemesterSettingModal)에도 step-5-1 부터 같은 줄이 있었다.",
-      "fix": "두 모달의 호출부 onError 제거. 에러 토스트 발원지를 MutationCache/QueryCache 하나로 수렴시켰다. 하네스가 includes(존재)에서 개수 세기로 바뀌었다. 커밋 ef4b399."
+      "fix": "두 모달의 호출부 onError 제거. 에러 토스트 발원지를 MutationCache/QueryCache 하나로 수렴시켰다. 하네스가 includes(존재)에서 개수 세기로 바뀌었다. 커밋 91bdd4a."
     },
     {
       "round": 1,
@@ -26,7 +26,7 @@
       "reviewer": "ds",
       "verdict": "FAIL",
       "finding": "'현재 적재' 라벨이 두 줄로 접혔다. text-caption(13px)에서 자연 폭 48.22px 가 w-12(48px)를 넘긴다. FieldRow 는 text-body(15px) 기준이라 '연도'·'학기' 는 한 줄이었고 그 폭을 그대로 가져온 게 원인. items-center 라 행 높이도 40px 로 떴다.",
-      "fix": "임의 값 없이 whitespace-nowrap 으로 해결. 값 컬럼은 여전히 64px 에서 시작해 FieldRow 와 정렬이 맞는다. 커밋 624f90e."
+      "fix": "임의 값 없이 whitespace-nowrap 으로 해결. 값 컬럼은 여전히 64px 에서 시작해 FieldRow 와 정렬이 맞는다. 커밋 cffd22c."
     },
     {
       "round": 3,
@@ -55,12 +55,12 @@
       "tag": "spec-gap",
       "question": "적재 데이터가 없고 표시 학기 조회도 실패하면 initialTarget 이 null 이라 M2 를 렌더하지 않는다 → [데이터 업데이트] 가 죽은 버튼이 됐다. 01 §6-3 은 데이터가 없을 때도 버튼이 M2 를 연다고 하지만 그 상황의 초기값은 명세에 없다.",
       "decision": "사용자가 '버튼 비활성 + 툴팁' 을 선택했다(2026-08-09). 문구는 구현자가 지었다 — '학기 정보를 불러온 뒤에 시작할 수 있어요.'(24자, 구어체). 원인을 단정하지 않은 이유는 이 상태가 조회 실패일 수도, 아직 로딩 중일 수도 있어서다.",
-      "commit": "0561b28",
+      "commit": "d97ba4e",
       "scope": "잠기는 조건은 명세가 상정한 '데이터 없음' 보다 좁다. 적재 학기가 없어도 표시 학기가 있으면 버튼은 활성이고 M2 가 열린다(01 §7-2 폴백 그대로). 03 §4-1 이 semester_setting 을 Flyway 시드로 보장하므로 정상 운영에서는 도달하지 않는 상태다. 카드 1 의 [다시 시도] 로 즉시 풀린다.",
       "reviewers": "spec=PASS(3라운드) · ds=PASS(3라운드)"
     }
   ],
   "verify": "harness/verify/step-5-2.mjs 42건 (전체 224건)",
-  "commit": "0561b28",
+  "commit": "d97ba4e",
   "ts": "2026-08-09"
 }

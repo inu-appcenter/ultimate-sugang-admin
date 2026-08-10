@@ -66,7 +66,13 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
  * 버그는 마운트를 갈면 재현되지 않는다 — 실행부터 관측까지 `click` 스텝으로 이어 붙인다.
  */
 export async function renderSyncMainSteps(
-  steps: Array<{ wait: number; before?: () => void; click?: string }>,
+  steps: Array<{
+    wait: number;
+    before?: () => void;
+    click?: string;
+    clickRow?: string;
+    clickId?: string;
+  }>,
 ) {
   const container = document.createElement('div');
   document.body.appendChild(container);
@@ -92,6 +98,23 @@ export async function renderSyncMainSteps(
       const scope = openDialog() ?? container;
       await act(async () => {
         buttonByText(scope, label)?.click();
+      });
+    }
+    if (step.clickRow !== undefined) {
+      const needle = step.clickRow;
+      const row = [...container.querySelectorAll<HTMLElement>('tr[role="button"]')].find((node) =>
+        node.textContent?.includes(needle),
+      );
+      await act(async () => {
+        row?.click();
+      });
+    }
+    if (step.clickId !== undefined) {
+      // Radix Tabs 는 click 이 아니라 mousedown 에서 값을 바꾼다. 둘 다 태운다.
+      const target = document.getElementById(step.clickId);
+      await act(async () => {
+        target?.dispatchEvent(new window.MouseEvent('mousedown', { bubbles: true, button: 0 }));
+        target?.click();
       });
     }
     await act(async () => {

@@ -20,14 +20,14 @@
   "spec_edit": false,
   "handoff": {
     "ts": "2026-08-10",
-    "next": "step-5-4:polling — 코드·게이트·검사는 끝났고 리뷰 재확인만 남았다. 새 절차(라운드 상한·deferred 파이프)의 첫 시험대로 쓴다.",
+    "next": "step-6:expand_detail — Step 5 는 네 하위단계 모두 COMPLETED. 리뷰 패킷 승인을 받았으면 step-6 으로 간다.",
     "how": [
-      "spec-conformance-reviewer 1회. 범위는 커밋 349840b 의 두 지적 확인으로 좁힌다 — (1) 종료 처리 횟수를 정확히 세는 회귀 검사(invalidateQueries 2회) (2) 명세에 없어 폐기한 '실행 중인 Job 의 완료 토스트' 검사",
-      "ds-conformance-reviewer 는 부르지 않는다 — 2라운드에서 이미 PASS 고 이후 변경이 queries.ts 로직과 하네스뿐이라 시각이 한 글자도 안 바뀌었다",
-      "PASS 면 harness/review/step-5-4:polling.json 작성(rounds.spec=3, ds=2, deferred 는 build-state.deferred 와 일치시킨다)",
-      "deferred 중 target_item 이 step-5-4 인 5건을 처리하거나 다른 항목으로 옮긴다 — 안 그러면 COMPLETED 로 못 간다(validate-state)",
-      "결정 대기는 없다 — 사용자가 2026-08-10 에 5건을 위임했고 각 deferred 의 decision 필드에 근거와 함께 적혀 있다. 그대로 구현한다",
-      "커밋은 commit-push 스킬로 한다. 작업 브랜치는 fix/step-5-4-polling"
+      "브랜치 fix/step-5-4-polling 이 origin 에 올라가 있다. main 병합은 사람이 한다 — step-6 은 feat/step-6-expand 를 새로 딴다",
+      "phase 문서는 .claude/resource/phases/step-6-expand.md. Expandable Row · Tab Group · 더보기(useInfiniteQuery) · FieldDiff · 실패 Job",
+      "⚠️ FAILED 종료 시 이력 최상단 행 자동 확장(01 §8-1 · 04 §10-4)도 여기서 붙인다 — 5-4 는 토스트까지만 했다. 트리거 자리는 useSyncJobPolling 의 종료 effect 다",
+      "deferred 중 target_item 이 step-6:expand_detail 인 2건을 먼저 읽는다 — academicYear 가 ±2 밖일 때의 처리는 사용자 위임 결정이 적혀 있다",
+      "step-7 로 이월된 항목이 9건이다. QA 때 target_item 으로 다시 훑는다",
+      "리뷰는 spec·ds 둘 다 부른다. 라운드 상한 2 — 3라운드째로 가려면 남은 지적을 review json 의 deferred/open_questions 에 먼저 적는다"
     ],
     "unresolved": "폐기한 시나리오에서 종료 effect 는 실행되는데(invalidateQueries 기록됨) sonner 토스트가 jsdom DOM 에 안 나타났다. 배제한 가설 — sonner 싱글턴 누적(신규 프로세스에서도 재현), 늦은 토스트(10초 뒤 단일 Job 은 정상). 좁혀진 조건 — 같은 마운트에서 M2→M3 모달을 열고 409/5200 을 한 번 맞은 뒤. 범위 밖이라 추적하지 않는다. 실제 브라우저에서 이상하면 step-7 Playwright 에서 본다."
   },
@@ -35,18 +35,21 @@
   "probes": {},
   "manual_review": [],
   "deferred": [
-    { "from": "step-5-2:M2_preflight", "target_item": "step-5-4:polling", "needs": "none", "status": "open",
+    { "from": "step-5-2:M2_preflight", "target_item": "step-5-4:polling", "needs": "none", "status": "resolved",
+      "resolution": "[해소됨 2026-08-10] 처방(`isJobRunning || job?.status === 'RUNNING'`)보다 한 칸 앞을 잠갔다. 그 처방은 창을 좁힐 뿐 닫지 못한다 — 202 직후에는 summary 도 job 도 in-flight 라 둘 다 false 다. SyncMainPage 가 `runningJobId !== null || launchedJobId !== null` 로 판정해 카드에 내려준다. launchedJobId 는 종료 effect 가 비우므로 남지 않는다. 회귀 검사: step-5-4.mjs '202 직후 버튼이 잠긴다'(summary 가 끝까지 runningJobId=null 인 케이스).",
       "text": "202 직후 한 틱 동안 [데이터 업데이트] 가 다시 활성된다. summary 재조회 전까지 runningJobId 가 null 이라 CourseSummaryCard 의 isJobRunning 이 false 다. 게이트를 `isJobRunning || job?.status === 'RUNNING'` 로 넓힌다(job 은 SyncMainPage 가 이미 들고 있다). 다시 눌러도 409/5200 으로 끝나 데이터 손상은 없다." },
-    { "from": "step-5-2:M2_preflight", "target_item": "step-5-4:polling", "needs": "none", "status": "open",
-      "text": "표시 학기 쿼리가 in-flight 인 동안 적재 학기가 없으면 버튼이 잠깐 잠긴다. 01 §9 로딩 처리표에 없는 상태다. 실사용에서 거슬리지 않으면 그대로 둔다." },
-    { "from": "step-5-4:polling", "target_item": "step-5-4:polling", "needs": "none", "status": "open",
+    { "from": "step-5-2:M2_preflight", "target_item": "step-7:qa", "needs": "none", "status": "open",
+      "text": "표시 학기 쿼리가 in-flight 인 동안 적재 학기가 없으면 버튼이 잠깐 잠긴다. 01 §9 로딩 처리표에 없는 상태다. 실사용에서 거슬리지 않으면 그대로 둔다. (step-5-4 에서 step-7 로 옮김 2026-08-10 — 육안 확인이 있어야 판단이 선다)" },
+    { "from": "step-5-4:polling", "target_item": "step-5-4:polling", "needs": "none", "status": "dropped",
       "decision": "ⓐ 그대로 둔다 (사용자 위임 2026-08-10). 01 §8-1 와이어프레임의 축약으로 본다. RUNNING 중이라고 학기·수치·마지막 업데이트를 감추면 명세가 시키지 않은 정보 은닉이 되고, 그 행의 [진행 중] 배지는 lastJob 이 곧 그 Job 이므로 틀린 표시도 아니다. 되돌리기 쉬운 쪽을 고른다.",
       "text": "RUNNING 중 카드 2 에 주황이 두 번 뜬다 — 진행률 줄(text-warning-text)과 `마지막 업데이트 … [진행 중]` 배지가 동시에 보인다. 01 §8-1 와이어프레임은 실행 중 카드에 타이틀·진행률·비활성 버튼만 그린다." },
-    { "from": "step-5-4:polling", "target_item": "step-5-4:polling", "needs": "none", "status": "open",
+    { "from": "step-5-4:polling", "target_item": "step-5-4:polling", "needs": "none", "status": "resolved",
       "decision": "ⓑ total === null 일 때만 접두어를 뺀다 (사용자 위임 2026-08-10). 화면 표기의 담당은 03 §7-3 이고 거기 표기가 `{단계} 중…` 이다. 접두어는 total 이 있을 때만 붙인다.",
+      "resolution": "[해소됨 2026-08-10] progressText 가 세 갈래다 — progress 없음 `업데이트 진행 중` / total null `강의 수집 중…` / total 있음 `업데이트 진행 중 · 강의 수집 3/12 페이지`. 회귀 검사: step-5-4.mjs 'total null 이면 분모 없이'(진행률 줄만 뽑아 문자열 전체를 비교한다).",
       "text": "total === null 일 때 '중'이 두 번 읽힌다 — `업데이트 진행 중 · 강의 수집 중…`. SyncProgressText.tsx" },
-    { "from": "step-5-4:polling", "target_item": "step-5-4:polling", "needs": "none", "status": "open",
+    { "from": "step-5-4:polling", "target_item": "step-5-4:polling", "needs": "none", "status": "resolved",
       "decision": "ⓐ 폴링 쿼리만 전역 에러 토스트에서 제외한다 (사용자 위임 2026-08-10). ⓑ(N회 후 중단)는 명세에 없는 상태를 새로 만든다 — 폴링이 멈춘 화면을 어떻게 보여줄지 01 §9 가 정하지 않는다. 진행률은 다음 성공 응답에서 알아서 따라잡는다.",
+      "resolution": "[해소됨 2026-08-10] 폴링 쿼리에 `meta: { skipErrorToast: true }` 를 달고 QueryCache.onError 가 그 표시만 건너뛴다. Register 인터페이스를 확장해 meta 에 타입을 줬다(오타가 조용히 통과하지 않게). 회귀 검사 2개: '폴링 에러 토스트가 없다' + '현황 조회 실패는 토스트 1개'(예외가 폴링 하나로 좁혀졌는지).",
       "text": "폴링 중 네트워크가 죽으면 2초마다 에러 토스트가 쌓인다. 폴링 쿼리가 마지막 성공 데이터(RUNNING)를 유지해 refetchInterval 이 계속 2000 을 돌려주고 전역 QueryCache.onError 가 매번 띄운다. queryClient.ts" },
     { "from": "step-5-1:M1_semester", "target_item": "step-6:expand_detail", "needs": "none", "status": "open",
       "decision": "서버가 준 academicYear 가 ±2 밖이면 그 값을 옵션에 추가해 표시한다 (사용자 위임 2026-08-10). 01 §7-1 의 두 요구('옵션은 ±2', '초기값은 현재 설정값') 중 초기값 보존이 우선이다 — 트리거가 빈칸이 되면 무엇이 설정돼 있는지 화면에서 사라진다. 옵션을 늘리는 게 값을 감추는 것보다 작은 일탈이다.",
@@ -67,7 +70,13 @@
     { "from": "step-5-3:M3_M4_execute", "target_item": "step-7:qa", "needs": "none", "status": "open",
       "text": "같은 '라벨 + 값' 패턴이 M2(w-12 고정폭, 둘 다 caption)와 M4(고정폭 없음, caption/body)로 갈렸다. 값이 데이터인 M4 쪽이 DS-00 §4-1 원칙 1 기준으로 맞다." },
     { "from": "step-5-2:M2_preflight", "target_item": "step-7:qa", "needs": "none", "status": "open",
-      "text": "'현재 적재' 라벨 컬럼을 공용 컴포넌트로 뽑으면 폰트 폴백 시 오버플로가 커지는 문제를 한 곳에서 관리할 수 있다." }
+      "text": "'현재 적재' 라벨 컬럼을 공용 컴포넌트로 뽑으면 폰트 폴백 시 오버플로가 커지는 문제를 한 곳에서 관리할 수 있다." },
+    { "from": "step-5-4:polling", "target_item": "step-7:qa", "needs": "none", "status": "open",
+      "text": "폴링 주기 2초가 어느 검사에도 고정돼 있지 않다. step-5-4.mjs 의 'RUNNING 동안 여러 번 돈다' 가 부등호(>=3)라 간격이 500ms 로 바뀌어도 통과한다. 소스의 POLL_INTERVAL_MS=2000 은 맞으니 지금 동작은 정상이다. 폴 간 경과시간을 재는 쪽으로 조이거나, 실타이머라 flaky 하면 파일 헤더에서 '2초' 문구를 빼는 편이 정직하다. 근거 03 §7-4 · 01 §8-1." },
+    { "from": "step-5-4:polling", "target_item": "step-7:qa", "needs": "none", "status": "open",
+      "text": "폴링이 첫 응답부터 계속 실패하면 [데이터 업데이트] 가 잠긴 채로 남는다 — launchedJobId 를 비우는 경로가 job 데이터 도착에만 달려 있다. 폴링 토스트를 껐으므로 그 화면엔 '업데이트 진행 중' + 비활성 버튼만 남고 설명이 없다. 01 §9 에 그 상태 규정이 없어 위반은 아니다. 새로고침하면 summary 가 실제 RUNNING 여부를 알려주므로 잠금 자체는 틀린 표시가 아니다. 육안 확인 대상." },
+    { "from": "step-5-4:polling", "target_item": "step-7:qa", "needs": "none", "status": "open",
+      "text": "FAILED 토스트만 개수 검사가 없다(step-5-4.mjs 'FAILED 종료' 섹션). 중복 발화는 SUCCESS 쪽 개수 검사와 settleCount 가 잡으므로 구멍은 아니다. 지금 붙이면 red 를 만들 방법이 없어 — 종료 후 재fetch 가 없어 settledJobIds 가드를 빼도 한 번만 뜬다 — 검사만 늘고 증명이 빈다. 시나리오를 만들 수 있는 step-7 에서 본다." }
   ],
   "checklist": [
     { "id": "step-1:setup",            "status": "COMPLETED", "note": "Vite+TS+Tailwind+shadcn, DS-01 토큰 배선, alias, env(Zod), 빈 라우터 2개" },
@@ -77,8 +86,8 @@
     { "id": "step-5-1:M1_semester",    "status": "COMPLETED", "note": "표시 학기 조회/변경. 카드2 무영향(D10)" },
     { "id": "step-5-2:M2_preflight",   "status": "COMPLETED", "note": "학기 선택 + preflight. 응답은 onPreflight 로 올린다" },
     { "id": "step-5-3:M3_M4_execute",  "status": "COMPLETED", "note": "preflight 응답 보관 + M3/M4/최초적재 변형 + POST jobs + 409 2종. M4 격식체 유지" },
-    { "id": "step-5-4:polling",        "status": "IN_PROGRESS", "note": "202 jobId 를 onSuccess 에서 보관해 폴링 시작 · refetchInterval 조건부 · runningJobId 재개 · total null 분기 · PERSIST 단위 건" },
-    { "id": "step-6:expand_detail",    "status": "TODO", "note": "Expandable Row·Tab Group·더보기(useInfiniteQuery)·FieldDiff·실패 Job. ⚠️ FAILED 종료 시 이력 최상단 행 자동 확장(01 §8-1 · 04 §10-4)도 여기서 붙인다 — 5-4 에서 토스트까지만 했다" },
+    { "id": "step-5-4:polling",        "status": "COMPLETED", "note": "202 jobId 를 onSuccess 에서 보관해 폴링 시작 · refetchInterval 조건부 · runningJobId 재개 · total null 분기 · PERSIST 단위 건" },
+    { "id": "step-6:expand_detail",    "status": "IN_PROGRESS", "note": "Expandable Row·Tab Group·더보기(useInfiniteQuery)·FieldDiff·실패 Job. ⚠️ FAILED 종료 시 이력 최상단 행 자동 확장(01 §8-1 · 04 §10-4)도 여기서 붙인다 — 5-4 에서 토스트까지만 했다" },
     { "id": "step-7:qa",               "status": "TODO", "note": "시나리오 14개 + DS 일관성 점검" }
   ],
   "notes": [
@@ -121,7 +130,7 @@
     {
       "tag": "decision",
       "item": "step-5-2:M2_preflight",
-      "text": "명세 빈칸을 스스로 채운 값 — (1) 적재 데이터가 없으면 M2 의 '현재 적재' 행을 숨긴다(01 §7-2 에 그때 문구가 없다. 나중에 넣는다면 카드 2 의 '아직 적재된 데이터가 없어요.' 로 맞추는 게 일관적이다). (2) [다음] 은 판정 중에만 비활성 — dirty 로 막으면 UPSERT 경로가 통째로 막힌다. (3) 초기값(적재 학기 ?? 표시 학기)은 SyncMainPage 가 합성해 내려준다. (4) 라벨 폭 함정 — FieldRow 의 w-12 는 text-body(15px) 기준이라 text-caption(13px) 한글 4자는 48px 를 0.22px 넘겨 두 줄이 된다. whitespace-nowrap 으로 푼다. (5) ⚠️ [데이터 업데이트] 의 비활성 조건이 2개다. `01 §6-3`·`04 §10-2` 표에는 `runningJobId !== null` 한 줄뿐이지만, 초기값(적재 학기 ?? 표시 학기)을 못 정할 때도 잠그는 조건을 **사용자 결정으로 추가**했다(2026-08-09, 커밋 0561b28). 명세 위반이 아니라 승인된 확장이다 — 압축 뒤 §10-2 표를 다시 읽고 되돌리지 마라. `03 §4-1` 이 semester_setting 을 시드로 보장해 정상 운영에서는 도달하지 않는 상태다."
+      "text": "명세 빈칸을 스스로 채운 값 — (1) 적재 데이터가 없으면 M2 의 '현재 적재' 행을 숨긴다(01 §7-2 에 그때 문구가 없다. 나중에 넣는다면 카드 2 의 '아직 적재된 데이터가 없어요.' 로 맞추는 게 일관적이다). (2) [다음] 은 판정 중에만 비활성 — dirty 로 막으면 UPSERT 경로가 통째로 막힌다. (3) 초기값(적재 학기 ?? 표시 학기)은 SyncMainPage 가 합성해 내려준다. (4) 라벨 폭 함정 — FieldRow 의 w-12 는 text-body(15px) 기준이라 text-caption(13px) 한글 4자는 48px 를 0.22px 넘겨 두 줄이 된다. whitespace-nowrap 으로 푼다. (5) ⚠️ [데이터 업데이트] 의 비활성 조건이 2개다. `01 §6-3`·`04 §10-2` 표에는 `runningJobId !== null` 한 줄뿐이지만, 초기값(적재 학기 ?? 표시 학기)을 못 정할 때도 잠그는 조건을 **사용자 결정으로 추가**했다(2026-08-09, 커밋 d97ba4e). 명세 위반이 아니라 승인된 확장이다 — 압축 뒤 §10-2 표를 다시 읽고 되돌리지 마라. `03 §4-1` 이 semester_setting 을 시드로 보장해 정상 운영에서는 도달하지 않는 상태다."
     },
     {
       "tag": "decision",
@@ -132,12 +141,17 @@
       "tag": "human-step",
       "item": "step-5-4:polling",
       "status": "superseded",
-      "text": "[해소됨 2026-08-10 · 커밋 d96b9c3] 04 §10-5 의 스니펫과 표를 01 §8-1·03 §7-2·§7-3 과 같은 '3/12 페이지'(띄어쓰기)로 고쳤다. '건'은 세 문서 모두 붙여 쓴다. spec_edit 창을 열고 처리했다."
+      "text": "[해소됨 2026-08-10 · 커밋 d02d62a] 04 §10-5 의 스니펫과 표를 01 §8-1·03 §7-2·§7-3 과 같은 '3/12 페이지'(띄어쓰기)로 고쳤다. '건'은 세 문서 모두 붙여 쓴다. spec_edit 창을 열고 처리했다."
     },
     {
       "tag": "trap",
       "item": "all",
-      "text": "⚠️ 용어 주의 — 명세에 '다른 관리자의 Job' 이라는 개념이 없다. `GET /courses/summary` 의 `runningJobId` 는 **지금 시스템에 도는 Job** 이고 `01 §8-2` 가 동시 실행을 막아 RUNNING Job 은 전체에 최대 1개다. 누가 시작했는지를 명세는 구분하지 않는다. 요구사항은 하나다 — RUNNING Job 이 있으면 진행률을 보여주고 실행 버튼을 잠근다. ⚠️ 이 trap 의 회귀 검사는 **깨뜨려서 red 가 나는 걸 확인했다**(버그 재도입 시 `종료 처리는 Job 당 한 번 — got 3`). 폴링 대상 선택은 `useSyncJobPolling` 안에 있다: `runningJobId ?? launchedJobId`, 그리고 **종료 effect 가 launchedJobId 를 즉시 비운다**. 셋 다 필요하다. (1) 순서를 뒤집으면 끝난 내 Job 이 왼쪽에 남아 시스템의 RUNNING Job 을 영영 못 잡는다. (2) 종료 때 안 비우면 다음 Job 이 끝나는 순간 폴링 대상이 끝난 Job 으로 되돌아가 화면이 옛 Job 으로 갈아탄다. (3) settledJobIds 는 Set 이어야 한다 — id 하나만 기억하면 A→B→A 로 돌아올 때 A 를 다시 종료 처리한다. 202 응답은 그 시점에 RUNNING Job 이 없었다는 뜻이라(5200 이 아니므로) summary 를 먼저 봐도 내 Job 을 놓치지 않는다. ⚠️ 회귀 검사는 **한 마운트 안에서** 돌려야 한다 — 마운트를 갈면 launchedJobId 가 null 로 리셋돼 옛 코드도 통과한다. harness/verify/step-5-4.mjs 의 '한 마운트 안에서' 섹션이 실행→종료→인계까지 클릭 스텝으로 이어 붙인다."
+      "text": "⚠️ 용어 주의 — 명세에 '다른 관리자의 Job' 이라는 개념이 없다. `GET /courses/summary` 의 `runningJobId` 는 **지금 시스템에 도는 Job** 이고 `01 §8-2` 가 동시 실행을 막아 RUNNING Job 은 전체에 최대 1개다. 누가 시작했는지를 명세는 구분하지 않는다. 요구사항은 하나다 — RUNNING Job 이 있으면 진행률을 보여주고 실행 버튼을 잠근다. ⚠️ 이 trap 의 회귀 검사는 **깨뜨려서 red 가 나는 걸 확인했다**(버그 재도입 시 `종료 처리는 Job 당 한 번 — got 3`). 폴링 대상 선택은 `useSyncJobPolling` 안에 있다: `runningJobId ?? launchedJobId`, 그리고 **종료 effect 가 launchedJobId 를 즉시 비운다**. 셋 다 필요하다. (1) 순서를 뒤집으면 끝난 내 Job 이 왼쪽에 남아 시스템의 RUNNING Job 을 영영 못 잡는다. (2) 종료 때 안 비우면 다음 Job 이 끝나는 순간 폴링 대상이 끝난 Job 으로 되돌아가 화면이 옛 Job 으로 갈아탄다. (3) settledJobIds 는 Set 이어야 한다 — id 하나만 기억하면 A→B→A 로 돌아올 때 A 를 다시 종료 처리한다. 202 응답은 그 시점에 RUNNING Job 이 없었다는 뜻이라(5200 이 아니므로) summary 를 먼저 봐도 내 Job 을 놓치지 않는다. ⚠️ 회귀 검사는 **한 마운트 안에서** 돌려야 한다 — 마운트를 갈면 launchedJobId 가 null 로 리셋돼 옛 코드도 통과한다. harness/verify/step-5-4.mjs 의 '한 마운트 안에서' 섹션이 실행→종료→인계까지 클릭 스텝으로 이어 붙인다. ⚠️ launchedJobId 는 폴링 대상 선택만 하는 게 아니다 — [데이터 업데이트] 잠금도 여기에 걸려 있다(202 직후 summary 가 아직 null 인 구간). 지우면 두 가지가 같이 깨진다."
+    },
+    {
+      "tag": "decision",
+      "item": "step-5-4:polling",
+      "text": "넘긴 지적 5건을 처리하며 정한 것 — (1) 실행 버튼 잠금의 판정자가 SyncMainPage 로 올라갔다. CourseSummaryCard 는 `jobRunning` 을 prop 으로 받는다. 카드가 스스로 summary 를 읽어 판정하던 걸 그대로 두고 조건만 넓히면 판정자가 둘이 되는데, 애초에 이 버그가 그래서 났다. (2) 전역 에러 토스트의 예외 통로는 `meta.skipErrorToast` 하나다. 쿼리별 onError 를 다시 만들지 않는다 — 04 §9-2 의 '한 곳에서 띄운다' 가 그대로 유지된다. 새 예외를 늘리기 전에 정말 2초마다 도는 쿼리인지 본다. (3) 진행률 접두어(`업데이트 진행 중 · `)는 total 이 있을 때만 붙는다(03 §7-3). 표기를 바꾸면 step-5-4.mjs 가 진행률 줄 전체를 문자열 비교하므로 바로 걸린다."
     },
     {
       "tag": "decision",
@@ -159,7 +173,7 @@
     {
       "id": "step-1:setup",
       "ts": "2026-08-08",
-      "commit": "cf14d8a",
+      "commit": "4caf74f",
       "gate": "--full OK",
       "retry": 0,
       "text": "Vite8+React19+TS·Tailwind3.4+shadcn 배선·DS-01 토큰 전체·env.ts·04 §4 폴더·라우터 2개. 리뷰어 대상 아님(step-3~6만)."
@@ -167,7 +181,7 @@
     {
       "id": "step-1:setup",
       "ts": "2026-08-08",
-      "commit": "751c662",
+      "commit": "a5f166a",
       "gate": "--full OK",
       "retry": 0,
       "text": "후속 수정 — Node 20.11.1 에서 Vite 8(rolldown)이 node:util styleText 로 죽어 .nvmrc 22 + engines 추가."
@@ -175,7 +189,7 @@
     {
       "id": "step-2:infra",
       "ts": "2026-08-08",
-      "commit": "9a32ad7",
+      "commit": "b1f6cb1",
       "gate": "--full OK",
       "retry": 0,
       "text": "apiClient 1개·tokenManager·refreshQueue·errorHandler·types·schemas·queryClient, constants 4종, lib 3종, providers, MSW 9개 핸들러+Job 타임라인. Vite SSR + msw/node 로 42건 검증 전부 통과. 리뷰어 대상 아님(step-3~6만)."
@@ -183,16 +197,16 @@
     {
       "id": "step-3:ADMIN_LOGIN",
       "ts": "2026-08-08",
-      "commit": "cce66cd",
+      "commit": "4e41246",
       "gate": "--full OK",
       "review": "spec=PASS · ds=PASS (2라운드)",
       "retry": 0,
-      "text": "LoginLayout·로그인 폼(RHF+Zod)·auth store·protectedLoader·MainLayout+Header·M5. shadcn 4종을 DS-01 로 재정의. 리뷰 1라운드에서 둘 다 FAIL — aria-invalid 미생성(입력 에러 링이 죽어 있었음), 고아 jsdom, 04 §8 구조 이탈. 전부 수정 후 2라운드 PASS. 검증 하네스(harness/verify + npm run verify) 도입, 88건 통과. 이후 사용자 육안 확인으로 cn()/tailwind-merge 사고 발견(fd50c3f)."
+      "text": "LoginLayout·로그인 폼(RHF+Zod)·auth store·protectedLoader·MainLayout+Header·M5. shadcn 4종을 DS-01 로 재정의. 리뷰 1라운드에서 둘 다 FAIL — aria-invalid 미생성(입력 에러 링이 죽어 있었음), 고아 jsdom, 04 §8 구조 이탈. 전부 수정 후 2라운드 PASS. 검증 하네스(harness/verify + npm run verify) 도입, 88건 통과. 이후 사용자 육안 확인으로 cn()/tailwind-merge 사고 발견(a01a777)."
     },
     {
       "id": "step-4:SYNC_MAIN_shell",
       "ts": "2026-08-08",
-      "commit": "c212d0c",
+      "commit": "aa9fad1",
       "gate": "--full OK",
       "review": "spec=PASS · ds=PASS (2라운드)",
       "retry": 0,
@@ -201,7 +215,7 @@
     {
       "id": "step-5-1:M1_semester",
       "ts": "2026-08-08",
-      "commit": "ef8b44d",
+      "commit": "65413e3",
       "gate": "--full OK",
       "review": "spec=PASS(2라운드) · ds=PASS(3라운드)",
       "retry": 0,
@@ -210,20 +224,29 @@
     {
       "id": "step-5-2:M2_preflight",
       "ts": "2026-08-08",
-      "commit": "0561b28",
+      "commit": "d97ba4e",
       "gate": "--full OK",
       "review": "spec=PASS(3라운드) · ds=PASS(3라운드)",
       "retry": 0,
-      "text": "M2 학기 선택 모달 + POST /sync/preflight. (step-5-3 에서 D4 가드를 두 번 손봤다 — 완화 1회·구멍 메우기 2회) 3전략 판정은 전부 서버 몫이고 응답 4필드를 Zod 로 파싱해 onPreflight 로 올린다(D4). 초기값 = 적재 학기 ?? 표시 학기 를 SyncMainPage 가 합성. spec 1라운드 FAIL — 에러 토스트 중복(전역 MutationCache + 호출부). ds 1라운드 FAIL — '현재 적재' 라벨이 w-12 를 0.22px 넘겨 두 줄. 3라운드 — 패킷 §F 질문에 사용자가 '비활성 + 툴팁' 을 골라 반영(0561b28). 그 과정에서 `<button[^>]*disabled[^>]*>` 정규식이 class 의 disabled: 변형에 걸려 활성 버튼도 통과하던 걸 발견해 step-4 것까지 고쳤다. 검증 42건 추가(총 224건). 하네스에 D4 소스 스캔 가드(features/pages 에서 전략 리터럴 분기 금지) 추가. 리뷰어 2종을 처음으로 병렬 실행했다가 세션 한도로 둘 다 죽어 순차로 재실행했고, 3라운드는 병렬로 성공했다."
+      "text": "M2 학기 선택 모달 + POST /sync/preflight. (step-5-3 에서 D4 가드를 두 번 손봤다 — 완화 1회·구멍 메우기 2회) 3전략 판정은 전부 서버 몫이고 응답 4필드를 Zod 로 파싱해 onPreflight 로 올린다(D4). 초기값 = 적재 학기 ?? 표시 학기 를 SyncMainPage 가 합성. spec 1라운드 FAIL — 에러 토스트 중복(전역 MutationCache + 호출부). ds 1라운드 FAIL — '현재 적재' 라벨이 w-12 를 0.22px 넘겨 두 줄. 3라운드 — 패킷 §F 질문에 사용자가 '비활성 + 툴팁' 을 골라 반영(d97ba4e). 그 과정에서 `<button[^>]*disabled[^>]*>` 정규식이 class 의 disabled: 변형에 걸려 활성 버튼도 통과하던 걸 발견해 step-4 것까지 고쳤다. 검증 42건 추가(총 224건). 하네스에 D4 소스 스캔 가드(features/pages 에서 전략 리터럴 분기 금지) 추가. 리뷰어 2종을 처음으로 병렬 실행했다가 세션 한도로 둘 다 죽어 순차로 재실행했고, 3라운드는 병렬로 성공했다."
     },
     {
       "id": "step-5-3:M3_M4_execute",
       "ts": "2026-08-09",
-      "commit": "8aa6436",
+      "commit": "6121b64",
       "gate": "--full OK",
       "review": "spec=PASS(2라운드) · ds=PASS(2라운드)",
       "retry": 0,
       "text": "M3(UPSERT)·M3 변형(INITIAL)·M4(REPLACE) + POST /sync/jobs + 409 2종. expectedStrategy 는 preflight 응답을 그대로 되돌려 보내고(D4) 하네스가 요청 바디를 캡처해 확인한다. M4 Strict Match·격식체·480px·닫으면 입력 초기화까지 검사. spec 1라운드 PASS(가드 구멍 지적), ds 1라운드 FAIL 4건 — 그중 destructive 가 연분홍이라 비가역 버튼이 M3 보다 약해 보이던 게 핵심이었고 사용자 결정으로 진한 빨강이 됐다. 검증 54건 추가(총 285건)."
+    },
+    {
+      "id": "step-5-4:polling",
+      "ts": "2026-08-10",
+      "commit": "caec735",
+      "gate": "--full OK",
+      "review": "spec=PASS(4라운드) · ds=PASS(2라운드)",
+      "retry": 0,
+      "text": "2초 폴링·진행률·자동 재개·종료 처리. 리뷰가 네 라운드 간 이유는 전부 '검사가 회귀를 못 잡고 있었다' 였다 — 1라운드 폴링 대상 우선순위, 2라운드 마운트 리셋으로 옛 코드도 통과, 3라운드 존재/부등호 판정이 버그 쪽 값을 통과시킴. 4라운드에서 넘긴 지적 3건(202 직후 버튼 잠금·total null 표기·폴링 에러 토스트)을 반영하고 셋 다 red 를 실측한 뒤 PASS. 검증 31건 추가(총 315건). 넘긴 지적 5건 중 3 해소·1 유지(주황 두 번, 사용자 위임 ⓐ)·1 이동(버튼 잠깐 잠김 → step-7). 새 이월 3건은 전부 step-7."
     }
   ]
 }

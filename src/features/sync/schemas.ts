@@ -102,3 +102,24 @@ export type SyncJobListItem = z.infer<typeof syncJobListItemSchema>;
 
 export const syncJobPageSchema = paginatedSchema(syncJobListItemSchema);
 export type SyncJobPage = z.infer<typeof syncJobPageSchema>;
+
+export const syncChangeTypeSchema = z.enum(['CREATED', 'UPDATED', 'CLOSED', 'WARNING']);
+export type SyncChangeType = z.infer<typeof syncChangeTypeSchema>;
+
+export const changedFieldSchema = z.object({
+  field: z.string(),
+  before: z.string(),
+  after: z.string(),
+});
+export type ChangedField = z.infer<typeof changedFieldSchema>;
+
+export const syncChangeItemSchema = z.object({
+  haksuCode: z.string(),
+  courseName: z.string().nullable(),
+  changedFields: z.array(changedFieldSchema).nullable(),
+  reason: z.string().nullable(),
+});
+export type SyncChangeItem = z.infer<typeof syncChangeItemSchema>;
+
+export const syncChangePageSchema = paginatedSchema(syncChangeItemSchema);
+export type SyncChangePage = z.infer<typeof syncChangePageSchema>;

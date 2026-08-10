@@ -66,17 +66,18 @@ function SummaryBody({ summary }: { summary: CoursesSummary }) {
 
 export function CourseSummaryCard({
   targetReady,
+  jobRunning,
   runningProgress,
   onUpdateClick,
 }: {
   targetReady: boolean;
+  jobRunning: boolean;
   runningProgress: SyncProgress | null;
   onUpdateClick: () => void;
 }) {
   const { data, isPending, isError, error, refetch } = useCoursesSummary();
-  const isJobRunning = data !== undefined && data.runningJobId !== null;
 
-  const blockedReason = isJobRunning
+  const blockedReason = jobRunning
     ? '업데이트가 진행 중이에요.'
     : targetReady
       ? null
@@ -94,7 +95,7 @@ export function CourseSummaryCard({
 
       {data !== undefined && (
         <>
-          {isJobRunning && <SyncProgressText progress={runningProgress} />}
+          {jobRunning && <SyncProgressText progress={runningProgress} />}
           <SummaryBody summary={data} />
           <div className="mt-6 flex justify-end">
             {blockedReason !== null ? (

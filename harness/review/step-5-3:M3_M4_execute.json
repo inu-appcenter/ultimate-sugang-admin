@@ -65,6 +65,6 @@
     "[step-5-4 이후] 같은 '라벨 + 값' 패턴이 M2(w-12 고정폭, 둘 다 caption)와 M4(고정폭 없음, caption/body)로 갈렸다. 값이 데이터인 M4 쪽이 원칙 1 기준으로 맞다."
   ],
   "verify": "harness/verify/step-5-3.mjs 54건 + step-5-2 가드 보강 (전체 285건)",
-  "commit": "8aa6436",
+  "commit": "6121b64",
   "ts": "2026-08-09"
 }

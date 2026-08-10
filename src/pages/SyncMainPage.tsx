@@ -15,6 +15,7 @@ export function SyncMainPage() {
   const [targetOpen, setTargetOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [preflight, setPreflight] = useState<SyncPreflight | null>(null);
+  const [expandedJobId, setExpandedJobId] = useState<number | null>(null);
 
   const { data: displaySemester } = useDisplaySemester();
   const { data: summary } = useCoursesSummary();
@@ -22,7 +23,11 @@ export function SyncMainPage() {
   const loadedSemester = summary?.semester ?? null;
   const initialTarget = loadedSemester ?? displaySemester ?? null;
 
-  const { job, trackLaunchedJob } = useSyncJobPolling(summary?.runningJobId ?? null);
+  const { job, launchedJobId, trackLaunchedJob } = useSyncJobPolling(
+    summary?.runningJobId ?? null,
+    setExpandedJobId,
+  );
+  const jobRunning = (summary?.runningJobId ?? null) !== null || launchedJobId !== null;
 
   const openConfirm = (result: SyncPreflight) => {
     setTargetOpen(false);
@@ -38,10 +43,16 @@ export function SyncMainPage() {
         <DisplaySemesterCard />
         <CourseSummaryCard
           targetReady={initialTarget !== null}
+          jobRunning={jobRunning}
           runningProgress={job?.status === 'RUNNING' ? job.progress : null}
           onUpdateClick={() => setTargetOpen(true)}
         />
-        <SyncJobTable page={page} onPageChange={setPage} />
+        <SyncJobTable
+          page={page}
+          onPageChange={setPage}
+          expandedJobId={expandedJobId}
+          onExpandToggle={(jobId) => setExpandedJobId((current) => (current === jobId ? null : jobId))}
+        />
       </div>
 
       {initialTarget !== null && (

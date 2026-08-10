@@ -97,7 +97,7 @@ function SyncTargetForm({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {academicYearOptions().map((year) => (
+                {academicYearOptions(initialTarget.academicYear).map((year) => (
                   <SelectItem key={year} value={String(year)}>
                     {year}
                   </SelectItem>

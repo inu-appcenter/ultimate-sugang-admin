@@ -1,0 +1,75 @@
+{
+  "id": "step-5-4:polling",
+  "spec": "PASS",
+  "ds": "PASS",
+  "rounds": {
+    "spec": 4,
+    "ds": 2
+  },
+  "ds_rounds_note": "3·4라운드에 ds 를 부르지 않았다. 2라운드 PASS 이후 바뀐 것이 queries.ts 로직·queryClient·하네스뿐이고, 이번 diff 에 className 변경이 한 줄도 없다(git show caec735 -- src 로 확인). 문구가 바뀐 곳은 진행률 줄 하나인데 그 표기의 담당 문서가 03 §7-3 이라 spec 이 판정했다. DS-03 §1-1 관련 이월(DialogDescription 기본값)은 step-7 에 열려 있다.",
+  "diffs": [
+    {
+      "round": 1,
+      "reviewer": "spec",
+      "verdict": "FAIL",
+      "finding": "폴링 대상이 `launchedJobId ?? summary.runningJobId` 였다. launchedJobId 는 세팅만 되고 해제되지 않아 끝난 Job 의 id 가 계속 왼쪽에 남는다. 그 상태에서 시스템에 새 RUNNING Job 이 생기면 카드는 runningJobId 로 진행 중이라 그리는데 폴링은 끝난 Job 을 보고 있어 단계 없는 '업데이트 진행 중' 이 무기한 고정된다. 04 §10-4 는 runningJobId 재개를 진행률 유실을 막는 유일한 장치라고 못 박는다.",
+      "fix": "`summary.runningJobId ?? launchedJobId` 로 뒤집었다(커밋 645e699). 202 응답은 그 시점에 RUNNING Job 이 없었다는 뜻이라(5200 이 아니므로) summary 를 먼저 봐도 내 Job 을 놓치지 않는다."
+    },
+    {
+      "round": 1,
+      "reviewer": "ds",
+      "verdict": "FAIL",
+      "finding": "진행률 단위 앞 공백을 붙여쓰기로 통일했다. 01 §8-1·03 §7-2·§7-3 은 `3/12 페이지` 를 띄어쓰고 `450/1,203건` 만 붙여 쓴다 — 불일치가 명세의 의도다. 04 §10-5 만 붙여 쓰는데 화면 표기 담당은 01·03 이다(source-of-truth §2).",
+      "fix": "PERSIST 만 '건', 나머지는 ' 페이지'. 하네스도 같은 오답을 잠그고 있어 같이 고쳤다(645e699). 04 §10-5 표기는 spec_edit 창에서 사람이 정정(d02d62a)."
+    },
+    {
+      "round": 2,
+      "reviewer": "spec",
+      "verdict": "FAIL",
+      "finding": "우선순위를 뒤집는 것만으로 부족했다. 남의 Job 이 끝나는 순간 대상이 끝난 내 Job 으로 되돌아가 화면이 옛 Job 으로 갈아탄다. 그리고 회귀 검사가 회귀를 못 잡고 있었다 — runSyncConfirmFlow 가 언마운트하고 renderSyncMainSteps 가 새로 마운트해서 launchedJobId 가 null 로 리셋된다. 리뷰어가 워크트리를 떠서 옛 코드로도 전건 통과하는 걸 실측했다.",
+      "fix": "폴링 대상 선택을 useSyncJobPolling 안으로 옮기고 종료 effect 가 launchedJobId 를 즉시 비운다. settledJobIds 는 id 하나에서 Set 으로(A→B→A 재처리 방지). 프로브에 click 스텝을 붙여 실행→종료→인계를 한 마운트에서 잇는다(7c0d0ef)."
+    },
+    {
+      "round": 2,
+      "reviewer": "ds",
+      "verdict": "PASS",
+      "finding": "표기 수정 확인. 진행률 줄은 text-warning-text 단색이고 폴링 갱신이라 트랜지션이 없다.",
+      "fix": "없음."
+    },
+    {
+      "round": 3,
+      "reviewer": "spec",
+      "verdict": "FAIL",
+      "finding": "검사가 또 헛돌았다. 리뷰어가 버그 소스 + 새 하네스로 29/29 통과를 실측했다. 두 판정이 다 느슨했다 — 토스트 DOM 개수는 되살아난 쪽이 17ms 늦게 떠 두 장이 동시에 안 잡히고, summaryCalls 는 부등호(>=5)라 버그 쪽 6도 통과했다. 그리고 '실행 중인 Job 의 완료 토스트' 검사가 명세 범위를 넘어섰다.",
+      "fix": "queryClient.invalidateQueries 를 감싸 종료 처리 횟수를 직접 센다 — 종료 effect 만 ['sync','summary'] 를 콕 집어 무효화하므로(409 의 onSettled 는 ['sync'] 프리픽스) Job 둘이면 정확히 2, 되살아나면 3. 버그를 되돌려 red 를 실측했다(got 3). 완료 토스트 검사는 폐기(fc17b29)."
+    },
+    {
+      "round": 4,
+      "reviewer": "spec",
+      "verdict": "PASS",
+      "finding": "범위를 좁힌 재확인 — fc17b29 의 두 지적 + 이번에 반영한 넘긴 지적 3건(버튼 잠금·진행률 표기·폴링 토스트) + 명세 밖 확장 여부. 6파일만 봤다.",
+      "fix": "없음. 아래 self_judgements_accepted 3건을 인정하고 DEFER 3건을 냈다."
+    },
+    {
+      "round": 4,
+      "reviewer": "spec",
+      "verdict": "PASS",
+      "finding": "정정 — 3라운드에서 '실행 중인 Job 의 완료 토스트' 를 폐기하며 적은 근거('01/03/04 어디에도 그 동작을 요구하는 문장이 없다')가 과했다. 04 §10-4 의 종료 시 처리표는 status 별로 쓰였고 주체를 가르지 않으며, 같은 절의 재개 조건이 남이 띄운 Job 을 그 표 아래로 집어넣는다. 01 §8-1 도 완료 토스트와 자동 재개가 한 표 안에 있다.",
+      "fix": "코드는 그대로 둔다 — 종료 effect(queries.ts:67-81)가 누가 띄운 Job 인지 분기하지 않아 어차피 균일하게 토스트하고, 그 실행 자체는 settleCount === 2 가 잡는다. 폐기 사유를 '명세에 없다' 가 아니라 '이미 다른 검사가 덮는 중복 시나리오' 로 정정해 기록한다."
+    }
+  ],
+  "self_judgements_accepted": [
+    "실행 버튼 잠금 조건에 launchedJobId 를 더한 것 — 01 §8-2 는 'RUNNING job 이 존재하는 동안' 거부라고 쓰고, 202 를 받은 시점에 RUNNING job 은 서버에 이미 존재한다(summary 가 아직 모를 뿐이다). 01 §6-3 도 필드가 아니라 job 존재로 쓰였고 04 §10-2 는 카드 2 렌더 분기표라 충분조건이다. 같은 버튼의 비활성 조건이 2026-08-09 사용자 결정으로 이미 한 번 늘어난 전례도 있다.",
+    "폴링 쿼리만 전역 에러 토스트에서 뺀 것 — 04 §9-2 는 '에러 → 토스트 매핑'(문구 우선순위)이지 '모든 실패는 토스트를 띄운다' 가 아니다. 401 이 이미 예외로 표에 있다. 전역 한 곳 구조는 그대로고(QueryCache.onError 가 여전히 유일한 판정처) 예외 대상도 grep 상 폴링 하나다. 폴링 실패 화면은 01 §9·04 §9-6 의 4상태 대상 목록에 없는 명세 공백이다.",
+    "progress === null 갈래(`업데이트 진행 중`)를 남겨둔 것 — 03 §7 상 RUNNING 이면 progress 가 항상 있으므로 이건 Job 상태를 새로 만든 게 아니라 첫 폴링 응답 전 fetch 대기 표시이고, 문구도 01 §8-1 것을 쓴다."
+  ],
+  "open_questions": [],
+  "deferred": [
+    "[step-7:qa] 폴링 주기 2초가 어느 검사에도 고정돼 있지 않다. step-5-4.mjs 의 'RUNNING 동안 여러 번 돈다' 가 부등호(>=3)라 간격이 500ms 로 바뀌어도 통과한다. 소스의 POLL_INTERVAL_MS=2000 은 맞으니 지금 동작은 정상이다. 폴 간 경과시간을 재는 쪽으로 조이거나, 실타이머라 flaky 하면 파일 헤더에서 '2초' 문구를 빼는 편이 정직하다. 근거 03 §7-4·01 §8-1.",
+    "[step-7:qa] 폴링이 첫 응답부터 계속 실패하면 버튼이 잠긴 채로 남는다. launchedJobId 를 비우는 경로가 job 데이터 도착에만 달려 있어서다. 이번에 폴링 토스트를 껐으니 그 화면엔 '업데이트 진행 중' + 비활성 버튼만 남고 설명이 없다. 01 §9 에 그 상태 규정이 없어 위반은 아니고, 이미 열려 있는 '폴링이 멈춘 화면' 이월과 같은 자리다. 육안 확인 대상.",
+    "[step-7:qa] FAILED 토스트만 개수 검사가 없다(step-5-4.mjs 'FAILED 종료' 섹션). 중복 발화는 SUCCESS 쪽 개수 검사와 settleCount 가 잡으므로 구멍은 아니다. 지금 붙이면 red 를 만들 방법이 없어(종료 후 재fetch 가 없어 Set 가드를 빼도 한 번만 뜬다) 검사만 늘고 증명이 빈다 — 시나리오를 만들 수 있는 step-7 에서 본다."
+  ],
+  "verify": "harness/verify/step-5-4.mjs 31건 (전체 315건, 7스크립트). red 확인 3건 — 버튼 잠금: '202 직후 버튼이 잠긴다' + '진행률 줄도 같이 뜬다' FAIL / 진행률 표기: 'total null 이면 분모 없이' got \"업데이트 진행 중 · 강의 수집 중…\" / 폴링 토스트: '폴링 에러 토스트가 없다' got 1. 검사 3개를 includes 에서 진행률 줄 전체 문자열 eq 로 바꿨고, 토스트는 data-sonner-toast 노드만 세도록 좁혔다(같은 문구가 카드 Error State 에도 있어 전체 DOM 으로는 2개로 잡힌다).",
+  "commit": "caec735",
+  "ts": "2026-08-10"
+}
