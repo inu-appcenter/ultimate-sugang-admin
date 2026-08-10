@@ -1,22 +1,6 @@
 # USS 백오피스 — 디자인 시스템 (DS-01)
 
 > **이 문서가 토큰 값과 컴포넌트 이름을 정한다.** 시각 *방향*은 `DS-00_uss_overview.md`, 화면별 시각은 `01 §4~§7`, 강제되는 규칙은 `.claude/rules/ui-conventions.md` 를 본다.
-> ⚠️ Gravit `DS-01_design_system.md` 를 승계해 USS 값으로 병합한 문서다. **Gravit 원본은 폐기**한다.
-
-**문서 버전**: v1.0 (2026-08-07) — Gravit DS-01 v1.0 승계 + USS 값 병합
-
----
-
-## 목차
-
-1. [컬러 토큰](#1-컬러-토큰)
-2. [타이포그래피 토큰](#2-타이포그래피-토큰)
-3. [간격 / 레이아웃 토큰](#3-간격--레이아웃-토큰)
-4. [모서리 / 표면 / 모션 토큰](#4-모서리--표면--모션-토큰)
-5. [컴포넌트 명명 규칙](#5-컴포넌트-명명-규칙)
-6. [상태별 변형 규칙](#6-상태별-변형-규칙)
-7. [아이콘 사용 규칙](#7-아이콘-사용-규칙)
-8. [Gravit 대비 변경 요약](#8-gravit-대비-변경-요약)
 
 ---
 
@@ -32,7 +16,7 @@
 | `primary-foreground` | `#FFFFFF` | Primary 위 텍스트 | |
 
 > **화면당 채워진 Primary 버튼은 1개.** `ADMIN_LOGIN` = [로그인], `SYNC_MAIN` = [데이터 업데이트]. 나머지는 Outline·Ghost.
-> Gravit 의 `primary-bg-badge`(ADMIN 뱃지)는 USS 에 사용처가 없어 제거했다.
+> `primary-bg-badge` 는 USS 에 사용처가 없어 **정의하지 않는다.**
 
 ### 1-2. Neutral (Grayscale) 컬러 — Blue Tint
 
@@ -63,7 +47,7 @@
 
 #### ⚠️ Info / Accent 제거
 
-Gravit 의 `info`(#1D4ED8 파랑, 객관식)·`accent`(#7E22CE 보라, 주관식)는 **USS 에서 정의하지 않는다.**
+`info`·`accent` 계열은 **USS 에서 정의하지 않는다.**
 
 | 제거 | 사유 |
 |---|---|
@@ -86,7 +70,7 @@ Gravit 의 `info`(#1D4ED8 파랑, 객관식)·`accent`(#7E22CE 보라, 주관식
 | `caption` | 13px / regular | 메타 정보, 보조 문구, 에러 메시지 |
 
 > **`metric` 이 USS 의 핵심 토큰**이다. `DS-00 §4-1` 원칙 1(크기로 계층)의 구현체 — 라벨보다 숫자가 먼저 읽혀야 한다.
-> Gravit 대비: `display`(32) → `metric` 으로 개명·용도 변경, `h2` 20→18, `body` 14→15, `caption` 12→13. 본문을 한 단계 키워 가독성을 확보했다.
+> `display` 토큰은 없다 — 핵심 수치는 `metric`(32) 이다. 본문을 한 단계 키워(`body` 15 / `caption` 13) 가독성을 확보했다.
 
 ### 위계 적용 예 (카드 2)
 
@@ -126,7 +110,7 @@ font-mono:  Tailwind 기본 monospace  (학수번호 표시 — 0000018001)
 
 ### ⚠️ 제거된 토큰
 
-| Gravit 토큰 | 사유 |
+| 제거된 토큰 | 사유 |
 |---|---|
 | `sidebar-width` (240px) | **사이드바 없음** — `01 §4` |
 | `menu-gap` (4px) | 메뉴 없음 |
@@ -136,9 +120,9 @@ font-mono:  Tailwind 기본 monospace  (학수번호 표시 — 0000018001)
 | 콘텐츠 폭 | + padding 32×2 | 1280px 화면 좌우 여백 |
 |---|---|---|
 | **1024** | 1088 | **96px씩** — 적정 |
-| 1200 (Gravit) | 1264 | 8px씩 — 화면 끝에 붙음 |
+| 1200 | 1264 | 8px씩 — 화면 끝에 붙음 |
 
-Gravit 은 사이드바 240px 이 좌측을 차지해 1200 이 성립했다. USS 는 사이드바가 없어 그대로 쓰면 최소 해상도에서 여백이 붕괴한다. 이력 테이블 7컬럼 합계도 640px 이라 1024 로 충분하다.
+사이드바가 있는 레이아웃이라면 1200 도 성립하지만 USS 는 사이드바가 없어 그대로 쓰면 최소 해상도에서 여백이 붕괴한다. 이력 테이블 7컬럼 합계도 640px 이라 1024 로 충분하다.
 
 ---
 
@@ -156,7 +140,7 @@ Gravit 은 사이드바 240px 이 좌측을 차지해 1200 이 성립했다. USS
 
 > ⚠️ **shadcn 기본 radius(6px)를 따르지 않는다.** `globals.css` 의 `--radius` 를 재정의한다. `DS-00 §8`.
 
-### 4-2. 표면 (Elevation) — Gravit 대비 가장 큰 변경
+### 4-2. 표면 (Elevation)
 
 | 토큰명 | 값 | 용도 |
 |---|---|---|
@@ -165,7 +149,7 @@ Gravit 은 사이드바 240px 이 좌측을 차지해 1200 이 성립했다. USS
 
 - **카드에 `border` 를 쓰지 않는다.** `bg-surface`(흰색) + `shadow-card` + `bg-page`(연회색) 대비로 층을 만든다.
 - 그림자는 **거의 보이지 않을 정도**여야 한다. 진하면 토스가 아니라 머티리얼 톤이 된다.
-- Gravit 의 Info Card(`1px 보더 + 8px radius`)는 **폐기**한다.
+- Info Card(`1px 보더 + 8px radius`) 패턴은 **쓰지 않는다.**
 
 ### 4-3. 모션
 
@@ -178,7 +162,7 @@ Gravit 은 사이드바 240px 이 좌측을 차지해 1200 이 성립했다. USS
 
 ### 4-4. 제거된 토큰
 
-| Gravit 토큰 | 사유 |
+| 제거된 토큰 | 사유 |
 |---|---|
 | `border-active-menu` (3px) | 사이드바 메뉴 없음 |
 | `border-changed-input` (4px) | 인라인 편집(스테이징) 없음 |
@@ -199,7 +183,7 @@ Gravit 은 사이드바 240px 이 좌측을 차지해 1200 이 성립했다. USS
 | **Header** | 상단 56px. 좌 "USS 관리자"(→`/`) / 우 관리자 이름 + Ghost "로그아웃". 하단 1px `border` |
 | **Content Area** | max-width 1024px, 중앙 정렬, 좌우 32px padding |
 
-> Gravit 의 **Sidebar**·**Breadcrumb** 는 USS 에 **존재하지 않는다.**
+> **Sidebar**·**Breadcrumb** 는 USS 에 **존재하지 않는다.**
 
 ### 5-2. 페이지 패턴
 
@@ -208,7 +192,7 @@ Gravit 은 사이드바 240px 이 좌측을 차지해 1200 이 성립했다. USS
 | **Page Header** | 페이지 타이틀(`h1`) 단독. USS 는 설명 텍스트·우측 액션 버튼을 두지 않는다 |
 | **Card Stack** | 카드를 세로로 24px 간격 배치 (`SYNC_MAIN` 의 표시 학기 → 적재 데이터 → 이력) |
 
-> Gravit 의 **List Page**·**Detail Page**·**Form Page** 패턴은 USS 화면 구조와 대응하지 않는다.
+> **List Page**·**Detail Page**·**Form Page** 패턴은 USS 화면 구조와 대응하지 않는다.
 
 ### 5-3. 데이터 표시 컴포넌트
 
@@ -224,7 +208,7 @@ Gravit 은 사이드바 240px 이 좌측을 차지해 1200 이 성립했다. USS
 | **Tab Group** | 확장 영역의 신규/수정/폐강/경고 탭. 건수 0 이면 비활성 |
 | **Progress Text** | `{단계} {current}/{total}` 또는 `{단계} 중…`. 스피너 아이콘 동반 |
 
-> Gravit 의 **Filter Bar**·**Stat Card** 는 USS 에 사용처가 없다(검색·필터 UI 없음).
+> **Filter Bar**·**Stat Card** 는 USS 에 사용처가 없다(검색·필터 UI 없음).
 
 ### 5-4. 입력 컴포넌트
 
@@ -234,7 +218,7 @@ Gravit 은 사이드바 240px 이 좌측을 차지해 1200 이 성립했다. USS
 | **Select Dropdown** | shadcn/ui Select. M1·M2 의 연도·학기 선택. shadcn 기본 스타일을 따른다 |
 | **Strict Match Input** | M4 전용. `font-mono`, placeholder 없음, 정확 일치 시에만 실행 버튼 활성 |
 
-> Gravit 의 **Textarea**·**Radio Group**·**Checkbox**·**Search Input** 은 USS 에 사용처가 없다.
+> **Textarea**·**Radio Group**·**Checkbox**·**Search Input** 은 USS 에 사용처가 없다.
 
 ### 5-5. 액션 컴포넌트
 
@@ -259,7 +243,7 @@ Gravit 은 사이드바 240px 이 좌측을 차지해 1200 이 성립했다. USS
 | **Error State** | 경고 아이콘(48px) + 메시지 + [다시 시도] 버튼 |
 | **Loading Skeleton** | 회색 placeholder bar. 이력 테이블 5행 / 인라인 확장 3행 |
 
-> Gravit 의 **Banner (Success)** 는 USS 에 사용처가 없다(COMPLETED 상태 개념 없음).
+> **Banner (Success)** 는 USS 에 사용처가 없다(COMPLETED 상태 개념 없음).
 
 ### 5-7. 특수 컴포넌트
 
@@ -282,7 +266,7 @@ Gravit 은 사이드바 240px 이 좌측을 차지해 1200 이 성립했다. USS
 | **Loading** | 버튼, 액션 | spinner + 텍스트, disabled |
 | **Error** | 입력 필드 | `ring-2` danger + 하단 `caption` 에러 메시지 |
 
-> Gravit 의 **Read-only** 상태는 USS 에 사용처가 없다(편집 화면 없음).
+> **Read-only** 상태는 USS 에 사용처가 없다(편집 화면 없음).
 
 ### 6-1. 입력창 — Fill 방식 (Outline 아님)
 
@@ -330,29 +314,9 @@ Gravit 은 사이드바 240px 이 좌측을 차지해 1200 이 성립했다. USS
 | 정보 | `Info` |
 | 빈 상태 | `Inbox` |
 
-> Gravit 의 사이드바 메뉴 아이콘 매핑(`LayoutDashboard`·`Users` 등)은 **메뉴가 없으므로 폐기**한다.
+> 사이드바 메뉴 아이콘(`LayoutDashboard`·`Users` 등)은 **메뉴가 없으므로 쓰지 않는다.**
 
 ---
-
-## 8. Gravit 대비 변경 요약
-
-| 영역 | Gravit | **USS** | 근거 |
-|---|---|---|---|
-| Primary | `#7738EE` 보라 | **`#0064FF` 파랑** | 사용자 지정 |
-| 본문 텍스트 | `#171717` 무채색 | **`#202632` blue tint** | 사용자 지정 · `DS-00 §4` |
-| 페이지 배경 | `#FAFAFA` | `#F5F7FA` | blue tint 일관 |
-| 카드 표면 | 1px 보더 + radius 8 | **보더 없음 + shadow + radius 14** | `DS-00 §4-1` 원칙 2 |
-| 버튼 radius | 6 | **10** | `DS-00 §5-1` |
-| 모달 radius | (미정의) | **16** | 신규 |
-| 입력창 | Outline | **Fill** | `DS-00 §5-1` |
-| 타이포 | display 32 / h2 20 / body 14 / caption 12 | **metric 32 / h2 18 / body 15 / caption 13** | 위계 강화 + 본문 가독성 |
-| 콘텐츠 폭 | 1200 | **1024** | 사이드바 없음 (§3) |
-| 카드 간격 | 16 | **24** | `DS-00 §4-1` 원칙 3 |
-| info / accent | 정의 | **제거** | Primary 파랑과 충돌 (§1-3) |
-| 갱신 배지 | info(파랑) | **muted(회색)** | 동일 |
-| 교체 배지 | accent(보라) | **neutral-strong(명도)** | `DS-00 §4-1` 원칙 4 |
-| 모션 | (미정의) | **200ms** | 신규 |
-| 제거 토큰 | — | `sidebar-width`·`menu-gap`·`border-active-menu`·`border-changed-input`·`primary-bg-badge` | 대응 UI 없음 |
 
 ## 9. 미해결
 
@@ -364,6 +328,3 @@ Gravit 은 사이드바 240px 이 좌측을 차지해 1200 이 성립했다. USS
 
 ---
 
-**문서 작성일**: 2026-08-07
-**문서 버전**: v1.0
-**관련**: `DS-00_uss_overview.md`(방향) · `01 §4~§7`(화면 시각) · `.claude/rules/ui-conventions.md`(강제 규칙)

@@ -40,9 +40,14 @@
 - **Figma 는 spec 이 아니라 시각(레이아웃·구성) 참고 자료다.** 값은 DS-01 토큰을 거치고(raw 값 복사나 새 토큰 추가 금지), **동작·데이터·계약은 Figma 가 정하지 않는다**(01/03/04). → [[ui-conventions]]
 - Figma 에 어떤 요소가 없다면 그건 충돌이 아니라 빈칸이다 → 명세와 토큰으로 시각을 채운다(**멈추거나 묻지 않는다**). 단 **동작·데이터·계약의 빈칸은 채우지 말고 멈춘다**(🙋🏻).
 
-<!-- ## 4. spec 은 읽기 전용이다
+## 4. spec 은 기본이 읽기 전용이다 — 고치려면 사람이 창을 연다
 
-- `.claude/spec/` 의 어떤 파일도 수정·생성·덮어쓰기 하지 않는다. PreToolUse 훅이 막는다. → [[hooks]]
-- spec 에서 오류를 발견하면 고치지 말고 **`build-state.json.notes` 에 `human-step` 태그로 적은 뒤** 사용자에게 보고한다. -->
+- 평소 `.claude/spec/` 는 수정·생성·덮어쓰기 금지다. PreToolUse 훅이 막는다(`00_INDEX.md` 만 상시 예외).
+- **오류를 발견해도 스스로 고치지 않는다.** `build-state.json.notes` 에 `human-step` 태그로 적고 사용자에게 보고한다.
+- 구조를 손봐야 할 때만 **사람이 `build-state.json` 의 `spec_edit` 를 `true` 로 열고, 끝나면 닫는다.**
+  - 창이 열려도 고칠 수 있는 건 **구조**다(목차·메타·중복·문서끼리 어긋난 표기). **사실을 바꾸지 않는다.**
+  - ⚠️ **코드와 spec 이 다르면 코드를 고친다**(§2-4)는 규칙은 창이 열려 있어도 그대로다. 코드를 편하게 하려고 spec 을 고치는 건 이 규칙을 무력화하는 짓이다.
+- spec 을 고쳤으면 **`node .claude/hooks/checks/spec-map.mjs` 로 map 을 다시 만든다.** 안 하면 fast 게이트가 red 다.
+- 창이 닫힌 상태에서 spec 이 바뀌면 spec-map 의 해시가 걸러낸다 — 의도치 않은 변경을 알리는 장치다. → [[hooks]]
 
 관련: [[decisions]] · [[api-contract]] · [[architecture]] · [[ui-conventions]]

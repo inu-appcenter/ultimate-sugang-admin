@@ -13,6 +13,7 @@
  *
  * 절 표기 규약: `## 6. 제목` → `§6`, `### 6-4. 제목` → `§6-4`. 번호 없는 헤딩(목차 등)은 무시한다.
  */
+import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -31,11 +32,15 @@ const abbrev = (file) => {
 
 export function buildSpecMap(dir = specDir) {
   const map = {};
-  if (!existsSync(dir)) return map;
+  const files = {};
+  if (!existsSync(dir)) return { _files: files, sections: map };
   for (const file of readdirSync(dir).filter((f) => f.endsWith('.md')).sort()) {
     const doc = abbrev(file);
+    const raw = readFileSync(join(dir, file), 'utf8');
+    // 해시는 00_INDEX 를 포함해 전부 남긴다. 절 없이 내용만 바뀐 수정도 여기서 걸린다.
+    files[file] = createHash('sha256').update(raw).digest('hex').slice(0, 16);
     if (!doc) continue;
-    const lines = readFileSync(join(dir, file), 'utf8').split('\n');
+    const lines = raw.split('\n');
     const heads = [];
     lines.forEach((line, i) => {
       const h2 = /^##\s+(\d+)\.\s*(.*)$/.exec(line);
@@ -52,11 +57,12 @@ export function buildSpecMap(dir = specDir) {
       map[`${doc} ${h.key}`] = { file, lines: [h.line, end], title: h.title };
     });
   }
-  return map;
+  return { _files: files, sections: map };
 }
 
 const args = process.argv.slice(2);
-const map = buildSpecMap();
+const built = buildSpecMap();
+const map = built.sections;
 
 if (args[0] && args[0] !== '--check') {
   const key = args.join(' ').replace(/\s+/g, ' ').trim();
@@ -72,15 +78,22 @@ if (args[0] && args[0] !== '--check') {
   process.exit(0);
 }
 
-const rendered = JSON.stringify(map, null, 2) + '\n';
+const rendered = JSON.stringify(built, null, 2) + '\n';
 
 if (args[0] === '--check') {
   const current = existsSync(outPath) ? readFileSync(outPath, 'utf8') : '';
   if (current === rendered) { console.log('spec-map OK'); process.exit(0); }
-  console.error('spec-map FAIL — spec/ 이 바뀌었는데 resource/spec-map.json 이 낡았다.');
-  console.error('  고치는 법: node .claude/hooks/checks/spec-map.mjs');
+  let detail = '';
+  try {
+    const old = JSON.parse(current);
+    const changed = Object.keys(built._files).filter((f) => old._files?.[f] !== built._files[f]);
+    if (changed.length) detail = `\n  내용이 바뀐 문서: ${changed.join(' · ')}`;
+  } catch { /* 생성물이 없거나 깨졌다 */ }
+  console.error('spec-map FAIL — spec/ 이 바뀌었는데 resource/spec-map.json 이 낡았다.' + detail);
+  console.error('  spec 을 의도적으로 고쳤다면: node .claude/hooks/checks/spec-map.mjs');
+  console.error('  고친 적이 없다면 spec 이 의도치 않게 바뀐 것이다 — git diff .claude/spec/ 로 확인한다.');
   process.exit(1);
 }
 
 writeFileSync(outPath, rendered, 'utf8');
-console.log(`spec-map 생성 — 절 ${Object.keys(map).length}개 → .claude/resource/spec-map.json`);
+console.log(`spec-map 생성 — 절 ${Object.keys(map).length}개 · 문서 ${Object.keys(built._files).length}개 → .claude/resource/spec-map.json`);

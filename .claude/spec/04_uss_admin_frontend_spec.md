@@ -3,26 +3,6 @@
 > 프론트엔드를 **AI(Claude Code 등)가 단독으로 구현 가능한 수준**으로 통합 정리한 문서.
 > `01`(화면·동작)·`03`(API 계약)·`DS-00`(시각 방향)·`DS-01`(토큰)의 결정을 프론트 구현 관점에서 통합하고, 아키텍처·Step 절차·횡단 정책을 추가한다.
 
-**문서 버전**: v1.0 (2026-08-07)
-
----
-
-## 목차
-
-1. [개요](#1-개요)
-2. [문서 정합성 노트](#2-문서-정합성-노트)
-3. [기술 스택](#3-기술-스택)
-4. [디렉토리 구조·컨벤션](#4-디렉토리-구조컨벤션)
-5. [환경 변수](#5-환경-변수)
-6. [API 클라이언트 레이어](#6-api-클라이언트-레이어)
-7. [인증 흐름](#7-인증-흐름)
-8. [라우팅 구조](#8-라우팅-구조)
-9. [횡단 정책](#9-횡단-정책)
-10. [SYNC_MAIN 상세 동작](#10-sync_main-상세-동작)
-11. [MSW Mock 전략](#11-msw-mock-전략)
-12. [단계별 구현 가이드 (Step 1~7)](#12-단계별-구현-가이드-step-17)
-13. [백엔드 추가 요청 사항](#13-백엔드-추가-요청-사항)
-
 ---
 
 ## 1. 개요
@@ -68,13 +48,13 @@ DS-01_uss_design_system.md       토큰·컴포넌트
 
 작성 시점에 식별된 문서 간 관계를 다음과 같이 처리한다.
 
-### 2-1. 승계하지 않는 Gravit 문서
+### 2-1. 판단 근거로 쓰지 않는 문서
 
 | 문서 | 처리 |
 |---|---|
 | `DS-00_overview.md` | **폐기** — `DS-00_uss_overview.md` 가 대체 |
 | `DS-01_design_system.md` | **폐기** — `DS-01_uss_design_system.md` 로 병합 완료 |
-| `DS-02_screens.md` | **USS 화면을 여기서 판단하지 않는다.** Gravit 16화면 문서다. 공통 패턴만 참고한다 |
+| `DS-02_screens.md` | **USS 화면을 여기서 판단하지 않는다.** 다른 제품의 16화면 문서다. 테이블·폼·모달 구성만 참고한다 |
 | `DS-03_interactions.md` | 유지. 단 §5(스테이징)·사이드바 항목은 USS 무관 |
 
 ### 2-2. 어조 혼재 (의도적)
@@ -250,7 +230,7 @@ export const env = parsed.data;
 | Content-Type | `application/json` |
 | 타임아웃 | 30,000ms |
 
-> ⚠️ **Gravit 처럼 `authApiClient` 를 분리하지 않는다.** `/auth/refresh` 도 같은 base 를 쓰고 헤더만 다르다.
+> ⚠️ **`authApiClient` 를 분리하지 않는다.** `/auth/refresh` 도 같은 base 를 쓰고 헤더만 다르다.
 
 ```typescript
 // shared/api/client.ts
@@ -297,7 +277,7 @@ export const tokenManager = {
 };
 ```
 
-> ⚠️ **access 토큰을 localStorage 에 둔다.** Gravit 은 access 를 메모리에 두고 refresh 를 localStorage 에 뒀지만, USS 는 refresh 가 없어 메모리에 두면 새로고침마다 로그아웃된다.
+> ⚠️ **access 토큰을 localStorage 에 둔다.** refresh 토큰이 없어서 메모리에 두면 새로고침마다 로그아웃된다.
 > XSS 노출 위험은 있으나 ① 내부 담당자 수 명 ② 학내망 도구 ③ 토큰 유효기간 2시간이라는 조건에서의 절충이다. 향후 httpOnly 쿠키 전환은 백엔드와 함께 재설계한다.
 
 ### 6-4. Response 인터셉터 — 401 재발급 큐(동시에 1건만)
@@ -810,14 +790,14 @@ const { data: job } = useQuery({
 function progressText(p: SyncProgress): string {
   const label = phaseLabels[p.phase];               // 강의 수집 / 시간표 수집 / 적재
   if (p.total === null) return `${label} 중…`;      // 첫 페이지 수신 전
-  const unit = p.phase === 'PERSIST' ? '건' : '페이지';
+  const unit = p.phase === 'PERSIST' ? '건' : ' 페이지';
   return `${label} ${formatNumber(p.current)}/${formatNumber(p.total)}${unit}`;
 }
 ```
 
 | phase | 단위 | 예 |
 |---|---|---|
-| `COURSE_FETCH` · `TIMETABLE_FETCH` | 페이지 | `강의 수집 3/12페이지` |
+| `COURSE_FETCH` · `TIMETABLE_FETCH` | 페이지 | `강의 수집 3/12 페이지` |
 | `PERSIST` | **건** | `적재 450/1,203건` |
 
 > ⚠️ **폴링 갱신에 트랜지션을 걸지 않는다**(`DS-01 §4-3`). 2초마다 화면이 움직이면 산만하다.
@@ -1073,6 +1053,4 @@ t=22s  SUCCESS  (카운트·details 채움)
 
 ---
 
-**문서 작성일**: 2026-08-07
-**문서 버전**: v1.0
 **관련 문서**: `01` v1.2 · `03` v1.1 · `DS-00_uss_overview` · `DS-01_uss_design_system`
