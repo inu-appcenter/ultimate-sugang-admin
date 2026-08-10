@@ -27,7 +27,10 @@ description: USS 백오피스 빌드의 전체 흐름을 소유한다. "빌드 �
 6. **리뷰 게이트 (화면 항목 `step-3` ~ `step-6` — 미실행 방지, `checks/validate-state.mjs` 가 강제).** 게이트 green·커밋 후 **`spec-conformance-reviewer` + `ds-conformance-reviewer` 를 호출**하고 결과를 `harness/review/<항목ID>.json` 에 기록한다:
    `{ "id", "spec": "PASS"|"FAIL", "ds": "PASS"|"FAIL", "diffs": [], "commit", "ts" }`.
    - **`spec`·`ds` 모두 `PASS` 인 증거가 있을 때만** 항목을 `COMPLETED` 로 전환한다(7).
-   - 하나라도 `FAIL`/DIFF → 수정 → 재게이트(`--full`) → 재리뷰. **자가수정 한도 3회**(`retry`). 초과 시 `manual_review` 기록 후 멈춰 보고.
+   - 하나라도 `FAIL`/DIFF → 수정 → 재게이트(`--full`) → 재리뷰. **자가수정 한도 3회**(`retry` — `stop-gate` 가 자동으로 센다).
+   - **재리뷰는 범위를 좁혀 부른다**: 1라운드 지적 항목 + 그 수정이 닿은 파일만. 전체 재검토를 반복하면 새 라운드가 새 지적을 부른다.
+   - **리뷰어 1종당 라운드 상한 2.** 3라운드째로 가려면 남은 지적을 그 항목 review json 의 `deferred`(다음 단계로) 또는 `open_questions`(사용자 결정 대기)로 **넘긴 기록을 먼저 쓴다.** 안 쓰면 validate-state 가 FAIL 한다.
+   - `deferred` 에 쓴 항목은 **같은 턴에** `build-state.json.deferred` 로 옮긴다. 리뷰 파일에만 두면 아무도 안 읽는다.
    - validate-state 가 COMPLETED 인 `/^step-[3-6](-\d+)?:/` 항목에 **통과 리뷰 JSON** 을 요구한다 — **Step 5 하위단계 4개도 각각 필요**. 없거나 미통과면 fast 게이트가 FAIL(Stop 차단)된다.
 7. 항목 `COMPLETED`(또는 사유와 함께 `SKIPPED`/`manual-review`) 로 갱신, `log` 추가.
 
@@ -39,7 +42,9 @@ description: USS 백오피스 빌드의 전체 흐름을 소유한다. "빌드 �
 
 ## 4. 상태 파일 갱신 규칙
 - 한 번에 `IN_PROGRESS` 1개. 끝나면 즉시 다음으로 넘기지 말고 정지 규칙(§2) 확인.
-- `retry` 는 **항목 ID 로 키잉된 객체**, `manual_review` 는 배열. `log` 와 함께 사실대로 기록한다. 게이트 red 를 green 으로 보고하지 않는다. → [[antipatterns]]
+- `retry`·`probes` 는 **항목 ID 로 키잉된 객체**, `manual_review`·`deferred` 는 배열. `log` 와 함께 사실대로 기록한다. 게이트 red 를 green 으로 보고하지 않는다. → [[antipatterns]]
+- **`retry` 는 손대지 않는다** — `stop-gate` 훅이 red 마다 자동으로 올린다.
+- **원인을 못 밝힌 채 3회 시도했으면 멈춘다**: `probes[항목ID]` 를 올리고 `notes` 에 `unresolved` 태그로 *미규명 사실 + 배제한 가설 + 좁혀진 조건*을 적은 뒤 넘어간다. → [[verification]] §5
 
 ## 5. Gravit 에서 넘어오기 쉬운 것
 이 하네스는 Gravit 백오피스에서 가져왔다. **`Authorization: Bearer`·refresh 토큰 저장·`/auth/logout`·`/admin/me`·문자열 에러코드·페이지 크기 20·UTC 변환·16화면·STAGING/promote 는 전부 오답이다.**

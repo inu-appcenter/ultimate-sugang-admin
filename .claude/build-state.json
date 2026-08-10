@@ -18,7 +18,9 @@
     "mock": "msw"
   },
   "retry": {},
+  "probes": {},
   "manual_review": [],
+  "deferred": [],
   "checklist": [
     { "id": "step-1:setup",            "status": "COMPLETED", "note": "Vite+TS+Tailwind+shadcn, DS-01 토큰 배선, alias, env(Zod), 빈 라우터 2개" },
     { "id": "step-2:infra",            "status": "COMPLETED", "note": "apiClient(1개)·tokenManager·refreshQueue·errorHandler·constants·lib·MSW 셋업" },

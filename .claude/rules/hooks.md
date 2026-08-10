@@ -64,6 +64,11 @@ paths:
 
 ## 경로 약속 (바꾸면 같이 고칠 것)
 - 상태 파일은 **`.claude/build-state.json`** 하나다. 스크립트는 자기 위치 기준 상대경로로 찾는다(`stop-gate.mjs`·`session-start.mjs` → `../build-state.json`, `validate-state.mjs` → `../../build-state.json`).
-- `build-state.json` 의 **`retry` 는 항목 ID 를 키로 쓰는 객체**(`{"step-3:ADMIN_LOGIN": 2}`)이고 `manual_review` 는 배열이다. 숫자나 문자열로 바꾸면 3회 한도가 동작하지 않는다.
+- `build-state.json` 의 **`retry`·`probes` 는 항목 ID 를 키로 쓰는 객체**(`{"step-3:ADMIN_LOGIN": 2}`)이고 `manual_review`·`deferred` 는 배열이다. 숫자나 문자열로 바꾸면 3회 한도가 동작하지 않는다.
+  - **`retry` 는 `stop-gate.mjs` 가 자동으로 올린다.** 손으로 건드리지 않는다. 정규식으로 그 객체만 갈아끼우므로 **`"retry"` 를 여러 줄로 펼쳐 쓰면 안 된다**(한 줄 유지).
+  - ⚠️ 항목 ID 에 콜론이 들어 있다(`step-5-4:polling`). 카운터를 렌더링할 때 콜론·콤마에 공백을 넣으면 **키가 망가져 매번 새 키가 생기고 한도에 영영 못 닿는다.** 실제로 한 번 겪었다.
+  - **`probes` 는 원인 탐색 횟수**다. 3회를 넘기면 `notes` 에 `unresolved` 로 적고 넘어간다 → [[verification]] §5.
+  - **`deferred` 는 다음 단계로 넘긴 지적**이다. `{ from, target_item, text, needs: "user"|"none", status? }`. `target_item` 이 COMPLETED 인데 `status` 가 `resolved`/`dropped` 가 아니면 validate-state 가 FAIL 한다.
+- **리뷰 라운드 수(`rounds`)의 출처는 `harness/review/<id>.json` 하나다.** build-state 에 복제하지 않는다(두 곳에 두면 어긋난다). 리뷰어 1종당 **2라운드**를 넘기려면 같은 파일의 `deferred` 또는 `open_questions` 에 남은 지적을 넘긴 기록이 있어야 한다 — 없으면 validate-state 가 FAIL.
 - `stop-gate.mjs` 는 같은 디렉토리의 `checks/gate-runner.sh` 를 부른다.
 - 스모크 테스트는 `.claude/resource/smoke/` 에 둔다(`checks/smoke.sh` 가 실행한다). **Step 7 전까지는 비어 있는 게 정상이고**, Playwright 가 없으면 건너뛴다.
