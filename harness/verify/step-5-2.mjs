@@ -1,9 +1,7 @@
 /** step-5-2:M2_preflight — 학기 선택 모달 + 전략 판정. 계약·3전략·D4·초기값 폴백. */
-import { readdirSync, readFileSync, statSync } from 'node:fs';
-import { join } from 'node:path';
-
 import { delay, http, HttpResponse } from 'msw';
 
+import { D4_PRODUCES } from '../../.claude/hooks/checks/d4-strategy.mjs';
 import { createChecker, createRuntime, installDom } from './env.mjs';
 
 installDom();
@@ -73,39 +71,11 @@ section('preflight 는 DB 를 바꾸지 않는다 (03 §6-1)');
   eq('summary 그대로', await fetchCoursesSummary(), before);
 }
 
-section('D4 — 클라이언트가 전략 값을 만들어내지 않는다');
+section('D4 가드가 진짜 잡는지 (03 §6-1 · decisions D4 · rules/verification.md §2)');
 {
-  // 서버가 준 strategy 를 읽고 모달을 고르는 건 03 §6-1 "클라이언트 분기" 가 시키는 일이다.
-  // 막아야 하는 건 클라이언트가 전략 값을 스스로 **생산**하는 것 — 대입·반환·삼항 결과.
-  const STRATEGY = "(?:INITIAL|UPSERT|REPLACE)";
-  const produces = [
-    new RegExp(`(?<![=!<>])=\\s*['"]${STRATEGY}['"]`),
-    new RegExp(`return\\s+['"]${STRATEGY}['"]`),
-    new RegExp(`\\?\\s*['"]${STRATEGY}['"]`),
-    new RegExp(`:\\s*['"]${STRATEGY}['"]`),
-    new RegExp(`\\(\\s*['"]${STRATEGY}['"]`),
-    /expectedStrategy:\s*['"]/,
-  ];
-  const offenders = [];
-
-  const walk = (dir) => {
-    for (const name of readdirSync(dir)) {
-      const path = join(dir, name);
-      if (statSync(path).isDirectory()) {
-        walk(path);
-        continue;
-      }
-      if (!/\.tsx?$/.test(name)) continue;
-      const source = readFileSync(path, 'utf8');
-      if (produces.some((rule) => rule.test(source))) offenders.push(path.replace(process.cwd(), ''));
-    }
-  };
-  walk(join(process.cwd(), 'src/features'));
-  walk(join(process.cwd(), 'src/pages'));
-  walk(join(process.cwd(), 'src/shared'));
-
-  eq('전략 값을 만들어내는 파일', offenders, []);
-  // 가드가 살아 있는지 확인 — 위 규칙이 실제 위반을 잡아야 한다.
+  // 실제 소스 검사는 uss-contract-lint 의 `d4-strategy` 규칙이 fast 게이트에서 한다.
+  // 여기서는 그 규칙이 잡아야 할 것과 통과시켜야 할 것을 고정한다 — 규칙이 헛돌면 여기서 red 가 난다.
+  const produces = D4_PRODUCES;
   check(
     '가드가 대입을 잡는다',
     produces.some((rule) => rule.test("const strategy = 'REPLACE';")),

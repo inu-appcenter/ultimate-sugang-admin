@@ -40,9 +40,9 @@
 - **Figma 는 spec 이 아니라 시각(레이아웃·구성) 참고 자료다.** 값은 DS-01 토큰을 거치고(raw 값 복사나 새 토큰 추가 금지), **동작·데이터·계약은 Figma 가 정하지 않는다**(01/03/04). → [[ui-conventions]]
 - Figma 에 어떤 요소가 없다면 그건 충돌이 아니라 빈칸이다 → 명세와 토큰으로 시각을 채운다(**멈추거나 묻지 않는다**). 단 **동작·데이터·계약의 빈칸은 채우지 말고 멈춘다**(🙋🏻).
 
-## 4. spec 은 읽기 전용이다
+<!-- ## 4. spec 은 읽기 전용이다
 
 - `.claude/spec/` 의 어떤 파일도 수정·생성·덮어쓰기 하지 않는다. PreToolUse 훅이 막는다. → [[hooks]]
-- spec 에서 오류를 발견하면 고치지 말고 **`build-state.json.notes` 에 `human-step` 태그로 적은 뒤** 사용자에게 보고한다.
+- spec 에서 오류를 발견하면 고치지 말고 **`build-state.json.notes` 에 `human-step` 태그로 적은 뒤** 사용자에게 보고한다. -->
 
 관련: [[decisions]] · [[api-contract]] · [[architecture]] · [[ui-conventions]]

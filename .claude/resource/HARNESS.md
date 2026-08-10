@@ -21,8 +21,9 @@
 - 매 Step 종료 시(**Step 5 는 4 하위단계 각각마다**) 리뷰 패킷 제출 후 정지 → 사용자 승인 후 다음.
 
 ## 게이트 강도 (상세는 rules/hooks.md)
-- **fast**(Stop 훅·매 턴): validate-state · typecheck · token-lint.
-- **`--full`**(커밋/리뷰패킷 전): + vite build. **`--with-smoke`**(QA): + Playwright.
+- **fast**(Stop 훅·매 턴): validate-state · typecheck · token-lint · uss-contract-lint.
+- **`--full`**(커밋/리뷰패킷 전): + `npm run verify`(동작 검증) + vite build. **`--with-smoke`**(QA): + Playwright.
+- 검사를 추가·수정할 때의 규율(red 증명·근거 절·탐색 상한)은 `rules/verification.md`.
 - lint 는 PostToolUse 에서 자동수정(소프트, 비차단).
 - 자가수정 3회 초과 → `manual_review` + 정지(사람 검수). 데드락 없음.
 - 안전 차단(PreToolUse): rm -rf · 원격푸시 · 배포/publish · `.claude/spec/` 쓰기 · `.env` 비밀값. 비가역(**실제 REPLACE Job 실행**·배포·비밀값)은 코드 구조만, 실행은 사람.

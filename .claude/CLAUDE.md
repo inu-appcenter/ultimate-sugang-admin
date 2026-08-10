@@ -37,6 +37,7 @@ resource/ phases/(단계별 절차) · smoke/(Playwright) · HARNESS.md
 | `rules/ui-conventions.md` | `src/**/*.tsx` · `*.css` · `tailwind.config.ts` |
 | `rules/architecture.md` · `rules/good-patterns.md` | `src/**/*.{ts,tsx}` |
 | `rules/api-contract.md` | `features/**/{api,schemas}.ts` · `shared/api/**` · `mocks/**` |
+| `rules/verification.md` | `harness/verify/**` · `.claude/hooks/checks/**` |
 | `rules/hooks.md` | `.claude/**` 의 스크립트·설정 |
 
 **그래서 다음 두 경우에는 직접 Read 해야 한다:**
@@ -78,10 +79,14 @@ resource/ phases/(단계별 절차) · smoke/(Playwright) · HARNESS.md
 ## 4. 자동 검사 (통과 전에 "완료"라고 하지 않는다)
 - 검사 묶음: `.claude/hooks/checks/gate-runner.sh` → `OK` 또는 `FAIL\n{사유}` 를 출력한다.
   - 인자 없음 = **fast**(validate-state·typecheck·token-lint·uss-contract-lint) — Stop 훅이 매 턴 자동 실행
-  - `--full` = fast + `vite build` — 커밋·리뷰 패킷 직전
+  - `--full` = fast + **`npm run verify`**(동작 검증, 약 100초) + `vite build` — 커밋·리뷰 패킷 직전
   - `--with-smoke` = full + Playwright — QA(Step 7)
-- 훅과 검사의 **상세는 `.claude/rules/hooks.md` 하나만 본다.**
-- 스스로 고쳐보는 횟수는 **3회까지**(`build-state.json.retry`). 넘으면 `manual_review` 에 적고 멈춰서 보고한다.
+- 훅과 검사가 **무엇을 잡는지**는 `.claude/rules/hooks.md` 하나만 본다.
+- 검사를 **추가·수정할 때의 규율**은 `.claude/rules/verification.md` 하나만 본다. 핵심 셋:
+  - **회귀 검사를 넣으면 깨뜨려서 red 를 확인한다.** 확인 못 했으면 "고정했다"고 쓰지 않는다
+  - 각 `section()` 에 **근거 절**(`01 §x`·`03 §y`·`사용자 결정 YYYY-MM-DD`)을 단다. 못 달면 만들지 않는다
+  - 소스를 훑는 규칙은 `uss-contract-lint`, 렌더·클릭으로 드러나는 건 `harness/verify` — 자리를 바꾸지 않는다
+- 스스로 고쳐보는 횟수는 **3회까지**(`build-state.json.retry`). 원인 탐색도 **3회까지**(`probes`). 넘으면 기록하고 멈춘다.
 
 ## 5. 사람이 승인하는 지점
 - Step 이 끝날 때마다(**Step 5 는 하위단계 4개 각각마다**) 리뷰 패킷을 내고 **멈춘다.** 승인을 받은 뒤 다음으로 간다.

@@ -17,6 +17,8 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { D4_PRODUCES, D4_SCOPE } from './d4-strategy.mjs';
+
 const here = dirname(fileURLToPath(import.meta.url));
 const root = process.cwd();
 const srcDir = join(root, 'src');
@@ -139,6 +141,14 @@ for (const file of walk(srcDir)) {
         const normalized = m[1].replace(/\$\{[^}]*\}/g, '{id}').replace(/\/+$/, '');
         if (ALLOWED_PATHS.has(normalized)) continue;
         add(file, n, 'endpoint', `명세에 없는 엔드포인트 \`${m[1]}\` — 9개 외 호출 금지`);
+      }
+    }
+
+    // 전략 값 생산 금지(D4). mocks/ 는 서버 역할이라 대상에서 뺀다.
+    const relPosix = rel.replace(/\\/g, '/');
+    if (D4_SCOPE.some((p) => relPosix.startsWith(p)) && !isAllowed(rel, 'd4-strategy')) {
+      if (D4_PRODUCES.some((re) => re.test(line))) {
+        add(file, n, 'd4-strategy', '적재 전략은 서버가 판정한다(D4). 클라이언트가 전략 값을 만들지 않는다 — preflight 응답을 그대로 되돌려 보낸다');
       }
     }
 

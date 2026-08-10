@@ -12,9 +12,9 @@ import { AdminMenu } from '@/features/auth/components/AdminMenu';
 import { useUpdateDisplaySemester } from '@/features/semester/queries';
 import type { DisplaySemester } from '@/features/semester/schemas';
 import { AdminLoginPage } from '@/pages/AdminLoginPage';
+import { SyncMainPage } from '@/pages/SyncMainPage';
 import { LoginLayout } from '@/shared/components/layout/LoginLayout';
 import { MainLayout } from '@/shared/components/layout/MainLayout';
-import { SyncMainPage } from '@/pages/SyncMainPage';
 
 /**
  * 데이터를 부르는 화면용. 첫 페인트(Loading)와 쿼리가 끝난 뒤(Data/Empty/Error)를 같이 돌려준다.

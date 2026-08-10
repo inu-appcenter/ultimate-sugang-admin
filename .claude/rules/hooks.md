@@ -12,12 +12,14 @@ paths:
 
 ## rules/ 로딩 방식 (컨텍스트 비용과 직결)
 - `paths:` frontmatter가 **없는** 규칙은 매 세션 전량 로드된다: `decisions` · `antipatterns` · `source-of-truth`.
-- `paths:` 가 **있는** 규칙은 매칭 파일을 읽거나 쓸 때만 붙는다: `ui-conventions` · `architecture` · `good-patterns` · `api-contract` · `hooks`(이 파일).
+- `paths:` 가 **있는** 규칙은 매칭 파일을 읽거나 쓸 때만 붙는다: `ui-conventions` · `architecture` · `good-patterns` · `api-contract` · `verification` · `hooks`(이 파일).
 - ⚠️ 조건부 규칙은 **`/compact` 이후 자동으로 돌아오지 않는다.** 압축 뒤에는 필요한 규칙을 직접 Read 한다. → `CLAUDE.md §0-1`
 
 ## hooks/ 구조
 - `hooks/` — settings.json 이 직접 부르는 **진입점**: `session-start.mjs` · `pretool-guard.mjs` · `posttool-lint.mjs` · `stop-gate.mjs`
 - `hooks/checks/` — 진입점이 부르는 **검사**: `gate-runner.sh`(묶음) · `validate-state.mjs` · `spec-presence.mjs` · `typecheck.sh` · `token-lint.mjs` · `uss-contract-lint.mjs` · `build.sh` · `smoke.sh` · `lint.sh` · `doc-lint.mjs`
+- `harness/verify/` — **동작 검증**(jsdom). `--full` 에서 돈다. 검사를 추가·수정하는 규칙은 [[verification]] 하나만 본다.
+- `hooks/checks/d4-strategy.mjs` — D4 정규식. `uss-contract-lint`(검사)와 `harness/verify/step-5-2.mjs`(그 규칙이 진짜 잡는지 증명)가 **같은 파일을 공유**한다. 규칙을 고치면 양쪽에 동시 반영된다.
 
 ## 연결된 훅 (settings.json)
 | 이벤트 | 대상 | 스크립트 | 하는 일 |
@@ -30,9 +32,10 @@ paths:
 ## 검사 묶음 (`hooks/checks/gate-runner.sh`)
 `OK` 또는 `FAIL\n{사유}` 를 출력한다.
 - **fast**(인자 없음) = `validate-state` + `typecheck` + `token-lint` + `uss-contract-lint`. **Stop 훅이 매 턴 돌린다.**
-- **`--full`** = fast + `build`(vite). **커밋과 리뷰 패킷 직전**에 오케스트레이터가 돌린다. 무거운 풀빌드는 여기서만 한다.
+- **`--full`** = fast + **`verify`**(`npm run verify` — jsdom 동작 검증, 약 100초) + `build`(vite). **커밋과 리뷰 패킷 직전**에 오케스트레이터가 돌린다.
 - **`--with-smoke`** = full + Playwright 스모크. **QA(Step 7)**.
 - 매 턴 풀빌드를 돌리지 않는 이유가 이 구분이다. Stop 은 가볍게, 의미 있는 지점에서만 무겁게.
+- 작업 중 특정 Step 만 보려면 `npm run verify -- step-5`. **커밋 전에는 반드시 `--full` 로 전량**을 돌린다 — 한 Step 수정이 다른 Step 검사를 깨뜨리는 게 이 프로젝트에서 실제로 일어난다.
 
 > `spec-presence` 와 `doc-lint` 는 묶음에 **없다.** 설치 실수와 문서 표기는 빌드를 막을 일이 아니라 알려주면 되는 일이다.
 > 수동 실행: `node .claude/hooks/checks/spec-presence.mjs` · `node .claude/hooks/checks/doc-lint.mjs`
@@ -49,6 +52,8 @@ paths:
 - **token-lint** — `src/` 의 raw hex 와 arbitrary 값을 찾는다. 토큰 정의 파일은 `token-lint.allow.txt` 로, shadcn 생성물은 `src/components/ui` 경로로 뺀다. → [[ui-conventions]]
 - **uss-contract-lint** — 판단이 필요 없는 계약 위반을 잡는다: Gravit 습관(인증 헤더·refresh 토큰·UTC 변환·페이지 20), 9개 밖의 엔드포인트, `any`, `?? 0`, 금지된 Job 상태, 지운 토큰, 다크·반응형, 상대경로 import, features 간 직접 import, 금지 라이브러리. 예외는 `uss-contract-lint.allow.txt` 에 `경로조각::규칙ID` 로 적는다. → [[antipatterns]]
   - ⚠️ 엔드포인트 9개 목록이 이 스크립트 안에도 있다. [[api-contract]] 의 목록을 바꾸면 스크립트도 같이 바꾼다.
+  - `d4-strategy` — 클라이언트가 적재 전략 값을 생산하는 것을 막는다(D4). 대상은 `src/features`·`src/pages`·`src/shared` 이고 `src/mocks` 는 서버 역할이라 제외한다.
+- **verify**(`npm run verify`) — 렌더·클릭·폴링으로만 드러나는 동작을 본다. **검사를 추가·수정할 때의 규율은 [[verification]] 이 정한다**(red 증명 의무·근거 절 의무·탐색 상한).
 - **validate-state** — `IN_PROGRESS` 가 1개 이하인지, checklist `id` 가 겹치지 않는지, `status` 가 {TODO, IN_PROGRESS, COMPLETED, SKIPPED, manual-review} 안에 있는지 본다.
   - **리뷰를 건너뛰지 못하게 막는다**: `COMPLETED` 인 화면 항목은 `harness/review/<id>.json` 이 있고 `spec` 과 `ds` 가 모두 `PASS` 여야 한다. 대상은 **`/^step-[3-6](-\d+)?:/`** — Step 5 하위단계(`step-5-1:M1_semester` 등)까지 포함한다.
 - **spec-presence** — `spec/` 에 USS 문서 6개가 **참조와 같은 이름으로** 있는지, **Gravit 문서가 남아 있지 않은지** 본다.
