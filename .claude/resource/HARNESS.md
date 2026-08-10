@@ -1,16 +1,15 @@
 # USS 백오피스 빌드 하네스 — 설치/사용
 
 > 이 하네스를 다른 repo 나 계정에서 돌릴 때 보는 설치·사용 안내다. **훅과 검사에 관한 사실은 `.claude/rules/hooks.md` 에만 적는다** — 여기서 다시 쓰지 않는다.
-> 원본은 Gravit 백오피스 하네스이며, USS(ultimate-sugang) 기준으로 승계·수정했다.
 
 ## 설치
 1. 이 `.claude/` 트리를 빌드용 빈 repo 루트에 복사(하네스 전체가 `.claude/` 아래에 통합).
 2. `.claude/spec/` 에 SoT 문서를 **아래 정확한 파일명 그대로** 투입(읽기전용). 에이전트가 이 이름으로 Read 하므로 **이름이 다르면 경로가 깨진다.**
    - `01_uss_admin_wireframe_spec.md` · `03_uss_admin_api_spec.md` · `04_uss_admin_frontend_spec.md`
-   - `DS-00_uss_overview.md` · `DS-01_uss_design_system.md` · `DS-03_interactions.md`(Gravit 승계 — §5 스테이징·사이드바 무시)
+   - `DS-00_uss_overview.md` · `DS-01_uss_design_system.md` · `DS-03_interactions.md`(승계 문서 — 절별 적용 범위는 `00_INDEX`)
    - `00_INDEX.md` 는 하네스 트리에 동봉(인덱스·약어 매핑). **02 번호는 백엔드 몫이라 부재(누락 아님).**
    - ⚠️ **원본이 버전 접미사를 달고 있으면(예: `03_uss_admin_api_spec_v1_1.md`) 반드시 접미사 없는 이름으로 리네임**해서 넣는다.
-   - ⚠️ **Gravit 문서는 반드시 삭제한다** — `01/03/04_gravit_*.md` · `DS-00_overview.md` · `DS-01_design_system.md` · `DS-02_screens.md`. 남아 있으면 `spec-presence` 가 **FAIL** 한다. `DS-04_prompt_templates.md` 는 경고(삭제 권장).
+   - ⚠️ **위 7개 밖의 `.md` 를 `spec/` 에 두지 않는다.** 허용 목록 방식이라 남아 있으면 `spec-presence` 가 **FAIL** 한다.
    - 점검: `node .claude/hooks/checks/spec-presence.mjs` → `OK` 또는 `FAIL\n{사유}`. SessionStart 훅도 세션 시작 시 비차단 경고로 알린다.
 3. Node 18+ 설치 확인(게이트/훅이 node 사용).
 4. Claude Code 에서 repo 를 열면 `.claude/CLAUDE.md`·`.claude/rules/` 자동 로드, `.claude/settings.json` 훅 활성, `.claude/skills`·`.claude/agents` 인식. **SessionStart 훅이 재개 항목을 띄운다.**

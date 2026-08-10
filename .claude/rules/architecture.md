@@ -34,11 +34,11 @@ features/auth/       로그인·토큰·관리자 이름
 features/semester/   표시 학기 조회·변경 (M1)
 features/sync/       적재 현황·preflight·Job 생성·이력·상세·진행률 폴링
 ```
-> Gravit 의 `users`·`reports`·`chapters`·`staging`·`notices`·`inquiries` 는 **USS 에 없다.** 만들지 않는다.
+> `users`·`reports`·`chapters`·`staging`·`notices`·`inquiries` 같은 도메인은 **USS 에 없다.** 만들지 않는다.
 
 ## 공통 인프라 위치 (04 §4, §6)
 - `shared/api/`
-  - `client.ts` — **axios 인스턴스 1개**(`apiClient`). ⚠️ Gravit 처럼 `authApiClient` 를 따로 두지 않는다. `/auth/refresh` 도 base(`/api/v1/admin`)가 같고 헤더만 다르다.
+  - `client.ts` — **axios 인스턴스 1개**(`apiClient`). ⚠️ `authApiClient` 를 따로 두지 않는다. `/auth/refresh` 도 base(`/api/v1/admin`)가 같고 헤더만 다르다.
   - `tokenManager.ts` — **access 토큰과 `name` 만** 보관한다. refresh 토큰 저장소가 없다.
   - `refreshQueue.ts` — 401 이 나면 재발급을 **동시에 1건만** 보낸다(만료된 토큰을 `access-token` 헤더에 실어 `/auth/refresh` 1회).
   - `errorHandler.ts` — `{ code: number, message }` 를 토스트 문구로 옮긴다.

@@ -52,16 +52,16 @@ paths:
 
 ## 검사별로 무엇을 보나
 - **token-lint** — `src/` 의 raw hex 와 arbitrary 값을 찾는다. 토큰 정의 파일은 `token-lint.allow.txt` 로, shadcn 생성물은 `src/components/ui` 경로로 뺀다. → [[ui-conventions]]
-- **uss-contract-lint** — 판단이 필요 없는 계약 위반을 잡는다: Gravit 습관(인증 헤더·refresh 토큰·UTC 변환·페이지 20), 9개 밖의 엔드포인트, `any`, `?? 0`, 금지된 Job 상태, 지운 토큰, 다크·반응형, 상대경로 import, features 간 직접 import, 금지 라이브러리. 예외는 `uss-contract-lint.allow.txt` 에 `경로조각::규칙ID` 로 적는다. → [[antipatterns]]
+- **uss-contract-lint** — 판단이 필요 없는 계약 위반을 잡는다: 흔한 오답(인증 헤더·refresh 토큰·UTC 변환·페이지 20), 9개 밖의 엔드포인트, `any`, `?? 0`, 금지된 Job 상태, 지운 토큰, 다크·반응형, 상대경로 import, features 간 직접 import, 금지 라이브러리. 예외는 `uss-contract-lint.allow.txt` 에 `경로조각::규칙ID` 로 적는다. → [[antipatterns]]
   - ⚠️ 엔드포인트 9개 목록이 이 스크립트 안에도 있다. [[api-contract]] 의 목록을 바꾸면 스크립트도 같이 바꾼다.
   - `d4-strategy` — 클라이언트가 적재 전략 값을 생산하는 것을 막는다(D4). 대상은 `src/features`·`src/pages`·`src/shared` 이고 `src/mocks` 는 서버 역할이라 제외한다.
 - **verify**(`npm run verify`) — 렌더·클릭·폴링으로만 드러나는 동작을 본다. **검사를 추가·수정할 때의 규율은 [[verification]] 이 정한다**(red 증명 의무·근거 절 의무·탐색 상한).
 - **validate-state** — `IN_PROGRESS` 가 1개 이하인지, checklist `id` 가 겹치지 않는지, `status` 가 {TODO, IN_PROGRESS, COMPLETED, SKIPPED, manual-review} 안에 있는지 본다.
   - **리뷰를 건너뛰지 못하게 막는다**: `COMPLETED` 인 화면 항목은 `harness/review/<id>.json` 이 있고 `spec` 과 `ds` 가 모두 `PASS` 여야 한다. 대상은 **`/^step-[3-6](-\d+)?:/`** — Step 5 하위단계(`step-5-1:M1_semester` 등)까지 포함한다.
-- **spec-presence** — `spec/` 에 USS 문서 6개가 **참조와 같은 이름으로** 있는지, **Gravit 문서가 남아 있지 않은지** 본다.
-  - 두 가지로 쓰인다: `checkSpecPresence(specDir)`(SessionStart 가 import 한다. 경고 배열을 돌려주고 막지 않는다)와 직접 실행(`OK`/`FAIL`, 필수 누락이나 Gravit 문서가 있으면 exit 1).
+- **spec-presence** — `spec/` 에 필수 문서 6개가 **참조와 같은 이름으로** 있는지, **허용 목록 밖의 문서가 없는지** 본다(허용 목록 방식 — 이름을 나열해 금지하면 목록에 없는 새 문서가 조용히 통과한다).
+  - 두 가지로 쓰인다: `checkSpecPresence(specDir)`(SessionStart 가 import 한다. 경고 배열을 돌려주고 막지 않는다)와 직접 실행(`OK`/`FAIL`, 필수 누락이나 허용 목록 밖 문서가 있으면 exit 1).
   - ⚠️ export 이름과 형태는 `session-start.mjs` 와의 약속이다. 바꾸면 SessionStart 가 깨진다.
-  - **있으면 FAIL**: `01_gravit_admin_wireframe_spec.md` · `03_gravit_admin_api_spec.md` · `04_gravit_admin_frontend_spec.md` · `DS-00_overview.md` · `DS-01_design_system.md` · `DS-02_screens.md`. `DS-04_prompt_templates.md` 는 경고만 한다.
+  - **허용되는 파일은 7개뿐**: `00_INDEX` · `01`·`03`·`04`·`DS-00`·`DS-01`(필수) + `DS-03`(선택). 그 밖의 `.md` 는 FAIL.
 - **spec-map** — spec 의 절 번호(`## 6.` → `§6`, `### 6-4.` → `§6-4`)를 실제 행 범위로 옮겨 `resource/spec-map.json` 에 넣는다.
   - **행 범위를 문서에 손으로 박지 않는다.** phase 문서와 `00_INDEX` 는 **절 번호만** 쓰고, 읽을 행은 이 map 에서 가져온다.
   - 읽을 구간을 찾을 때: `node .claude/hooks/checks/spec-map.mjs "03 §6"` → `Read` 의 `offset`/`limit` 을 그대로 출력한다.
