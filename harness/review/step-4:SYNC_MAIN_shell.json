@@ -2,6 +2,10 @@
   "id": "step-4:SYNC_MAIN_shell",
   "spec": "PASS",
   "ds": "PASS",
+  "rounds": {
+    "spec": 2,
+    "ds": 2
+  },
   "diffs": [
     {
       "reviewer": "ds",
@@ -60,6 +64,9 @@
       "resolution": "사용자 확정 — 긴 형식 / 카드 안쪽. build-state.notes 에 decision 기록."
     }
   ],
+  "self_judgements_accepted": [],
+  "open_questions": [],
+  "deferred": [],
   "carry_forward": [
     "Step 5-4: syncKeys.job 과 SyncPhase enum 을 04 §6-7 대로 다시 넣는다.",
     "Step 5-3: 에러 표시 모양 통일(Step 3 이월) · formatSemesterCompact 가 표기와 M4 Strict Match 를 겸하는 문제 판단.",

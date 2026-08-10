@@ -2,9 +2,10 @@
   "id": "step-5-1:M1_semester",
   "spec": "PASS",
   "ds": "PASS",
-  "commit": "ef8b44d",
-  "ts": "2026-08-08",
-  "rounds": { "spec": 2, "ds": 3 },
+  "rounds": {
+    "spec": 2,
+    "ds": 3
+  },
   "diffs": [
     {
       "round": 1,
@@ -49,11 +50,15 @@
       "fix": "tooltip.tsx 에 data-[state=closed]:duration-200 추가. harness 가드를 src/shared/components/ui/**.tsx 소스 스캔으로 확장(variant animate ↔ variant duration 짝 검사)."
     }
   ],
+  "self_judgements_accepted": [],
   "open_questions": [
     {
       "tag": "spec-gap",
       "text": "서버의 academicYear 가 현재 연도 ±2 밖일 때 동작이 명세에 없다. 01 §7-1 은 '연도 옵션 = 현재 연도 ±2' 와 '초기값 = 현재 설정값' 을 동시에 요구하고, 03 §4-2 는 연도 범위를 클라이언트 UI 제약으로만 규정해 서버가 범위 밖 값을 들고 있을 수 있다. 지금은 매칭 옵션이 없어 트리거가 빈칸이 되고 isDirty=false 라 [저장]도 꺼진다. 명세 밖이라 임의로 채우지 않았다."
     }
   ],
-  "verify": "harness/verify/step-5-1.mjs 40건 (전체 182건)"
+  "deferred": [],
+  "verify": "harness/verify/step-5-1.mjs 40건 (전체 182건)",
+  "commit": "ef8b44d",
+  "ts": "2026-08-08"
 }

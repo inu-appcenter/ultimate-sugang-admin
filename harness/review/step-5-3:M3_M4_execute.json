@@ -2,9 +2,10 @@
   "id": "step-5-3:M3_M4_execute",
   "spec": "PASS",
   "ds": "PASS",
-  "commit": "8aa6436",
-  "ts": "2026-08-09",
-  "rounds": { "spec": 2, "ds": 2 },
+  "rounds": {
+    "spec": 2,
+    "ds": 2
+  },
   "diffs": [
     {
       "round": 1,
@@ -63,5 +64,7 @@
     "[step-7:qa] M4 삭제 건수의 ml-auto 가 480px 모달 오른쪽 끝까지 숫자를 민다. 01 §7-4 와이어프레임은 라벨 바로 옆이다. DS 는 수치 우측 정렬로 통과시켰고 spec 은 계약 위반이 아니라고 봤지만, 라벨-숫자 간격이 리더 도트 없이 읽히는지는 실제 화면에서 봐야 한다.",
     "[step-5-4 이후] 같은 '라벨 + 값' 패턴이 M2(w-12 고정폭, 둘 다 caption)와 M4(고정폭 없음, caption/body)로 갈렸다. 값이 데이터인 M4 쪽이 원칙 1 기준으로 맞다."
   ],
-  "verify": "harness/verify/step-5-3.mjs 54건 + step-5-2 가드 보강 (전체 285건)"
+  "verify": "harness/verify/step-5-3.mjs 54건 + step-5-2 가드 보강 (전체 285건)",
+  "commit": "8aa6436",
+  "ts": "2026-08-09"
 }

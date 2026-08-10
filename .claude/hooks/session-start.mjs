@@ -38,5 +38,29 @@ if (resume) {
 } else {
   lines.push('모든 checklist 항목 완료/스킵 — 남은 재개 항목 없음.');
 }
+
+// 넘긴 지적을 읽는 사람을 만든다. 리뷰 파일에만 두면 다음 세션이 같은 항목을 또 옮겨 적기만 한다.
+const deferred = (Array.isArray(s.deferred) ? s.deferred : []).filter(
+  (d) => d.status !== 'resolved' && d.status !== 'dropped',
+);
+if (deferred.length) {
+  const mine = resume ? deferred.filter((d) => d.target_item === resume.id) : [];
+  const asks = deferred.filter((d) => d.needs === 'user');
+  lines.push(`\n[넘긴 지적] 열린 항목 ${deferred.length}건 — 전문은 build-state.json 의 deferred.`);
+  if (mine.length) {
+    lines.push(`  · 재개 항목(${resume.id})을 겨냥한 것 ${mine.length}건 — 이 단계에서 처리한다:`);
+    for (const d of mine) lines.push(`      - ${String(d.text).slice(0, 70)}…`);
+  }
+  if (asks.length) {
+    lines.push(`  · 사용자 결정 대기 ${asks.length}건 — 코드 쓰기 전에 한 번에 묻는다(🙋🏻).`);
+  }
+}
+
+// 원인 추적을 3회 넘긴 항목이 있으면 되짚지 말라고 알린다.
+const stalled = Object.entries(s.probes || {}).filter(([, n]) => Number(n) >= 3);
+if (stalled.length) {
+  lines.push(`\n[탐색 상한 초과] ${stalled.map(([k, n]) => `${k}(${n}회)`).join(' · ')} — notes 의 unresolved 를 먼저 읽는다. 같은 가설을 다시 밟지 않는다.`);
+}
+
 out(lines.join('\n'));
 process.exit(0);

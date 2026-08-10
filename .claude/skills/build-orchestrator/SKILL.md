@@ -25,7 +25,19 @@ description: USS 백오피스 빌드의 전체 흐름을 소유한다. "빌드 �
    - `OK` → green 커밋(메시지에 항목 ID).
    - `FAIL` → 사유 보고 부분만 자가수정 후 재실행. **한도 3회**(`build-state.json.retry[항목ID]`). 초과 → 더 고치지 말고 `manual_review` 에 기록하고 멈춰 보고.
 6. **리뷰 게이트 (화면 항목 `step-3` ~ `step-6` — 미실행 방지, `checks/validate-state.mjs` 가 강제).** 게이트 green·커밋 후 **`spec-conformance-reviewer` + `ds-conformance-reviewer` 를 호출**하고 결과를 `harness/review/<항목ID>.json` 에 기록한다:
-   `{ "id", "spec": "PASS"|"FAIL", "ds": "PASS"|"FAIL", "diffs": [], "commit", "ts" }`.
+   ```jsonc
+   {
+     "id": "step-5-4:polling",
+     "spec": "PASS", "ds": "PASS",          // 둘 다 PASS 여야 COMPLETED 로 갈 수 있다
+     "rounds": { "spec": 2, "ds": 2 },      // 리뷰어별 라운드 수. 2 초과면 아래 둘 중 하나가 비어 있으면 안 된다
+     "diffs": [ { "round": 1, "reviewer": "spec|ds|both", "verdict": "PASS|FAIL", "finding": "", "fix": "" } ],
+     "self_judgements_accepted": [],        // 명세 빈칸을 스스로 채운 판단 중 리뷰어가 인정한 것
+     "open_questions": [],                  // 사용자 결정이 필요해 멈춘 것
+     "deferred": [],                        // 다음 단계로 넘긴 것 — 같은 턴에 build-state.deferred 로 옮긴다
+     "verify": "harness/verify/step-5-4.mjs 29건 (전체 312건). red 확인: …",
+     "commit": "349840b", "ts": "2026-08-10"
+   }
+   ```
    - **`spec`·`ds` 모두 `PASS` 인 증거가 있을 때만** 항목을 `COMPLETED` 로 전환한다(7).
    - 하나라도 `FAIL`/DIFF → 수정 → 재게이트(`--full`) → 재리뷰. **자가수정 한도 3회**(`retry` — `stop-gate` 가 자동으로 센다).
    - **재리뷰는 범위를 좁혀 부른다**: 1라운드 지적 항목 + 그 수정이 닿은 파일만. 전체 재검토를 반복하면 새 라운드가 새 지적을 부른다.
