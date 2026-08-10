@@ -50,6 +50,7 @@ resource/ phases/(단계별 절차) · smoke/(Playwright) · HARNESS.md
 - 무슨 작업이든 시작 전에 `.claude/resource/phases/phase-0-recovery.md` 를 Read 하고 그대로 따른다.
 - **지금 할 일은 하나로 정해진다**: `.claude/build-state.json` 의 `checklist` 에서 **가장 위에 있는 미완료(TODO/IN_PROGRESS) 항목**.
 - `IN_PROGRESS` 는 동시에 딱 1개다. 2개 이상이면 상태가 깨진 것이므로 멈추고 보고한다(🙋🏻).
+- **상태 파일은 `build-state.json` 하나다.** 인수인계(`handoff`)·넘긴 지적(`deferred`)·함정(`notes`)이 전부 여기 있다. 별도 인수인계 문서를 만들지 않는다. SessionStart 훅이 이 셋을 요약해 띄운다.
 
 ## 1. 흐름은 어디에 있나
 - 전체 흐름: `.claude/skills/build-orchestrator/SKILL.md`

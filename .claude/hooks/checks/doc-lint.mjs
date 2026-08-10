@@ -47,6 +47,9 @@ const TERMS = [
   { bad: '척추', good: '기준', why: 'spine 비유 직역', fixable: false },
   { bad: '휘발 산출물', good: '다시 만들 수 있는 파일', why: 'volatile artifact 직역', fixable: false },
   { bad: '단일비행', good: '동시 1건만', why: 'single-flight 직역', fixable: false },
+
+  // 유래 서술 — 어디서 왔는지는 동작에 영향이 없다. 지시만 남긴다.
+  { bad: 'Gravit', re: /Gravit/i, good: '(삭제)', why: '이전 프로젝트 이름. 지시는 남기고 출처만 지운다 — "Gravit 의 Sidebar 는 없다" → "Sidebar 는 없다"', fixable: false },
 ];
 
 // 문서뿐 아니라 훅·검사 스크립트도 본다. 사용자에게 보이는 문구(SessionStart 출력, 경고 메시지)가

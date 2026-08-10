@@ -56,6 +56,13 @@ if (deferred.length) {
   }
 }
 
+// 지난 세션이 남긴 인수인계. 별도 파일을 만들지 않는다 — 상태 파일이 하나여야 어긋나지 않는다.
+if (s.handoff && s.handoff.next) {
+  lines.push(`\n[인수인계 ${s.handoff.ts || ''}] ${s.handoff.next}`);
+  for (const step of s.handoff.how || []) lines.push(`  · ${step}`);
+  if (s.handoff.unresolved) lines.push('  · 미규명(다시 파지 않는다): build-state.handoff.unresolved 참조');
+}
+
 // 원인 추적을 3회 넘긴 항목이 있으면 되짚지 말라고 알린다.
 const stalled = Object.entries(s.probes || {}).filter(([, n]) => Number(n) >= 3);
 if (stalled.length) {

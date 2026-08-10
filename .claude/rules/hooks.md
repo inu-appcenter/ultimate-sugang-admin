@@ -79,3 +79,11 @@ paths:
 - **리뷰 라운드 수(`rounds`)의 출처는 `harness/review/<id>.json` 하나다.** build-state 에 복제하지 않는다(두 곳에 두면 어긋난다). 리뷰어 1종당 **2라운드**를 넘기려면 같은 파일의 `deferred` 또는 `open_questions` 에 남은 지적을 넘긴 기록이 있어야 한다 — 없으면 validate-state 가 FAIL.
 - `stop-gate.mjs` 는 같은 디렉토리의 `checks/gate-runner.sh` 를 부른다.
 - 스모크 테스트는 `.claude/resource/smoke/` 에 둔다(`checks/smoke.sh` 가 실행한다). **Step 7 전까지는 비어 있는 게 정상이고**, Playwright 가 없으면 건너뛴다.
+
+## build-state 의 notes·handoff 위생
+
+- **세션 인수인계는 `build-state.json` 의 `handoff` 객체 하나다.** 별도 `HANDOFF.md` 를 만들지 않는다 — 상태 파일이 둘이 되면 어긋나고, 어긋났을 때 누가 이기는지 정한 규칙이 없다.
+- `notes` 는 **덧붙이기만 하는 배열이 아니다.** 틀린 것으로 밝혀지면 **지우지 말고 `"status": "superseded"` 를 달고 본문을 `[해소됨 날짜 · 커밋]` 으로 다시 쓴다.** 지우면 왜 그렇게 믿었는지가 사라져 같은 판단을 반복한다.
+  - `status` 가 없으면 `active` 다. 살아 있는 항목에 굳이 달지 않는다.
+  - 실제로 겪은 문제: 폐기된 프레임("다른 관리자의 Job" — 명세에 없는 개념)이 정정 경로가 없어 상태 파일에 그대로 살아 있었다.
+- `"item": "all"` 인 trap 은 **매 세션 전량 로드된다.** 늘리기 전에 그 함정이 특정 파일에 묶이는지 보고, 묶이면 해당 파일의 규칙 문서로 내린다.
