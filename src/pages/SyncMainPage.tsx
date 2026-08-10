@@ -22,7 +22,10 @@ export function SyncMainPage() {
   const loadedSemester = summary?.semester ?? null;
   const initialTarget = loadedSemester ?? displaySemester ?? null;
 
-  const { job, trackLaunchedJob } = useSyncJobPolling(summary?.runningJobId ?? null);
+  const { job, launchedJobId, trackLaunchedJob } = useSyncJobPolling(
+    summary?.runningJobId ?? null,
+  );
+  const jobRunning = (summary?.runningJobId ?? null) !== null || launchedJobId !== null;
 
   const openConfirm = (result: SyncPreflight) => {
     setTargetOpen(false);
@@ -38,6 +41,7 @@ export function SyncMainPage() {
         <DisplaySemesterCard />
         <CourseSummaryCard
           targetReady={initialTarget !== null}
+          jobRunning={jobRunning}
           runningProgress={job?.status === 'RUNNING' ? job.progress : null}
           onUpdateClick={() => setTargetOpen(true)}
         />

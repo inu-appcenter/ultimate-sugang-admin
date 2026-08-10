@@ -20,6 +20,18 @@ const { result, check, eq, section } = createChecker();
 const text = (html) => html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
 const RUNNING_JOB_ID = 99;
 
+/** 진행률 줄(SyncProgressText)만 뽑는다. 카드의 다른 문구가 섞이면 문구를 정확히 못 센다. */
+function progressLine(html) {
+  const found = /<p class="([^"]*text-warning-text[^"]*)"[^>]*>([\s\S]*?)<\/p>/.exec(html);
+  return found === null ? null : { className: found[1], text: text(found[2]).trim() };
+}
+
+/** sonner 토스트만 센다. 같은 문구가 카드 Error State 에도 있어 전체 DOM 으로는 2개로 잡힌다. */
+function toastCount(html, message) {
+  const toasts = html.match(/<li[^>]*data-sonner-toast[\s\S]*?<\/li>/g) ?? [];
+  return toasts.filter((node) => text(node).includes(message)).length;
+}
+
 /** 22초짜리 mock 타임라인을 안 쓰고 Job 레코드를 직접 넣는다. 진행 단계를 손으로 민다. */
 function seedRunningJob() {
   mockDb.reset();
@@ -93,17 +105,15 @@ section('진입 시 자동 재개 + 진행률 표기 (01 §8-1 · 03 §7 · 04 �
     },
   ]);
 
-  check('실행 없이 폴링이 붙는다', text(first).includes('업데이트 진행 중'));
-  check('total null 이면 분모 없이', text(first).includes('강의 수집 중…'));
-  check('분모를 0 으로 뭉개지 않는다', !text(first).includes('강의 수집 0/0'));
+  check('실행 없이 폴링이 붙는다', progressLine(first) !== null);
+  // 03 §7-3 의 표기는 `강의 수집 중…` 이다. 접두어를 덧붙이면 '중' 이 두 번 읽힌다.
+  eq('total null 이면 분모 없이', progressLine(first)?.text, '강의 수집 중…');
 
   // 03 §7-2 는 수집만 띄어쓰고(3/12 페이지) 적재는 붙여 쓴다(450/1,203건). 통일하면 오답이다.
-  check('수집은 띄어쓴 페이지', text(fetching).includes('강의 수집 3/12 페이지'));
-  check('붙여쓴 페이지가 아니다', !text(fetching).includes('3/12페이지'));
-  check('적재는 붙여쓴 건', text(persisting).includes('적재 450/1,203건'));
-  check('건수에 천단위 콤마', text(persisting).includes('1,203건'));
+  eq('수집은 띄어쓴 페이지', progressLine(fetching)?.text, '업데이트 진행 중 · 강의 수집 3/12 페이지');
+  eq('적재는 붙여쓴 건 + 천단위 콤마', progressLine(persisting)?.text, '업데이트 진행 중 · 적재 450/1,203건');
 
-  check('종료되면 진행률이 사라진다', !text(finished).includes('업데이트 진행 중'));
+  eq('종료되면 진행률이 사라진다', progressLine(finished), null);
   check('성공 토스트', text(finished).includes('업데이트를 마쳤어요.'));
   eq('토스트는 한 번만', text(finished).match(/업데이트를 마쳤어요\./g)?.length, 1);
   check('버튼이 다시 활성', !/\sdisabled(?:=|\s|$)/.test(updateButtonTag(finished)));
@@ -200,8 +210,13 @@ section('실행 직후에는 202 의 jobId 로 시작한다 (04 §10-3)');
     }),
   );
 
-  await probe.runSyncConfirmFlow({ actionLabel: '갱신', settleMs: 600 });
-  check('summary 가 몰라도 폴링이 시작된다', polls >= 1, `polls=${polls}`);
+  const { afterAction } = await probe.runSyncConfirmFlow({ actionLabel: '갱신', settleMs: 600 });
+  eq('summary 가 몰라도 폴링이 시작된다', polls, 1);
+
+  // 이 케이스의 summary 는 끝까지 runningJobId 를 null 로 준다. 실행 버튼의 잠금이
+  // summary 에만 달려 있으면 202 를 받은 뒤에도 다시 눌러진다 (01 §8-2).
+  check('202 직후 버튼이 잠긴다', /\sdisabled(?:=|\s|$)/.test(updateButtonTag(afterAction)));
+  check('진행률 줄도 같이 뜬다', progressLine(afterAction) !== null);
 
   server.resetHandlers();
   queryClient.clear();
@@ -341,15 +356,52 @@ section('한 마운트 안에서 — 남의 Job 인계 + 끝난 Job 되살아나
   queryClient.clear();
 }
 
+section('폴링 실패는 조용히, 나머지 쿼리는 그대로 (사용자 결정 2026-08-10)');
+{
+  // 폴링은 2초마다 돈다. 실패할 때마다 전역 토스트를 띄우면 같은 문구가 화면에 쌓인다.
+  const job = seedRunningJob();
+  let polls = 0;
+  server.use(
+    http.get(`http://localhost:8080/api/v1/admin/sync/jobs/${RUNNING_JOB_ID}`, () => {
+      polls += 1;
+      if (polls === 1) return HttpResponse.json(job);
+      return HttpResponse.json({ code: 5000, message: '폴링이 끊겼어요.' }, { status: 500 });
+    }),
+  );
+
+  const [, dead] = await probe.renderSyncMainSteps([{ wait: 600 }, { wait: 6000 }]);
+
+  check('첫 응답 뒤로는 계속 실패시켰다', polls >= 2, `polls=${polls}`);
+  eq('폴링 에러 토스트가 없다', toastCount(dead, '폴링이 끊겼어요.'), 0);
+  eq('마지막 성공 응답을 유지한다', progressLine(dead)?.text, '강의 수집 중…');
+
+  server.resetHandlers();
+  queryClient.clear();
+
+  // 예외는 폴링 쿼리 하나다. 현황 조회가 죽으면 04 §9-2 대로 토스트가 뜬다.
+  mockDb.reset();
+  server.use(
+    http.get('http://localhost:8080/api/v1/admin/courses/summary', () =>
+      HttpResponse.json({ code: 5000, message: '현황을 불러오지 못했어요.' }, { status: 500 }),
+    ),
+  );
+
+  const [broken] = await probe.renderSyncMainSteps([{ wait: 3000 }]);
+  eq('현황 조회 실패는 토스트 1개', toastCount(broken, '현황을 불러오지 못했어요.'), 1);
+
+  server.resetHandlers();
+  queryClient.clear();
+}
+
 section('폴링 갱신에는 트랜지션을 걸지 않는다 (DS-01 §4-3)');
 {
   const job = seedRunningJob();
   const [snapshot] = await probe.renderSyncMainSteps([{ wait: 600 }]);
 
-  const line = /<p class="([^"]*)"[^>]*>(?:(?!<\/p>)[\s\S])*?업데이트 진행 중/.exec(snapshot);
+  const line = progressLine(snapshot);
   check('진행률 줄을 찾았다', line !== null);
-  check('transition 클래스 없음', line !== null && !line[1].includes('transition'), line?.[1]);
-  check('duration 클래스 없음', line !== null && !/\bduration-/.test(line[1]));
+  check('transition 클래스 없음', line !== null && !line.className.includes('transition'), line?.className);
+  check('duration 클래스 없음', line !== null && !/\bduration-/.test(line.className));
   eq('progress 는 job 이 살아 있을 때만 읽는다', job.status, 'RUNNING');
 }
 
