@@ -32,7 +32,7 @@
 | 버킷 | 경로 | 내용 |
 |---|---|---|
 | **skill** | `skills/` | 흐름·절차(build-orchestrator·implement-one-screen·build-review-packet) |
-| **agent** | `agents/` | 코드를 고치지 않고 판정만 하는 리뷰어(spec-conformance·architecture·ds-conformance) |
+| **agent** | `agents/` | 코드를 고치지 않고 지적만 모으는 리뷰어 2종(spec-conformance·ds-conformance). 구조 리뷰는 `uss-contract-lint` 로 내렸다 |
 | **hook** | `hooks/` | 진입점(session-start·pretool-guard·posttool-lint·stop-gate) + `checks/`(gate-runner·validate-state·spec-presence·typecheck·token-lint·build·smoke·lint) |
 | **spec** | `spec/` | SoT 지식 6문서(읽기전용). 인덱스 = `00_INDEX.md` |
 | **기타** | `resource/` | `phases/`(재개 단위 phase-0·step-1~7) · `smoke/`(Playwright, **Step 7 전까지 비어 있음**) · `HARNESS.md`(이 파일) |

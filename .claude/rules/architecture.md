@@ -26,7 +26,9 @@ shared/   도메인과 무관한 공용          → 외부 라이브러리만 �
 - 타입 `types.ts` · Zod 스키마 `schemas.ts` · API 호출 `api.ts` · **쿼리 훅과 키 `queries.ts`**
 - 상수는 값이면 `UPPER_SNAKE_CASE`, 객체면 `camelCase`
 
-> ⚠️ 쿼리 훅 파일은 `queries.ts` 다. `hooks.ts` 가 아니다(`04 §4`).
+> ⚠️ 쿼리 훅 파일은 `queries.ts` 다. `hooks.ts` 가 아니다(`04 §4-2`).
+
+> 이 절과 아래 배치·의존 방향 규칙은 **`uss-contract-lint` 가 막는다**(`hooks-filename`·`module-placement`·`infra-location`·`file-naming`·`shared-to-feature`·`zod-parse`). 위반하면 fast 게이트가 red 다. → [[hooks]]
 
 ## 도메인은 3개뿐이다
 ```

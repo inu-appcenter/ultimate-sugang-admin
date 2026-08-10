@@ -66,6 +66,28 @@ const LINE_RULES = [
 
   // 아키텍처 (rules/architecture.md)
   { id: 'relative-import', re: /\bfrom\s+['"]\.\.\//, msg: 'import 는 절대경로 `@/` alias 만 쓴다' },
+
+  // 라우트 상수 (rules/architecture.md) — 정의 파일 자신은 제외한다.
+  {
+    id: 'route-literal',
+    re: /(?:navigate\(|(?:to|href)=|path:\s*)['"]\/[a-z]/,
+    msg: '경로 문자열을 직접 쓰지 않는다. `@/shared/constants/routes` 의 ROUTES 를 쓴다',
+    skip: (rel) => rel.replace(/\\/g, '/').endsWith('src/shared/constants/routes.ts'),
+  },
+
+  // 시각 — shadcn 기본 radius (rules/ui-conventions.md · DS-01 §4-1)
+  {
+    id: 'shadcn-radius',
+    re: /\brounded-(?:sm|md|lg)\b/,
+    msg: 'shadcn 기본 radius 를 그대로 두지 않는다. 카드 `rounded-card`(14) · 버튼 `rounded-btn`(10) · 모달 `rounded-modal`(16)',
+  },
+
+  // 도메인 결정 D2 — 두 필드는 서비스 소유라 동기화 계약에 등장하지 않는다.
+  {
+    id: 'd2-service-owned',
+    re: /\b(maxCapacity|currentEnrollment)\b/,
+    msg: '`maxCapacity`·`currentEnrollment` 는 학교 API 28필드에 없다(D2). changedFields 라벨이나 화면에 넣지 않는다',
+  },
 ];
 
 // ── 규칙: 엔드포인트 allowlist (rules/api-contract.md) ─────────
@@ -130,6 +152,7 @@ for (const file of walk(srcDir)) {
 
     for (const rule of LINE_RULES) {
       if (!rule.re.test(line)) continue;
+      if (rule.skip && rule.skip(rel)) continue;
       if (isAllowed(rel, rule.id)) continue;
       add(file, n, rule.id, rule.msg);
     }
@@ -176,7 +199,92 @@ if (existsSync(featuresDir)) {
   }
 }
 
-// ── 3) package.json 의존성 ───────────────────────────────────
+// ── 3) 구조 규칙 (rules/architecture.md · decisions D8) ───────
+// 전부 파일 배치와 이름만 보면 판정된다.
+const INFRA_FILES = ['tokenManager', 'refreshQueue', 'errorHandler', 'client'];
+const MODULE_FILES = ['api.ts', 'schemas.ts', 'queries.ts', 'store.ts'];
+
+if (existsSync(srcDir)) {
+  const files = walk(srcDir).map((f) => f.replace(root + '/', '').replace(/\\/g, '/'));
+
+  // (a) 역방향 참조 — shared/ 는 features/ 를 모른다
+  for (const rel of files.filter((f) => f.startsWith('src/shared/'))) {
+    if (isAllowed(rel, 'shared-to-feature')) continue;
+    readFileSync(join(root, rel), 'utf8')
+      .split('\n')
+      .forEach((line, i) => {
+        if (/from\s+['"]@\/features\//.test(line)) {
+          violations.push(`${rel}:${i + 1}  [shared-to-feature] shared/ 가 features/ 를 참조하지 않는다. 의존 방향은 features → shared 한쪽이다`);
+        }
+      });
+  }
+
+  // (b) 쿼리 훅 파일명은 queries.ts 다 (04 §4)
+  for (const rel of files.filter((f) => /^src\/features\/[^/]+\/hooks\.ts$/.test(f))) {
+    if (isAllowed(rel, 'hooks-filename')) continue;
+    violations.push(`${rel}  [hooks-filename] 쿼리 훅 파일은 \`queries.ts\` 다. \`hooks.ts\` 를 만들지 않는다`);
+  }
+
+  // (c) 모듈 배치 — api/schemas/queries/store 는 feature 루트에 둔다
+  for (const rel of files) {
+    const m = /^src\/features\/([^/]+)\/(.+)$/.exec(rel);
+    if (!m) continue;
+    const [, , tail] = m;
+    if (!tail.includes('/')) continue;
+    const base = tail.slice(tail.lastIndexOf('/') + 1);
+    if (!MODULE_FILES.includes(base)) continue;
+    if (isAllowed(rel, 'module-placement')) continue;
+    violations.push(`${rel}  [module-placement] \`${base}\` 는 feature 루트에 둔다(04 §4). 하위 폴더로 내리지 않는다`);
+  }
+
+  // (d) 인프라 위치 — shared/api/ 밖에 같은 이름을 두지 않는다
+  for (const rel of files) {
+    const base = rel.slice(rel.lastIndexOf('/') + 1).replace(/\.tsx?$/, '');
+    if (!INFRA_FILES.includes(base)) continue;
+    if (rel.startsWith('src/shared/api/')) continue;
+    if (isAllowed(rel, 'infra-location')) continue;
+    violations.push(`${rel}  [infra-location] \`${base}\` 는 \`shared/api/\` 에 둔다(04 §4)`);
+  }
+
+  // (e) 이름 규칙 — 컴포넌트 PascalCase.tsx · 훅 useXxx.ts · 그 외 camelCase.ts
+  for (const rel of files) {
+    if (isAllowed(rel, 'file-naming')) continue;
+    const base = rel.slice(rel.lastIndexOf('/') + 1);
+    const stem = base.replace(/\.tsx?$/, '');
+    if (/\.d\.ts$/.test(base) || stem === 'vite-env') continue;
+    // src/app/ 은 부트스트랩·라우터·프로바이더다(architecture.md §구조). 컴포넌트 규칙 대상이 아니다.
+    if (rel.startsWith('src/app/')) continue;
+    if (base.endsWith('.tsx')) {
+      if (!/^[A-Z][A-Za-z0-9]*$/.test(stem)) {
+        violations.push(`${rel}  [file-naming] 컴포넌트 파일은 PascalCase.tsx 다`);
+      }
+    } else if (stem.startsWith('use')) {
+      if (!/^use[A-Z][A-Za-z0-9]*$/.test(stem)) {
+        violations.push(`${rel}  [file-naming] 훅 파일은 useXxx.ts 다`);
+      }
+    } else if (!/^[a-z][A-Za-z0-9]*$/.test(stem)) {
+      violations.push(`${rel}  [file-naming] 유틸 파일은 camelCase.ts 다`);
+    }
+  }
+
+  // (f) Zod 검증 — 응답은 스키마를 거친다. any 가 없다는 것으로는 증명되지 않는다
+  for (const rel of files.filter((f) => /^src\/features\/[^/]+\/api\.ts$/.test(f))) {
+    if (isAllowed(rel, 'zod-parse')) continue;
+    if (/\.(safeParse|parse)\s*\(/.test(readFileSync(join(root, rel), 'utf8'))) continue;
+    violations.push(`${rel}  [zod-parse] 응답을 Zod 로 파싱하지 않는다. \`parse\`/\`safeParse\` 를 거친다`);
+  }
+
+  // (g) 화면은 2개다 (D8)
+  const pagesDir = join(srcDir, 'pages');
+  if (existsSync(pagesDir)) {
+    const pages = readdirSync(pagesDir).filter((n) => n.endsWith('.tsx'));
+    if (pages.length > 2 && !isAllowed('src/pages', 'screen-count')) {
+      violations.push(`src/pages  [screen-count] 화면은 ADMIN_LOGIN·SYNC_MAIN 2개뿐이다(D8). 지금 ${pages.length}개: ${pages.join(', ')}`);
+    }
+  }
+}
+
+// ── 4) package.json 의존성 ───────────────────────────────────
 const pkgPath = join(root, 'package.json');
 if (existsSync(pkgPath)) {
   try {

@@ -42,6 +42,9 @@
     --ring: var(--primary);
 
     --radius: 10px;
+
+    --header-height: 56px;
+    --toast-offset-top: calc(var(--header-height) + 24px);
   }
 
   * {

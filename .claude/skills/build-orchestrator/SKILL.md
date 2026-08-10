@@ -24,26 +24,29 @@ description: USS 백오피스 빌드의 전체 흐름을 소유한다. "빌드 �
 5. 게이트 실행(커밋 직전): `bash .claude/hooks/checks/gate-runner.sh --full`(QA 는 `--with-smoke`). 매 턴 Stop 훅은 fast 게이트를 자동 실행한다.
    - `OK` → green 커밋. 커밋과 push 는 **`commit-push` 스킬**로 한다(브랜치·메시지 형식은 [[git-convention]]).
    - `FAIL` → 사유 보고 부분만 자가수정 후 재실행. **한도 3회**(`build-state.json.retry[항목ID]`). 초과 → 더 고치지 말고 `manual_review` 에 기록하고 멈춰 보고.
-6. **리뷰 게이트 (화면 항목 `step-3` ~ `step-6` — 미실행 방지, `checks/validate-state.mjs` 가 강제).** 게이트 green·커밋 후 **`spec-conformance-reviewer` + `ds-conformance-reviewer` 를 호출**하고 결과를 `harness/review/<항목ID>.json` 에 기록한다:
+6. **리뷰 (화면 항목 `step-3` ~ `step-6` — 미종결 방지, `checks/validate-state.mjs` 가 강제).**
+   게이트 green·커밋 후 **`spec-conformance-reviewer` + `ds-conformance-reviewer` 를 각 1회 호출한다.**
+   리뷰어는 판정하지 않고 **지적만 모은다.** 받은 지적을 그대로 `harness/review/<항목ID>.json` 에 옮긴다:
    ```jsonc
    {
      "id": "step-5-4:polling",
-     "spec": "PASS", "ds": "PASS",          // 둘 다 PASS 여야 COMPLETED 로 갈 수 있다
-     "rounds": { "spec": 2, "ds": 2 },      // 리뷰어별 라운드 수. 2 초과면 아래 둘 중 하나가 비어 있으면 안 된다
-     "diffs": [ { "round": 1, "reviewer": "spec|ds|both", "verdict": "PASS|FAIL", "finding": "", "fix": "" } ],
-     "self_judgements_accepted": [],        // 명세 빈칸을 스스로 채운 판단 중 리뷰어가 인정한 것
-     "open_questions": [],                  // 사용자 결정이 필요해 멈춘 것
-     "deferred": [],                        // 다음 단계로 넘긴 것 — 같은 턴에 build-state.deferred 로 옮긴다
+     "reviewed": { "spec": "2026-08-10", "ds": "2026-08-10" },  // 각 1회 호출한 날짜
+     "findings": [
+       { "id": "S1", "reviewer": "spec", "ref": "01 §8-1", "text": "", "resolution": "fixed", "note": "커밋 fc17b29" }
+     ],
+     "plan_reported_at": "2026-08-10",     // 계획을 사용자에게 보고한 날
      "verify": "harness/verify/step-5-4.mjs 29건 (전체 312건). red 확인: …",
      "commit": "fc17b29", "ts": "2026-08-10"
    }
    ```
-   - **`spec`·`ds` 모두 `PASS` 인 증거가 있을 때만** 항목을 `COMPLETED` 로 전환한다(7).
-   - 하나라도 `FAIL`/DIFF → 수정 → 재게이트(`--full`) → 재리뷰. **자가수정 한도 3회**(`retry` — `stop-gate` 가 자동으로 센다).
-   - **재리뷰는 범위를 좁혀 부른다**: 1라운드 지적 항목 + 그 수정이 닿은 파일만. 전체 재검토를 반복하면 새 라운드가 새 지적을 부른다.
-   - **리뷰어 1종당 라운드 상한 2.** 3라운드째로 가려면 남은 지적을 그 항목 review json 의 `deferred`(다음 단계로) 또는 `open_questions`(사용자 결정 대기)로 **넘긴 기록을 먼저 쓴다.** 안 쓰면 validate-state 가 FAIL 한다.
-   - `deferred` 에 쓴 항목은 **같은 턴에** `build-state.json.deferred` 로 옮긴다. 리뷰 파일에만 두면 아무도 안 읽는다.
-   - validate-state 가 COMPLETED 인 `/^step-[3-6](-\d+)?:/` 항목에 **통과 리뷰 JSON** 을 요구한다 — **Step 5 하위단계 4개도 각각 필요**. 없거나 미통과면 fast 게이트가 FAIL(Stop 차단)된다.
+   순서는 **리스트업 → 계획 → 보고 → 실행** 이다:
+   - **리스트업** — 두 리뷰어의 지적을 `findings` 에 전부 적는다. 이 시점에 고치지 않는다.
+   - **계획** — 지적마다 처리 방침을 정한다. `resolution` 은 4개뿐: `fixed`(이번에 고침) · `deferred`(다음 단계로) · `dropped`(버림) · `question`(사용자 결정 필요).
+   - **보고** — §2 사람 게이트에서 `build-review-packet` §E-2 로 지적과 방침을 함께 낸다. **여기서 멈춘다.**
+   - **실행** — 승인 후 `fixed` 만 고친다. 고쳤으면 `--full` 재게이트 후 커밋. **재리뷰는 하지 않는다.**
+   - `deferred` 는 **같은 턴에** `build-state.json.deferred` 로 옮긴다(`from` 에 항목 ID). validate-state 가 개수를 대조한다.
+   - **재리뷰는 사용자가 요청할 때만 한다.** PASS 를 받으러 다시 부르지 않는다.
+   - validate-state 가 COMPLETED 인 `/^step-[3-6](-\d+)?:/` 항목에 **종결된 리뷰 JSON** 을 요구한다 — **Step 5 하위단계 4개도 각각 필요**. 없거나 미종결이면 fast 게이트가 FAIL(Stop 차단)된다.
 7. 항목 `COMPLETED`(또는 사유와 함께 `SKIPPED`/`manual-review`) 로 갱신, `log` 추가.
 
 ## 2. 사람 게이트 (정지 지점)

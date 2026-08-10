@@ -28,6 +28,8 @@ const buttonTag = (html, label) => {
   return element === undefined ? '' : (/<button[^>]*>/.exec(element)?.[0] ?? '');
 };
 const isDisabled = (tag) => /\sdisabled(?:=|\s|$)/.test(tag);
+const labelTag = (html) => /<label[\s\S]*?<\/label>/.exec(html)?.[0] ?? '';
+const openTag = (element) => /<[a-z]+[^>]*>/.exec(element)?.[0] ?? '';
 
 const JOBS_URL = 'http://localhost:8080/api/v1/admin/sync/jobs';
 
@@ -88,7 +90,7 @@ section('INITIAL → M3 변형 (01 §7-5)');
   check('destructive 가 아니다', !confirmDialog.includes('bg-destructive'));
 }
 
-section('REPLACE → M4 (01 §7-4 · DS-00 §6 격식체)');
+section('REPLACE → M4 (01 §7-4 · DS-00 §6 격식체 · 사용자 결정 2026-08-10)');
 {
   fresh();
   const { confirmDialog } = await probe.runSyncConfirmFlow({ termLabel: '여름계절학기' });
@@ -97,14 +99,20 @@ section('REPLACE → M4 (01 §7-4 · DS-00 §6 격식체)');
   check('제목', body.includes('기존 데이터를 모두 삭제합니다'));
   check('현재 학기', body.includes('현재') && body.includes('2026학년도 1학기'));
   check('변경 학기', body.includes('변경') && body.includes('2026학년도 여름계절학기'));
-  check('삭제 안내', body.includes('다음 데이터가 영구 삭제됩니다.'));
-  check('강의 건수', body.includes('강의') && body.includes('1,203건'));
-  check('시간표 건수', body.includes('2,847건'));
-  check('장바구니 건수', body.includes('87건'));
-  check('수강신청 건수', body.includes('41건'));
+  // 삭제 건수 4행 제거는 01 §7-4 이탈이다(사용자 결정 2026-08-10). 되살아나면 '건' 이 다시 센다.
+  check('삭제 안내가 없다', !body.includes('영구 삭제'));
+  eq('삭제 건수가 없다', (body.match(/건/g) ?? []).length, 0);
   check('비가역 경고', body.includes('이 작업은 되돌릴 수 없습니다.'));
-  check('입력 안내', body.includes('확인을 위해 아래를 입력하세요'));
-  check('기대 문자열', body.includes('2026-여름계절학기'));
+  eq(
+    '입력 안내가 기대 문자열을 품은 한 문장',
+    text(labelTag(confirmDialog)).replace(/\s/g, ''),
+    '확인을위해‘2026-여름계절학기’를입력하세요',
+  );
+  check(
+    '비가역 경고 가운데 정렬',
+    /<p class="[^"]*text-center[^"]*">이 작업은 되돌릴 수 없습니다\.<\/p>/.test(confirmDialog),
+  );
+  check('입력 안내 가운데 정렬', openTag(labelTag(confirmDialog)).includes('text-center'));
 
   check('폭 480px', confirmDialog.includes('max-w-modal-wide'));
   check('실행 버튼 destructive', buttonTag(confirmDialog, '삭제 후 적재').includes('bg-destructive'));

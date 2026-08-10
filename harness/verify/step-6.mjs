@@ -1,4 +1,6 @@
 /** step-6:expand_detail — Expandable Row · Tab Group · 더 보기 · Field Diff · 실패 Job. */
+import { readFileSync } from 'node:fs';
+
 import { delay, http, HttpResponse } from 'msw';
 
 import { createChecker, createRuntime, installDom } from './env.mjs';
@@ -31,8 +33,20 @@ const tabTag = (html, changeType) =>
 const isDisabled = (tag) => /\sdisabled(?:=|\s|$)/.test(tag);
 const isActive = (tag) => tag.includes('data-state="active"');
 const countOf = (html, word) => (text(html).match(new RegExp(word, 'g')) ?? []).length;
+
+/** 이력 페이지네이션이 지금 몇 페이지를 가리키는지. */
+const currentPage = (html) => {
+  const found = /<button[^>]*aria-current="page"[^>]*>([\s\S]*?)<\/button>/.exec(html);
+  return found === null ? null : text(found[1]).trim();
+};
 /** 클래스 이름은 태그 안에 있어 text() 로는 안 보인다. 마크업 원문에서 센다. */
 const classCount = (html, name) => (html.match(new RegExp(name, 'g')) ?? []).length;
+
+/** sonner 토스트만 센다. 같은 문구가 Error State 에도 있어 전체 DOM 으로는 2개로 잡힌다. */
+function toastCount(html, message) {
+  const toasts = html.match(/<li[^>]*data-sonner-toast[\s\S]*?<\/li>/g) ?? [];
+  return toasts.filter((node) => text(node).includes(message)).length;
+}
 
 const JOB_41 = '2026-08-05 14:22';
 const JOB_40 = '2026-07-28 16:40';
@@ -224,7 +238,7 @@ section('경고 탭 — 학수번호 + 사유, courseName 은 null 가능 (01 §
   eq('두 건', listRowCount(warning), 2);
 }
 
-section('빈 탭 문구 · 부분 적용 (01 §9 · 03 §6-4)');
+section('빈 탭 문구 · 부분 적용 (01 §9 · 03 §6-4 · DS-01 §1-3)');
 {
   fresh();
   const [, opened] = await probe.renderSyncMainSteps([
@@ -236,6 +250,13 @@ section('빈 탭 문구 · 부분 적용 (01 §9 · 03 §6-4)');
   check('빈 탭 문구', body.includes('항목이 없어요.'));
   eq('목록 행이 없다', listRowCount(opened), 0);
   check('partiallyApplied 면 부분 적용', body.includes('부분 적용'));
+  // DS-01 §1-3 의 warning 용례는 Job RUNNING 하나뿐이다. 이력에 진행 중 배지가 같이 뜰 수 있어
+  // 부분 적용까지 warning 을 쓰면 다른 뜻이 같은 색으로 나간다.
+  eq('부분 적용은 warning 을 쓰지 않는다', classCount(opened, 'bg-warning-bg'), 0);
+  check(
+    '부분 적용은 muted 배지',
+    /<span class="[^"]*bg-muted-ds-bg[^"]*">부분 적용<\/span>/.test(opened),
+  );
 }
 
 section('실패 Job 확장 — 탭 대신 실패 사유 (01 §6-5 · 04 §10-6)');
@@ -277,6 +298,34 @@ section('FAILED 종료 시 이력 최상단 행 자동 확장 (01 §8-1 · 04 §
   eq('실패하면 한 행이 열린다', panelCount(failed), 1);
   check('열린 행이 방금 실패한 Job 이다', text(failed).includes('학교 API 응답이 없습니다.'));
   check('실패 토스트도 그대로', text(failed).includes('업데이트에 실패했어요.'));
+  // DS-01 §4-3 은 인라인 확장을 200ms 대상으로 못박는다. 실패 Job 확장에는 탭이 없어
+  // duration-200 을 쓰는 곳이 확장 컨텐츠 하나뿐이다.
+  eq('확장 컨텐츠에 200ms 모션', classCount(failed, 'duration-200'), 1);
+}
+
+section('2페이지를 보고 있어도 최상단 행으로 되돌아간다 (01 §8-1)');
+{
+  const job = seedRunningJob();
+
+  const [, secondPage, failed] = await probe.renderSyncMainSteps([
+    { wait: 700 },
+    { click: '2', wait: 700 },
+    {
+      wait: 3000,
+      before: () => {
+        job.status = 'FAILED';
+        job.progress = null;
+        job.finishedAt = '2026-08-09T10:02:00';
+        job.durationSeconds = 12;
+        job.failureReason = '학교 API 응답이 없습니다.';
+      },
+    },
+  ]);
+
+  eq('2페이지로 이동했다', currentPage(secondPage), '2');
+  eq('실패 뒤에는 1페이지로 돌아온다', currentPage(failed), '1');
+  eq('한 행이 열린다', panelCount(failed), 1);
+  check('열린 행이 방금 실패한 Job 이다', text(failed).includes('학교 API 응답이 없습니다.'));
 }
 
 section('SUCCESS 종료는 자동 확장하지 않는다 (04 §10-4)');
@@ -341,6 +390,42 @@ section('인라인 확장 4상태 — Skeleton 3행 / Error State 는 [다시 �
 
   check('Error State 문구', text(broken).includes('상세를 불러오지 못했어요.'));
   eq('[다시 시도] 는 없다', countOf(broken, '다시 시도'), 0);
+  // 확장 조회는 폴링이 아니다. 04 §9-2 의 전역 토스트가 그대로 적용된다
+  // (예외는 2초마다 도는 폴링 쿼리 하나뿐 — 사용자 결정 2026-08-10).
+  eq('전역 에러 토스트 1개', toastCount(broken, '상세를 불러오지 못했어요.'), 1);
+  server.resetHandlers();
+  queryClient.clear();
+}
+
+section('헤더 고정 · 토스트는 헤더 아래에서 뜬다 (사용자 결정 2026-08-10 · DS-03 §2)');
+{
+  const shell = probe.renderMainShell();
+  check('헤더가 상단 고정', /<header class="[^"]*sticky top-0 z-40/.test(shell));
+
+  fresh();
+  server.use(
+    http.get('http://localhost:8080/api/v1/admin/sync/jobs/41', () =>
+      HttpResponse.json({ code: 5202, message: '상세를 불러오지 못했어요.' }, { status: 404 }),
+    ),
+  );
+
+  const [, toasted] = await probe.renderSyncMainSteps([
+    { wait: 700 },
+    { clickRow: JOB_41, wait: 2500 },
+  ]);
+
+  eq('토스트가 떠 있다', toastCount(toasted, '상세를 불러오지 못했어요.'), 1);
+  check(
+    '토스트 위 여백이 토큰에 걸려 있다',
+    /data-sonner-toaster[^>]*--offset-top:\s*var\(--toast-offset-top\)/.test(toasted),
+  );
+  // 값은 globals.css 가 갖는다. 토큰만 확인하면 56px 이 0 이 돼도 통과한다.
+  const globalsCss = readFileSync('src/shared/styles/globals.css', 'utf8');
+  check(
+    '그 토큰이 헤더 높이에서 나온다',
+    /--toast-offset-top:\s*calc\(var\(--header-height\)\s*\+\s*24px\)/.test(globalsCss),
+  );
+  check('헤더 높이 토큰이 56px', /--header-height:\s*56px/.test(globalsCss));
   server.resetHandlers();
   queryClient.clear();
 }

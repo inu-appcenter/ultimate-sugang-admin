@@ -1,5 +1,4 @@
 import {
-  queryOptions,
   skipToken,
   useInfiniteQuery,
   useMutation,
@@ -29,18 +28,10 @@ export const syncKeys = {
   jobList: () => [...syncKeys.all, 'jobs'] as const,
   jobs: (page: number) => [...syncKeys.jobList(), page] as const,
   job: (jobId: number | null) => [...syncKeys.all, 'job', jobId] as const,
+  jobDetail: (jobId: number) => [...syncKeys.all, 'jobDetail', jobId] as const,
   changes: (jobId: number, changeType: SyncChangeType) =>
-    [...syncKeys.job(jobId), 'changes', changeType] as const,
+    [...syncKeys.all, 'jobChanges', jobId, changeType] as const,
 };
-
-const syncJobQuery = (jobId: number | null) =>
-  queryOptions({
-    queryKey: syncKeys.job(jobId),
-    queryFn: jobId === null ? skipToken : () => fetchSyncJob(jobId),
-    refetchInterval: (query) =>
-      query.state.data?.status === 'RUNNING' ? POLL_INTERVAL_MS : false,
-    meta: { skipErrorToast: true },
-  });
 
 export function useCoursesSummary() {
   return useQuery({
@@ -67,8 +58,11 @@ export function useCreateSyncJob() {
   });
 }
 
-export function useSyncJob(jobId: number | null) {
-  return useQuery(syncJobQuery(jobId));
+export function useSyncJobDetail(jobId: number) {
+  return useQuery({
+    queryKey: syncKeys.jobDetail(jobId),
+    queryFn: () => fetchSyncJob(jobId),
+  });
 }
 
 export function useSyncChanges(jobId: number, changeType: SyncChangeType) {
@@ -90,7 +84,13 @@ export function useSyncJobPolling(
 
   const jobId = runningJobId ?? launchedJobId;
 
-  const query = useQuery(syncJobQuery(jobId));
+  const query = useQuery({
+    queryKey: syncKeys.job(jobId),
+    queryFn: jobId === null ? skipToken : () => fetchSyncJob(jobId),
+    refetchInterval: (query) =>
+      query.state.data?.status === 'RUNNING' ? POLL_INTERVAL_MS : false,
+    meta: { skipErrorToast: true },
+  });
 
   const job = query.data;
 

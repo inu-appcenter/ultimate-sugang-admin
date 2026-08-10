@@ -2,7 +2,7 @@ import { AlertTriangle } from 'lucide-react';
 import { useState } from 'react';
 
 import { SyncChangeList } from '@/features/sync/components/SyncChangeList';
-import { useSyncJob } from '@/features/sync/queries';
+import { useSyncJobDetail } from '@/features/sync/queries';
 import type { SyncChangeType, SyncJobDetail } from '@/features/sync/schemas';
 import { getErrorMessage } from '@/shared/api/errorHandler';
 import { ErrorState } from '@/shared/components/states/ErrorState';
@@ -47,7 +47,7 @@ function JobMeta({ job }: { job: SyncJobDetail }) {
           label="소요"
           value={job.durationSeconds === null ? '-' : formatDuration(job.durationSeconds)}
         />
-        {job.partiallyApplied && <Badge variant="warning">부분 적용</Badge>}
+        {job.partiallyApplied && <Badge variant="muted">부분 적용</Badge>}
       </div>
       {collected !== null && <MetaItem label="수집" value={collected} />}
     </div>
@@ -108,7 +108,7 @@ function ChangeTabs({ job }: { job: SyncJobDetail }) {
 }
 
 export function SyncJobDetailPanel({ jobId }: { jobId: number }) {
-  const { data: job, isPending, isError, error } = useSyncJob(jobId);
+  const { data: job, isPending, isError, error } = useSyncJobDetail(jobId);
 
   if (isPending) return <LoadingSkeleton rows={3} />;
   if (isError) return <ErrorState message={getErrorMessage(error)} />;

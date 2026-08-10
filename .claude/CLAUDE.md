@@ -20,13 +20,14 @@ CLAUDE.md            이 파일. 세션마다 자동 로드
 settings.json        훅 연결(SessionStart·PreToolUse·PostToolUse·Stop)
 build-state.json     어디까지 했는지를 정하는 단 하나의 파일
 skills/   흐름과 절차(build-orchestrator·implement-one-screen·build-review-packet)
-agents/   코드를 고치지 않고 판정만 하는 리뷰어 3종
+agents/   코드를 고치지 않고 지적만 모으는 리뷰어 2종(spec·ds)
 rules/    spec 을 어떻게 쓸지 정한 규칙. 일부는 조건부 로드다(아래 §0-1)
 hooks/    훅 진입점 + checks/(사람 판단 없이 통과·실패가 갈리는 검사)
 spec/     지식 원본 6문서(읽기전용). 목차는 spec/00_INDEX.md
 resource/ phases/(단계별 절차) · smoke/(Playwright) · HARNESS.md
 ```
 > 참조 규약: **실제로 Read 할 파일은 경로를 그대로 쓴다**(`.claude/...`). `[[name]]` 은 `rules/name.md` 를 가리키는 표시다.
+> **`01 §6-5` 같은 절 번호는 축약이 아니라 주소다.** 파일은 아래 §2, 행은 spec-map 이 준다 → §2 첫 줄.
 
 ## 0-1. 조건부로 로드되는 규칙 ⚠️
 
@@ -61,6 +62,8 @@ resource/ phases/(단계별 절차) · smoke/(Playwright) · HARNESS.md
 - 화면 디자인은 **Figma URL 이 있으면 먼저 보고, 없으면 `01 §4~§7` 로 진행한다**(멈추지 않는다). 값은 DS-01 토큰을 쓰고, 동작은 명세를 따른다. → `.claude/rules/ui-conventions.md`
 
 ## 2. 사실은 어디에 있나 — spec/ 목차
+- **절을 읽을 때**: `node .claude/hooks/checks/spec-map.mjs "03 §6-1"` → `Read` 의 `offset`/`limit` 을 그대로 준다(절 208개 등록).
+  **spec 파일을 통째로 읽지 않는다.** 인용은 하위 절까지 내려 쓴다.
 - 목차·약어·문서별 담당 범위: `.claude/spec/00_INDEX.md` (먼저 볼 것)
 - 화면 동작·상태전이·검증: `spec/01_uss_admin_wireframe_spec.md`
 - API 계약: `spec/03_uss_admin_api_spec.md`
