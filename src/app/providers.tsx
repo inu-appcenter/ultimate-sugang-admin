@@ -11,6 +11,7 @@ export function Providers({ children }: { children: ReactNode }) {
       <TooltipProvider delayDuration={200}>{children}</TooltipProvider>
       <Toaster
         position="top-right"
+        offset={{ top: 'var(--toast-offset-top)' }}
         duration={3000}
         toastOptions={{
           classNames: {

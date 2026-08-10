@@ -90,7 +90,9 @@ export function DataTable<T, K extends string | number>({
               {expanded && renderExpanded !== undefined && (
                 <TableRow>
                   <TableCell colSpan={columns.length} className="h-auto px-3 pb-6 pt-2 align-top">
-                    {renderExpanded(row)}
+                    <div className="animate-in fade-in-0 slide-in-from-top-1 duration-200">
+                      {renderExpanded(row)}
+                    </div>
                   </TableCell>
                 </TableRow>
               )}

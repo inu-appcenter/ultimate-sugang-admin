@@ -83,7 +83,7 @@ export default {
       },
 
       // DS-01 §3
-      height: { header: '56px' },
+      height: { header: 'var(--header-height)' },
       minWidth: { viewport: '1280px' },
       maxWidth: {
         content: '1024px',
