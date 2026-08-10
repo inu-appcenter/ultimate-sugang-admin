@@ -130,7 +130,7 @@
     {
       "tag": "decision",
       "item": "step-5-2:M2_preflight",
-      "text": "명세 빈칸을 스스로 채운 값 — (1) 적재 데이터가 없으면 M2 의 '현재 적재' 행을 숨긴다(01 §7-2 에 그때 문구가 없다. 나중에 넣는다면 카드 2 의 '아직 적재된 데이터가 없어요.' 로 맞추는 게 일관적이다). (2) [다음] 은 판정 중에만 비활성 — dirty 로 막으면 UPSERT 경로가 통째로 막힌다. (3) 초기값(적재 학기 ?? 표시 학기)은 SyncMainPage 가 합성해 내려준다. (4) 라벨 폭 함정 — FieldRow 의 w-12 는 text-body(15px) 기준이라 text-caption(13px) 한글 4자는 48px 를 0.22px 넘겨 두 줄이 된다. whitespace-nowrap 으로 푼다. (5) ⚠️ [데이터 업데이트] 의 비활성 조건이 2개다. `01 §6-3`·`04 §10-2` 표에는 `runningJobId !== null` 한 줄뿐이지만, 초기값(적재 학기 ?? 표시 학기)을 못 정할 때도 잠그는 조건을 **사용자 결정으로 추가**했다(2026-08-09, 커밋 0561b28). 명세 위반이 아니라 승인된 확장이다 — 압축 뒤 §10-2 표를 다시 읽고 되돌리지 마라. `03 §4-1` 이 semester_setting 을 시드로 보장해 정상 운영에서는 도달하지 않는 상태다."
+      "text": "명세 빈칸을 스스로 채운 값 — (1) 적재 데이터가 없으면 M2 의 '현재 적재' 행을 숨긴다(01 §7-2 에 그때 문구가 없다. 나중에 넣는다면 카드 2 의 '아직 적재된 데이터가 없어요.' 로 맞추는 게 일관적이다). (2) [다음] 은 판정 중에만 비활성 — dirty 로 막으면 UPSERT 경로가 통째로 막힌다. (3) 초기값(적재 학기 ?? 표시 학기)은 SyncMainPage 가 합성해 내려준다. (4) 라벨 폭 함정 — FieldRow 의 w-12 는 text-body(15px) 기준이라 text-caption(13px) 한글 4자는 48px 를 0.22px 넘겨 두 줄이 된다. whitespace-nowrap 으로 푼다. (5) ⚠️ [데이터 업데이트] 의 비활성 조건이 2개다. `01 §6-3`·`04 §10-2` 표에는 `runningJobId !== null` 한 줄뿐이지만, 초기값(적재 학기 ?? 표시 학기)을 못 정할 때도 잠그는 조건을 **사용자 결정으로 추가**했다(2026-08-09, 커밋 d97ba4e). 명세 위반이 아니라 승인된 확장이다 — 압축 뒤 §10-2 표를 다시 읽고 되돌리지 마라. `03 §4-1` 이 semester_setting 을 시드로 보장해 정상 운영에서는 도달하지 않는 상태다."
     },
     {
       "tag": "decision",
@@ -141,7 +141,7 @@
       "tag": "human-step",
       "item": "step-5-4:polling",
       "status": "superseded",
-      "text": "[해소됨 2026-08-10 · 커밋 d96b9c3] 04 §10-5 의 스니펫과 표를 01 §8-1·03 §7-2·§7-3 과 같은 '3/12 페이지'(띄어쓰기)로 고쳤다. '건'은 세 문서 모두 붙여 쓴다. spec_edit 창을 열고 처리했다."
+      "text": "[해소됨 2026-08-10 · 커밋 d02d62a] 04 §10-5 의 스니펫과 표를 01 §8-1·03 §7-2·§7-3 과 같은 '3/12 페이지'(띄어쓰기)로 고쳤다. '건'은 세 문서 모두 붙여 쓴다. spec_edit 창을 열고 처리했다."
     },
     {
       "tag": "trap",
@@ -173,7 +173,7 @@
     {
       "id": "step-1:setup",
       "ts": "2026-08-08",
-      "commit": "cf14d8a",
+      "commit": "4caf74f",
       "gate": "--full OK",
       "retry": 0,
       "text": "Vite8+React19+TS·Tailwind3.4+shadcn 배선·DS-01 토큰 전체·env.ts·04 §4 폴더·라우터 2개. 리뷰어 대상 아님(step-3~6만)."
@@ -181,7 +181,7 @@
     {
       "id": "step-1:setup",
       "ts": "2026-08-08",
-      "commit": "751c662",
+      "commit": "a5f166a",
       "gate": "--full OK",
       "retry": 0,
       "text": "후속 수정 — Node 20.11.1 에서 Vite 8(rolldown)이 node:util styleText 로 죽어 .nvmrc 22 + engines 추가."
@@ -189,7 +189,7 @@
     {
       "id": "step-2:infra",
       "ts": "2026-08-08",
-      "commit": "9a32ad7",
+      "commit": "b1f6cb1",
       "gate": "--full OK",
       "retry": 0,
       "text": "apiClient 1개·tokenManager·refreshQueue·errorHandler·types·schemas·queryClient, constants 4종, lib 3종, providers, MSW 9개 핸들러+Job 타임라인. Vite SSR + msw/node 로 42건 검증 전부 통과. 리뷰어 대상 아님(step-3~6만)."
@@ -197,16 +197,16 @@
     {
       "id": "step-3:ADMIN_LOGIN",
       "ts": "2026-08-08",
-      "commit": "cce66cd",
+      "commit": "4e41246",
       "gate": "--full OK",
       "review": "spec=PASS · ds=PASS (2라운드)",
       "retry": 0,
-      "text": "LoginLayout·로그인 폼(RHF+Zod)·auth store·protectedLoader·MainLayout+Header·M5. shadcn 4종을 DS-01 로 재정의. 리뷰 1라운드에서 둘 다 FAIL — aria-invalid 미생성(입력 에러 링이 죽어 있었음), 고아 jsdom, 04 §8 구조 이탈. 전부 수정 후 2라운드 PASS. 검증 하네스(harness/verify + npm run verify) 도입, 88건 통과. 이후 사용자 육안 확인으로 cn()/tailwind-merge 사고 발견(fd50c3f)."
+      "text": "LoginLayout·로그인 폼(RHF+Zod)·auth store·protectedLoader·MainLayout+Header·M5. shadcn 4종을 DS-01 로 재정의. 리뷰 1라운드에서 둘 다 FAIL — aria-invalid 미생성(입력 에러 링이 죽어 있었음), 고아 jsdom, 04 §8 구조 이탈. 전부 수정 후 2라운드 PASS. 검증 하네스(harness/verify + npm run verify) 도입, 88건 통과. 이후 사용자 육안 확인으로 cn()/tailwind-merge 사고 발견(a01a777)."
     },
     {
       "id": "step-4:SYNC_MAIN_shell",
       "ts": "2026-08-08",
-      "commit": "c212d0c",
+      "commit": "aa9fad1",
       "gate": "--full OK",
       "review": "spec=PASS · ds=PASS (2라운드)",
       "retry": 0,
@@ -215,7 +215,7 @@
     {
       "id": "step-5-1:M1_semester",
       "ts": "2026-08-08",
-      "commit": "ef8b44d",
+      "commit": "65413e3",
       "gate": "--full OK",
       "review": "spec=PASS(2라운드) · ds=PASS(3라운드)",
       "retry": 0,
@@ -224,16 +224,16 @@
     {
       "id": "step-5-2:M2_preflight",
       "ts": "2026-08-08",
-      "commit": "0561b28",
+      "commit": "d97ba4e",
       "gate": "--full OK",
       "review": "spec=PASS(3라운드) · ds=PASS(3라운드)",
       "retry": 0,
-      "text": "M2 학기 선택 모달 + POST /sync/preflight. (step-5-3 에서 D4 가드를 두 번 손봤다 — 완화 1회·구멍 메우기 2회) 3전략 판정은 전부 서버 몫이고 응답 4필드를 Zod 로 파싱해 onPreflight 로 올린다(D4). 초기값 = 적재 학기 ?? 표시 학기 를 SyncMainPage 가 합성. spec 1라운드 FAIL — 에러 토스트 중복(전역 MutationCache + 호출부). ds 1라운드 FAIL — '현재 적재' 라벨이 w-12 를 0.22px 넘겨 두 줄. 3라운드 — 패킷 §F 질문에 사용자가 '비활성 + 툴팁' 을 골라 반영(0561b28). 그 과정에서 `<button[^>]*disabled[^>]*>` 정규식이 class 의 disabled: 변형에 걸려 활성 버튼도 통과하던 걸 발견해 step-4 것까지 고쳤다. 검증 42건 추가(총 224건). 하네스에 D4 소스 스캔 가드(features/pages 에서 전략 리터럴 분기 금지) 추가. 리뷰어 2종을 처음으로 병렬 실행했다가 세션 한도로 둘 다 죽어 순차로 재실행했고, 3라운드는 병렬로 성공했다."
+      "text": "M2 학기 선택 모달 + POST /sync/preflight. (step-5-3 에서 D4 가드를 두 번 손봤다 — 완화 1회·구멍 메우기 2회) 3전략 판정은 전부 서버 몫이고 응답 4필드를 Zod 로 파싱해 onPreflight 로 올린다(D4). 초기값 = 적재 학기 ?? 표시 학기 를 SyncMainPage 가 합성. spec 1라운드 FAIL — 에러 토스트 중복(전역 MutationCache + 호출부). ds 1라운드 FAIL — '현재 적재' 라벨이 w-12 를 0.22px 넘겨 두 줄. 3라운드 — 패킷 §F 질문에 사용자가 '비활성 + 툴팁' 을 골라 반영(d97ba4e). 그 과정에서 `<button[^>]*disabled[^>]*>` 정규식이 class 의 disabled: 변형에 걸려 활성 버튼도 통과하던 걸 발견해 step-4 것까지 고쳤다. 검증 42건 추가(총 224건). 하네스에 D4 소스 스캔 가드(features/pages 에서 전략 리터럴 분기 금지) 추가. 리뷰어 2종을 처음으로 병렬 실행했다가 세션 한도로 둘 다 죽어 순차로 재실행했고, 3라운드는 병렬로 성공했다."
     },
     {
       "id": "step-5-3:M3_M4_execute",
       "ts": "2026-08-09",
-      "commit": "8aa6436",
+      "commit": "6121b64",
       "gate": "--full OK",
       "review": "spec=PASS(2라운드) · ds=PASS(2라운드)",
       "retry": 0,
@@ -242,7 +242,7 @@
     {
       "id": "step-5-4:polling",
       "ts": "2026-08-10",
-      "commit": "bd9fb28",
+      "commit": "caec735",
       "gate": "--full OK",
       "review": "spec=PASS(4라운드) · ds=PASS(2라운드)",
       "retry": 0,

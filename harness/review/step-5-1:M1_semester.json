@@ -12,35 +12,35 @@
       "reviewer": "spec",
       "verdict": "FAIL",
       "finding": "모달 파일명이 04 §4 트리(137행)의 SemesterSettingModal.tsx 와 다름(DisplaySemesterModal.tsx). 구조는 04 가 정한다(source-of-truth §1-2).",
-      "fix": "파일·컴포넌트·필드 id(semester-setting-year/term) 를 트리 이름에 맞춰 rename. 커밋 e78586c."
+      "fix": "파일·컴포넌트·필드 id(semester-setting-year/term) 를 트리 이름에 맞춰 rename. 커밋 aca78f1."
     },
     {
       "round": 1,
       "reviewer": "ds",
       "verdict": "FAIL",
       "finding": "[저장]이 isPending 동안 disabled 만 되고 spinner 가 없음. DS-01 §6 Loading 행이 'spinner + 텍스트, disabled' 를 규정하고 AdminLoginPage 의 [로그인]이 이미 그 형태.",
-      "fix": "Loader2 h-5 w-5 animate-spin 추가. 커밋 119586b."
+      "fix": "Loader2 h-5 w-5 animate-spin 추가. 커밋 96a76b6."
     },
     {
       "round": 1,
       "reviewer": "ds",
       "verdict": "보완",
       "finding": "select.tsx 의 min-w-[8rem] 임의 값. Tailwind 표준 min-w-32 가 같은 8rem.",
-      "fix": "min-w-32 로 교체(생성 CSS 로 동일 값 확인). 커밋 119586b."
+      "fix": "min-w-32 로 교체(생성 CSS 로 동일 값 확인). 커밋 96a76b6."
     },
     {
       "round": 1,
       "reviewer": "ds",
       "verdict": "보완",
       "finding": "로컬 FieldRow 가 features/semester 안에 있어 M2(features/sync)가 재사용할 수 없다. features 간 직접 import 금지라 복붙이 나올 자리.",
-      "fix": "shared/components/form/FieldRow.tsx 로 상향. prop 이름은 같은 폴더 FormField 에 맞춰 htmlFor → id. 커밋 119586b."
+      "fix": "shared/components/form/FieldRow.tsx 로 상향. prop 이름은 같은 폴더 FormField 에 맞춰 htmlFor → id. 커밋 96a76b6."
     },
     {
       "round": 2,
       "reviewer": "ds",
       "verdict": "FAIL",
       "finding": "맨 duration-200 은 특이도 (0,1,0) 이라 data-[state=open]:animate-in 이 만드는 (0,2,0) 규칙의 150ms 한테 진다. 모달이 step-3 부터 150ms 로 떠 있었다. select.tsx 가 dialog.tsx 의 같은 결함을 복제.",
-      "fix": "dialog.tsx(overlay·content)·select.tsx 세 곳에서 맨 duration-200 을 빼고 data-[state=open]:duration-200 data-[state=closed]:duration-200 으로 교체. 생성 CSS 로 순서·특이도 확인. 커밋 ef8b44d."
+      "fix": "dialog.tsx(overlay·content)·select.tsx 세 곳에서 맨 duration-200 을 빼고 data-[state=open]:duration-200 data-[state=closed]:duration-200 으로 교체. 생성 CSS 로 순서·특이도 확인. 커밋 65413e3."
     },
     {
       "round": 3,
@@ -59,6 +59,6 @@
   ],
   "deferred": [],
   "verify": "harness/verify/step-5-1.mjs 40건 (전체 182건)",
-  "commit": "ef8b44d",
+  "commit": "65413e3",
   "ts": "2026-08-08"
 }

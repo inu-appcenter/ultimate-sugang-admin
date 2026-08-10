@@ -6,28 +6,28 @@
     "spec": 4,
     "ds": 2
   },
-  "ds_rounds_note": "3·4라운드에 ds 를 부르지 않았다. 2라운드 PASS 이후 바뀐 것이 queries.ts 로직·queryClient·하네스뿐이고, 이번 diff 에 className 변경이 한 줄도 없다(git show bd9fb28 -- src 로 확인). 문구가 바뀐 곳은 진행률 줄 하나인데 그 표기의 담당 문서가 03 §7-3 이라 spec 이 판정했다. DS-03 §1-1 관련 이월(DialogDescription 기본값)은 step-7 에 열려 있다.",
+  "ds_rounds_note": "3·4라운드에 ds 를 부르지 않았다. 2라운드 PASS 이후 바뀐 것이 queries.ts 로직·queryClient·하네스뿐이고, 이번 diff 에 className 변경이 한 줄도 없다(git show caec735 -- src 로 확인). 문구가 바뀐 곳은 진행률 줄 하나인데 그 표기의 담당 문서가 03 §7-3 이라 spec 이 판정했다. DS-03 §1-1 관련 이월(DialogDescription 기본값)은 step-7 에 열려 있다.",
   "diffs": [
     {
       "round": 1,
       "reviewer": "spec",
       "verdict": "FAIL",
       "finding": "폴링 대상이 `launchedJobId ?? summary.runningJobId` 였다. launchedJobId 는 세팅만 되고 해제되지 않아 끝난 Job 의 id 가 계속 왼쪽에 남는다. 그 상태에서 시스템에 새 RUNNING Job 이 생기면 카드는 runningJobId 로 진행 중이라 그리는데 폴링은 끝난 Job 을 보고 있어 단계 없는 '업데이트 진행 중' 이 무기한 고정된다. 04 §10-4 는 runningJobId 재개를 진행률 유실을 막는 유일한 장치라고 못 박는다.",
-      "fix": "`summary.runningJobId ?? launchedJobId` 로 뒤집었다(커밋 98d775d). 202 응답은 그 시점에 RUNNING Job 이 없었다는 뜻이라(5200 이 아니므로) summary 를 먼저 봐도 내 Job 을 놓치지 않는다."
+      "fix": "`summary.runningJobId ?? launchedJobId` 로 뒤집었다(커밋 645e699). 202 응답은 그 시점에 RUNNING Job 이 없었다는 뜻이라(5200 이 아니므로) summary 를 먼저 봐도 내 Job 을 놓치지 않는다."
     },
     {
       "round": 1,
       "reviewer": "ds",
       "verdict": "FAIL",
       "finding": "진행률 단위 앞 공백을 붙여쓰기로 통일했다. 01 §8-1·03 §7-2·§7-3 은 `3/12 페이지` 를 띄어쓰고 `450/1,203건` 만 붙여 쓴다 — 불일치가 명세의 의도다. 04 §10-5 만 붙여 쓰는데 화면 표기 담당은 01·03 이다(source-of-truth §2).",
-      "fix": "PERSIST 만 '건', 나머지는 ' 페이지'. 하네스도 같은 오답을 잠그고 있어 같이 고쳤다(98d775d). 04 §10-5 표기는 spec_edit 창에서 사람이 정정(d96b9c3)."
+      "fix": "PERSIST 만 '건', 나머지는 ' 페이지'. 하네스도 같은 오답을 잠그고 있어 같이 고쳤다(645e699). 04 §10-5 표기는 spec_edit 창에서 사람이 정정(d02d62a)."
     },
     {
       "round": 2,
       "reviewer": "spec",
       "verdict": "FAIL",
       "finding": "우선순위를 뒤집는 것만으로 부족했다. 남의 Job 이 끝나는 순간 대상이 끝난 내 Job 으로 되돌아가 화면이 옛 Job 으로 갈아탄다. 그리고 회귀 검사가 회귀를 못 잡고 있었다 — runSyncConfirmFlow 가 언마운트하고 renderSyncMainSteps 가 새로 마운트해서 launchedJobId 가 null 로 리셋된다. 리뷰어가 워크트리를 떠서 옛 코드로도 전건 통과하는 걸 실측했다.",
-      "fix": "폴링 대상 선택을 useSyncJobPolling 안으로 옮기고 종료 effect 가 launchedJobId 를 즉시 비운다. settledJobIds 는 id 하나에서 Set 으로(A→B→A 재처리 방지). 프로브에 click 스텝을 붙여 실행→종료→인계를 한 마운트에서 잇는다(ba21f17)."
+      "fix": "폴링 대상 선택을 useSyncJobPolling 안으로 옮기고 종료 effect 가 launchedJobId 를 즉시 비운다. settledJobIds 는 id 하나에서 Set 으로(A→B→A 재처리 방지). 프로브에 click 스텝을 붙여 실행→종료→인계를 한 마운트에서 잇는다(7c0d0ef)."
     },
     {
       "round": 2,
@@ -41,13 +41,13 @@
       "reviewer": "spec",
       "verdict": "FAIL",
       "finding": "검사가 또 헛돌았다. 리뷰어가 버그 소스 + 새 하네스로 29/29 통과를 실측했다. 두 판정이 다 느슨했다 — 토스트 DOM 개수는 되살아난 쪽이 17ms 늦게 떠 두 장이 동시에 안 잡히고, summaryCalls 는 부등호(>=5)라 버그 쪽 6도 통과했다. 그리고 '실행 중인 Job 의 완료 토스트' 검사가 명세 범위를 넘어섰다.",
-      "fix": "queryClient.invalidateQueries 를 감싸 종료 처리 횟수를 직접 센다 — 종료 effect 만 ['sync','summary'] 를 콕 집어 무효화하므로(409 의 onSettled 는 ['sync'] 프리픽스) Job 둘이면 정확히 2, 되살아나면 3. 버그를 되돌려 red 를 실측했다(got 3). 완료 토스트 검사는 폐기(349840b)."
+      "fix": "queryClient.invalidateQueries 를 감싸 종료 처리 횟수를 직접 센다 — 종료 effect 만 ['sync','summary'] 를 콕 집어 무효화하므로(409 의 onSettled 는 ['sync'] 프리픽스) Job 둘이면 정확히 2, 되살아나면 3. 버그를 되돌려 red 를 실측했다(got 3). 완료 토스트 검사는 폐기(fc17b29)."
     },
     {
       "round": 4,
       "reviewer": "spec",
       "verdict": "PASS",
-      "finding": "범위를 좁힌 재확인 — 349840b 의 두 지적 + 이번에 반영한 넘긴 지적 3건(버튼 잠금·진행률 표기·폴링 토스트) + 명세 밖 확장 여부. 6파일만 봤다.",
+      "finding": "범위를 좁힌 재확인 — fc17b29 의 두 지적 + 이번에 반영한 넘긴 지적 3건(버튼 잠금·진행률 표기·폴링 토스트) + 명세 밖 확장 여부. 6파일만 봤다.",
       "fix": "없음. 아래 self_judgements_accepted 3건을 인정하고 DEFER 3건을 냈다."
     },
     {
@@ -70,6 +70,6 @@
     "[step-7:qa] FAILED 토스트만 개수 검사가 없다(step-5-4.mjs 'FAILED 종료' 섹션). 중복 발화는 SUCCESS 쪽 개수 검사와 settleCount 가 잡으므로 구멍은 아니다. 지금 붙이면 red 를 만들 방법이 없어(종료 후 재fetch 가 없어 Set 가드를 빼도 한 번만 뜬다) 검사만 늘고 증명이 빈다 — 시나리오를 만들 수 있는 step-7 에서 본다."
   ],
   "verify": "harness/verify/step-5-4.mjs 31건 (전체 315건, 7스크립트). red 확인 3건 — 버튼 잠금: '202 직후 버튼이 잠긴다' + '진행률 줄도 같이 뜬다' FAIL / 진행률 표기: 'total null 이면 분모 없이' got \"업데이트 진행 중 · 강의 수집 중…\" / 폴링 토스트: '폴링 에러 토스트가 없다' got 1. 검사 3개를 includes 에서 진행률 줄 전체 문자열 eq 로 바꿨고, 토스트는 data-sonner-toast 노드만 세도록 좁혔다(같은 문구가 카드 Error State 에도 있어 전체 DOM 으로는 2개로 잡힌다).",
-  "commit": "bd9fb28",
+  "commit": "caec735",
   "ts": "2026-08-10"
 }

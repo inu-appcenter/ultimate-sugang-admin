@@ -35,7 +35,7 @@ description: USS 백오피스 빌드의 전체 흐름을 소유한다. "빌드 �
      "open_questions": [],                  // 사용자 결정이 필요해 멈춘 것
      "deferred": [],                        // 다음 단계로 넘긴 것 — 같은 턴에 build-state.deferred 로 옮긴다
      "verify": "harness/verify/step-5-4.mjs 29건 (전체 312건). red 확인: …",
-     "commit": "349840b", "ts": "2026-08-10"
+     "commit": "fc17b29", "ts": "2026-08-10"
    }
    ```
    - **`spec`·`ds` 모두 `PASS` 인 증거가 있을 때만** 항목을 `COMPLETED` 로 전환한다(7).
