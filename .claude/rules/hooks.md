@@ -31,7 +31,7 @@ paths:
 
 ## 검사 묶음 (`hooks/checks/gate-runner.sh`)
 `OK` 또는 `FAIL\n{사유}` 를 출력한다.
-- **fast**(인자 없음) = `validate-state` + `typecheck` + `token-lint` + `uss-contract-lint`. **Stop 훅이 매 턴 돌린다.**
+- **fast**(인자 없음) = `validate-state` + `spec-map --check` + `typecheck` + `token-lint` + `uss-contract-lint`. **Stop 훅이 매 턴 돌린다.**
 - **`--full`** = fast + **`verify`**(`npm run verify` — jsdom 동작 검증, 약 100초) + `build`(vite). **커밋과 리뷰 패킷 직전**에 오케스트레이터가 돌린다.
 - **`--with-smoke`** = full + Playwright 스모크. **QA(Step 7)**.
 - 매 턴 풀빌드를 돌리지 않는 이유가 이 구분이다. Stop 은 가볍게, 의미 있는 지점에서만 무겁게.
@@ -60,6 +60,11 @@ paths:
   - 두 가지로 쓰인다: `checkSpecPresence(specDir)`(SessionStart 가 import 한다. 경고 배열을 돌려주고 막지 않는다)와 직접 실행(`OK`/`FAIL`, 필수 누락이나 Gravit 문서가 있으면 exit 1).
   - ⚠️ export 이름과 형태는 `session-start.mjs` 와의 약속이다. 바꾸면 SessionStart 가 깨진다.
   - **있으면 FAIL**: `01_gravit_admin_wireframe_spec.md` · `03_gravit_admin_api_spec.md` · `04_gravit_admin_frontend_spec.md` · `DS-00_overview.md` · `DS-01_design_system.md` · `DS-02_screens.md`. `DS-04_prompt_templates.md` 는 경고만 한다.
+- **spec-map** — spec 의 절 번호(`## 6.` → `§6`, `### 6-4.` → `§6-4`)를 실제 행 범위로 옮겨 `resource/spec-map.json` 에 넣는다.
+  - **행 범위를 문서에 손으로 박지 않는다.** phase 문서와 `00_INDEX` 는 **절 번호만** 쓰고, 읽을 행은 이 map 에서 가져온다.
+  - 읽을 구간을 찾을 때: `node .claude/hooks/checks/spec-map.mjs "03 §6"` → `Read` 의 `offset`/`limit` 을 그대로 출력한다.
+  - spec 을 고쳤으면 **`node .claude/hooks/checks/spec-map.mjs` 로 다시 생성한다.** 안 하면 fast 게이트가 red(`--check`).
+  - 왜 만들었나: 손으로 박은 숫자가 실제로 **4줄씩 어긋나 있었다**(`04 §10` 은 726행인데 730으로 박혀 헤딩을 건너뛰고 읽었다). 틀려도 티가 안 나는 종류의 오류다.
 - **doc-lint** — `.claude/**/*.md` 의 용어와 표기를 통일한다. 단어만 바꾸면 되는 건 `--fix` 가 처리하고, 문장을 다시 써야 하는 건 보고만 한다.
 
 ## 경로 약속 (바꾸면 같이 고칠 것)
