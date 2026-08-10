@@ -64,10 +64,14 @@ SUCCESS/FAILED → 폴링 중단 + summary·이력 invalidate + 토스트
 ### 근거는 어디에 남기나
 | 남길 것 | 자리 |
 |---|---|
-| 왜 이렇게 했나 / 어느 명세를 따랐나 | **커밋 메시지** |
+| 무엇을 해결했나 (한 줄) | **커밋 제목** — `{type}: 내용` 40자 → [[git-convention]] |
+| 왜 이렇게 했나 / 어느 명세를 따랐나 | `build-state.json` 의 `notes` 또는 `harness/review/<항목ID>.json` |
 | 리뷰에서 나온 지적과 처리 | `harness/review/<항목ID>.json` |
 | 다시 밟으면 안 되는 함정, 사용자 확정 사항 | `build-state.json` 의 `notes` |
+| 다음 단계로 넘긴 것 | `build-state.json` 의 `deferred` |
 | 명세 자체가 애매하다 | 리뷰 패킷 §C·§F 에 질문(🙋🏻) |
+
+> 커밋 본문은 짧게 쓰거나 생략한다. 길게 쓰면 다음 세션이 `git log` 를 뒤지게 되는데, 거기엔 검색도 갱신도 안 된다.
 
 > 주석을 쓰면 안 되는 실용적 이유도 있다. `uss-contract-lint` 는 **한 줄짜리 `/** */` 주석도 검사한다** — 주석에 `?? 0` 이나 `Authorization` 을 적으면 게이트가 red 가 된다. Tailwind 는 **주석 문자열까지 스캔해서** 클래스명을 적어두면 아무도 안 쓰는 CSS 규칙을 만든다. 둘 다 실제로 겪은 일이다.
 

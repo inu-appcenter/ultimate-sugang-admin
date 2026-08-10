@@ -22,7 +22,7 @@ description: USS 백오피스 빌드의 전체 흐름을 소유한다. "빌드 �
 3. 화면/모달 구현 항목이면  **`implement-one-screen`** 스킬 절차를 사용 (0단계 = **Figma URL 확인(선택)**, 없으면 `01 §4~§7` 로 진행·중단 없음).
 4. 결정 **D1~D12** 적용 → [[decisions]]. 특히 D4(전략은 서버 판정) · D8(화면 2개) · D10(표시 학기 ↔ 적재 독립) · D12(enum 미매핑은 경고).
 5. 게이트 실행(커밋 직전): `bash .claude/hooks/checks/gate-runner.sh --full`(QA 는 `--with-smoke`). 매 턴 Stop 훅은 fast 게이트를 자동 실행한다.
-   - `OK` → green 커밋(메시지에 항목 ID).
+   - `OK` → green 커밋. 커밋과 push 는 **`commit-push` 스킬**로 한다(브랜치·메시지 형식은 [[git-convention]]).
    - `FAIL` → 사유 보고 부분만 자가수정 후 재실행. **한도 3회**(`build-state.json.retry[항목ID]`). 초과 → 더 고치지 말고 `manual_review` 에 기록하고 멈춰 보고.
 6. **리뷰 게이트 (화면 항목 `step-3` ~ `step-6` — 미실행 방지, `checks/validate-state.mjs` 가 강제).** 게이트 green·커밋 후 **`spec-conformance-reviewer` + `ds-conformance-reviewer` 를 호출**하고 결과를 `harness/review/<항목ID>.json` 에 기록한다:
    ```jsonc
@@ -50,7 +50,8 @@ description: USS 백오피스 빌드의 전체 흐름을 소유한다. "빌드 �
 - **Step 종료마다**, 그리고 **Step 5 는 4 하위단계 각각마다**(`step-5-1` ~ `step-5-4`) → `build-review-packet` 스킬로 패킷 제출 후 **정지**. 사용자 승인 전 다음 단계로 넘어가지 않는다.
 
 ## 3. 비가역/외부 작업
-**실제 REPLACE Job 실행**(`POST /sync/jobs` — 학교 데이터 실적재), 배포/publish, `git push`, `.env` 비밀값 → **코드 구조만 생성**, 실행은 사람에게 위임. (PreToolUse 훅도 차단) → [[hooks]] · [[antipatterns]]
+**실제 REPLACE Job 실행**(`POST /sync/jobs` — 학교 데이터 실적재), 배포/publish, force push, `main` 으로의 push, `.env` 비밀값 → **코드 구조만 생성**, 실행은 사람에게 위임. (PreToolUse 훅도 차단) → [[hooks]] · [[antipatterns]]
+작업 브랜치 push 는 비가역이 아니다 — `commit-push` 스킬이 처리한다. → [[git-convention]]
 
 ## 4. 상태 파일 갱신 규칙
 - 한 번에 `IN_PROGRESS` 1개. 끝나면 즉시 다음으로 넘기지 말고 정지 규칙(§2) 확인.

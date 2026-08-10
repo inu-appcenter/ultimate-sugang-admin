@@ -25,7 +25,8 @@
 - 검사를 추가·수정할 때의 규율(red 증명·근거 절·탐색 상한)은 `rules/verification.md`.
 - lint 는 PostToolUse 에서 자동수정(소프트, 비차단).
 - 자가수정 3회 초과 → `manual_review` + 정지(사람 검수). 데드락 없음.
-- 안전 차단(PreToolUse): rm -rf · 원격푸시 · 배포/publish · `.claude/spec/` 쓰기 · `.env` 비밀값. 비가역(**실제 REPLACE Job 실행**·배포·비밀값)은 코드 구조만, 실행은 사람.
+- 안전 차단(PreToolUse): rm -rf · force push · `main` push · 배포/publish · `.claude/spec/` 쓰기(`spec_edit` 창 제외) · `.env` 비밀값. 비가역(**실제 REPLACE Job 실행**·배포·비밀값)은 코드 구조만, 실행은 사람.
+- 커밋·푸시는 `commit-push` 스킬로 한다(게이트 `--full` green 이 선행 조건). 형식은 `rules/git-convention.md`.
 
 ## 구조 한눈에 (모두 `.claude/` 아래)
 | 버킷 | 경로 | 내용 |

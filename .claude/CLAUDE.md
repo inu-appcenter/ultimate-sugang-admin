@@ -38,6 +38,7 @@ resource/ phases/(단계별 절차) · smoke/(Playwright) · HARNESS.md
 | `rules/architecture.md` · `rules/good-patterns.md` | `src/**/*.{ts,tsx}` |
 | `rules/api-contract.md` | `features/**/{api,schemas}.ts` · `shared/api/**` · `mocks/**` |
 | `rules/verification.md` | `harness/verify/**` · `.claude/hooks/checks/**` |
+| `rules/git-convention.md` | `commit-push` 스킬을 쓸 때 (스킬이 직접 Read 한다) |
 | `rules/hooks.md` | `.claude/**` 의 스크립트·설정 |
 
 **그래서 다음 두 경우에는 직접 Read 해야 한다:**
@@ -56,6 +57,7 @@ resource/ phases/(단계별 절차) · smoke/(Playwright) · HARNESS.md
 - 전체 흐름: `.claude/skills/build-orchestrator/SKILL.md`
 - 화면 하나 구현하는 절차: `.claude/skills/implement-one-screen/SKILL.md`
 - 리뷰 패킷 양식: `.claude/skills/build-review-packet/SKILL.md`
+- 커밋·푸시: `.claude/skills/commit-push/SKILL.md` — 게이트 `--full` green 이 아니면 커밋하지 않는다. 형식은 `.claude/rules/git-convention.md`(`{type}: 내용` 40자, 괄호·범위 표기 금지, `main` 직접 커밋 금지)
 - 화면 디자인은 **Figma URL 이 있으면 먼저 보고, 없으면 `01 §4~§7` 로 진행한다**(멈추지 않는다). 값은 DS-01 토큰을 쓰고, 동작은 명세를 따른다. → `.claude/rules/ui-conventions.md`
 
 ## 2. 사실은 어디에 있나 — spec/ 목차

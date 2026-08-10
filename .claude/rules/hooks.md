@@ -41,7 +41,11 @@ paths:
 > 수동 실행: `node .claude/hooks/checks/spec-presence.mjs` · `node .claude/hooks/checks/doc-lint.mjs`
 
 ## PreToolUse 가 막는 것 (pretool-guard.mjs)
-- Bash: `rm -rf /|~|..`, `git push`(`--force` 포함), `gh release|pr merge|repo delete`, npm/yarn/pnpm `publish`, vercel/netlify/firebase/gh-pages 배포·`--prod`, `curl | sh`, `> .claude/spec/` 리다이렉트
+- Bash: `rm -rf /|~|..`, `gh release|pr merge|repo delete`, npm/yarn/pnpm `publish`, vercel/netlify/firebase/gh-pages 배포·`--prod`, `curl | sh`, `> .claude/spec/` 리다이렉트
+- **push 는 좁게 막는다**(전면 차단이 아니다) → [[git-convention]]
+  - ❌ force push(`--force`·`--force-with-lease`·`-f`·`+refspec`) · ❌ `main` 으로의 push · ❌ `main` 브랜치에서의 push
+  - ✅ 작업 브랜치 push 는 통과한다. `commit-push` 스킬이 이 경로를 쓴다
+  - 브랜치 조회는 `git push` 명령일 때만 한다 — 매 Bash 호출마다 git 을 띄우지 않는다
 - Write/Edit: `.claude/spec/`(**`00_INDEX.md` 만 상시 예외**)와 `.env*` 파일 → spec 은 읽기 전용이고 비밀값은 사람이 넣는다. [[antipatterns]]
 - **spec 편집 창**: `build-state.json` 의 `spec_edit: true` 일 때만 spec 쓰기가 열린다. **사람이 열고 사람이 닫는다.** 열려 있어도 고칠 수 있는 건 구조지 사실이 아니다 → [[source-of-truth]] §4.
   - 창을 닫아도 `spec-map` 의 파일 해시가 남아, 창 밖에서 내용이 바뀌면 fast 게이트가 어느 문서인지 지목한다.
