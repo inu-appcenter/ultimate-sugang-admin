@@ -17,6 +17,7 @@
     "datetime_format": "KST-local-no-offset",
     "mock": "msw"
   },
+  "spec_edit": false,
   "retry": {},
   "probes": {},
   "manual_review": [],

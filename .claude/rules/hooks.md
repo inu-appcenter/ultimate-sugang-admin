@@ -42,7 +42,9 @@ paths:
 
 ## PreToolUse 가 막는 것 (pretool-guard.mjs)
 - Bash: `rm -rf /|~|..`, `git push`(`--force` 포함), `gh release|pr merge|repo delete`, npm/yarn/pnpm `publish`, vercel/netlify/firebase/gh-pages 배포·`--prod`, `curl | sh`, `> .claude/spec/` 리다이렉트
-- Write/Edit: `.claude/spec/`(**`00_INDEX.md` 만 예외**)와 `.env*` 파일 → spec 은 읽기 전용이고 비밀값은 사람이 넣는다. [[antipatterns]]
+- Write/Edit: `.claude/spec/`(**`00_INDEX.md` 만 상시 예외**)와 `.env*` 파일 → spec 은 읽기 전용이고 비밀값은 사람이 넣는다. [[antipatterns]]
+- **spec 편집 창**: `build-state.json` 의 `spec_edit: true` 일 때만 spec 쓰기가 열린다. **사람이 열고 사람이 닫는다.** 열려 있어도 고칠 수 있는 건 구조지 사실이 아니다 → [[source-of-truth]] §4.
+  - 창을 닫아도 `spec-map` 의 파일 해시가 남아, 창 밖에서 내용이 바뀌면 fast 게이트가 어느 문서인지 지목한다.
 
 ## Stop 검사 (stop-gate.mjs → checks/gate-runner.sh fast)
 - `package.json` 이 없으면(= Step 1 이전) 검사할 게 없으므로 **통과**시킨다. Step 1 이후 자동으로 켜진다.
