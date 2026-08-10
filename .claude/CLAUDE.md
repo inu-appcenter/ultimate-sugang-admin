@@ -73,7 +73,7 @@ resource/ phases/(단계별 절차) · smoke/(Playwright) · HARNESS.md
 - 색·간격·타이포는 DS-01 토큰만 쓴다. raw hex 와 임의 px 은 금지. **카드에는 보더를 쓰지 않는다**(그림자로 처리). → `rules/ui-conventions.md`
 - `features/{a}` 가 `features/{b}` 를 직접 import 하지 않는다. import 는 `@/` 절대경로만. → `rules/architecture.md`
 - **`src/` 에 주석을 쓰지 않는다.** 이름과 구조로 설명한다. 근거는 커밋 메시지·`harness/review`·`build-state.notes` 에 남긴다. 예외는 컴파일러 지시자뿐. → `rules/good-patterns.md`
-- **Gravit 에서 넘어온 습관 주의**: `Authorization: Bearer`·refresh 토큰·logout·문자열 에러코드·페이지 20·UTC 변환은 **전부 오답이다.** → `rules/antipatterns.md`
+- **가장 흔한 오답**: `Authorization: Bearer`·refresh 토큰·logout·문자열 에러코드·페이지 20·UTC 변환. 전부 틀렸다. → `rules/antipatterns.md`
 - 하지 말 것 전체: `rules/antipatterns.md` · 권장 방식: `rules/good-patterns.md`
 
 ## 4. 자동 검사 (통과 전에 "완료"라고 하지 않는다)

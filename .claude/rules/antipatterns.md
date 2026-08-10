@@ -25,9 +25,9 @@ dark: · 반응형 breakpoint · @media · raw hex · [12px] 임의 값
 - ❌ 표시 학기를 바꿨다고 데이터 적재를 실행하기 (D10)
 - ❌ 미리보기나 2단계 적용 흐름 (D11)
 - ❌ 증분 수집이나 마지막 실행일 커서를 요청에 넣기 (D1)
-- ❌ `changedFields` 라벨 매핑에 `maxCapacity`·`currentEnrollment` 넣기 (D2 — 절대 오지 않는 값이다)
+- ❌ `changedFields` 라벨 매핑에 `maxCapacity`·`currentEnrollment` 넣기 (D2)
 - ❌ 세 번째 화면 만들기 (D8). 화면은 `ADMIN_LOGIN`·`SYNC_MAIN` 2개뿐이다
-- ❌ `courseCount` 를 "활성 과목 수"로 읽기 (D3 — `CLOSED` 가 포함돼 있다)
+- ❌ `courseCount` 를 "활성 과목 수"로 읽기 (D3)
 - ❌ `TERM_CODE`(10/20/30/40) 로 학기를 정렬하거나 비교하기. 여름(30)이 2학기(20)보다 크다
 
 ### 명세 밖으로 나가기

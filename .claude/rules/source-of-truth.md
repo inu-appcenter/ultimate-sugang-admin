@@ -14,15 +14,15 @@
 | `04_uss_admin_frontend_spec.md` | **프론트 구조·기술 스택·Step 절차·공통 정책(인증/에러/폼)** |
 | `DS-00_uss_overview.md` | **시각 방향** — 톤·참고 사례·디자인 원칙·문장 어조·채택하지 않은 것 |
 | `DS-01_uss_design_system.md` | **디자인 토큰 값·컴포넌트 이름·상태별 변형·아이콘** |
-| `DS-03_interactions.md` | 상호작용 패턴(모달·토스트 등). Gravit 원문이라 절별로 적용 범위가 갈린다 → `spec/00_INDEX.md` |
+| `DS-03_interactions.md` | 상호작용 패턴(모달·토스트 등). 승계 문서라 절별로 적용 범위가 갈린다 → `spec/00_INDEX.md` |
 
 ### ⚠️ DS-02 로는 USS 화면을 만들 수 없다
 
-`DS-02_screens.md` 는 **Gravit 16화면**의 시각 명세다. USS 는 화면이 `ADMIN_LOGIN`·`SYNC_MAIN` **2개**뿐이라 서로 대응되지 않는다.
+`DS-02_screens.md` 는 **다른 제품 16화면**의 시각 명세다. USS 는 화면이 `ADMIN_LOGIN`·`SYNC_MAIN` **2개**뿐이라 서로 대응되지 않는다.
 
 - USS 화면의 시각은 **`01 §4~§7`**(레이아웃·와이어프레임·모달)에서 가져온다.
 - DS-02 는 **테이블·폼·모달을 어떻게 구성하는지 정도만 참고**한다. DS-02 에 나오는 화면(대시보드·유저·신고·스테이징·공지)을 USS 에 만들지 않는다.
-- Gravit `DS-00_overview.md`·`DS-01_design_system.md` 는 **버렸다.** `DS-00_uss_overview.md`·`DS-01_uss_design_system.md` 가 그 자리를 대신한다. → [[ui-conventions]]
+- 구 `DS-00_overview.md`·`DS-01_design_system.md` 는 **버렸다.** `DS-00_uss_overview.md`·`DS-01_uss_design_system.md` 가 그 자리를 대신한다. → [[ui-conventions]]
 
 ## 2. 어긋날 때 누가 이기나 (위가 이긴다)
 
@@ -30,7 +30,7 @@
 2. **그 영역을 담당하는 문서**(위 표)
 3. 나머지 문서
 4. **코드와 spec 이 다르면** → 언제나 spec 이 맞다. 코드를 spec 에 맞춘다.
-5. **Gravit 에서 온 서술과 USS 문서가 다르면** → 무조건 USS 문서다. Gravit 쪽 서술은 근거가 되지 않는다.
+5. **폐기 문서의 서술과 USS 문서가 다르면** → 무조건 USS 문서다. 폐기 쪽 서술은 근거가 되지 않는다.
 
 ## 3. 멈춰야 하는 경우 (지어내지 않는다)
 

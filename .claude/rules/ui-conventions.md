@@ -8,8 +8,7 @@ paths:
 # 규칙 — UI·디자인 토큰
 
 > 시각 방향은 `DS-00_uss_overview.md`, 토큰 값은 `DS-01_uss_design_system.md`, 화면 시각은 `01 §4~§7`, 상호작용은 `DS-03` 이 정한다.
-> ⚠️ **`DS-02` 는 Gravit 화면 문서다.** USS 화면 시각을 여기서 가져오지 않는다 → [[source-of-truth]] §1.
-> ⚠️ Gravit `DS-00` 은 **버렸다.** `DS-00_uss_overview.md` 가 그 자리를 대신한다.
+> ⚠️ **`DS-02` 는 다른 제품의 화면 문서다.** USS 화면 시각을 여기서 가져오지 않는다 → [[source-of-truth]] §1.
 
 ## 0. 톤 (DS-00 §4-1 — 값을 보기 전에 먼저 읽는다)
 1. **크기로 계층을 만든다** — 색으로 구분하지 않는다. 수치는 `text-metric`(32/Bold).
@@ -24,8 +23,8 @@ paths:
 - raw hex 와 임의 값(`#fff`, `[13px]`)을 쓰지 않는다. 색·간격·타이포는 **토큰만**.
 - 토큰 정의는 `globals.css`(CSS 변수)와 `tailwind.config.ts` 에만 둔다(= token-lint 예외 대상).
 
-## 전체 레이아웃 (01 §4) — **Gravit 과 다르다**
-| 항목 | Gravit (❌) | **USS (✅)** |
+## 전체 레이아웃 (01 §4)
+| 항목 | ❌ 쓰지 말 것 | **USS (✅)** |
 |---|---|---|
 | 사이드바 | 240px 고정 | **없음** |
 | 헤더 | 56px | 56px (같다). 왼쪽 "USS 관리자"(→`/`) / 오른쪽 관리자 이름 + Ghost "로그아웃" |
@@ -98,12 +97,12 @@ paths:
 | DS-01 토큰명 | Tailwind 클래스 | USS 값 |
 |---|---|---|
 | `header-height` | `h-header` | 56 |
-| `content-max-width` | `max-w-content` | **1024** (Gravit 1200 에서 변경) |
+| `content-max-width` | `max-w-content` | **1024** |
 | `viewport-min-width` | `min-w-viewport` | 1280 |
 | `login-card-width` | `max-w-login-card` | 400 |
 | `modal-width-default` / `-wide` | `max-w-modal` / `max-w-modal-wide` | 400 / **480(M4 전용)** |
-| `radius-card` | `rounded-card` | **14px** (Gravit 8 에서 변경) |
-| `radius-button` / `radius-input` | `rounded-btn` | **10px** (Gravit 6 에서 변경) |
+| `radius-card` | `rounded-card` | **14px** (shadcn 기본 6 을 재정의) |
+| `radius-button` / `radius-input` | `rounded-btn` | **10px** (shadcn 기본 6 을 재정의) |
 | `radius-modal` | `rounded-modal` | **16px** |
 | `text-metric` | `text-metric` | **32 / Bold — 카드의 핵심 수치** |
 | 타이포 | `text-h1`(24/B)·`text-h2`(18/SB)·`text-h3`(16/SB)·`text-body`(15/R)·`text-caption`(13/R) | `DS-01 §2` |
@@ -133,13 +132,13 @@ paths:
 - **Figma 가 없으면**: 위 순서대로 **알아서 완성한다. 멈추거나 묻지 않는다.**
 - **동작·필드·엔드포인트·검증 규칙은 Figma 가 정하지 않는다 — 명세에 없으면 만들지 않는다.** Figma 를 썼는지, 어디를 스스로 채웠는지는 **리뷰 패킷 §C 에 적는다.**
 - 시각 근거가 어디에도 없고 짐작이 너무 커질 때만 멈추고 묻는다(🙋🏻).
-- ⚠️ USS 에는 **브랜드나 일러스트를 쓰는 예외 화면이 없다**(Gravit 의 해당 규칙은 OAuth 로그인 전용이었다). `ADMIN_LOGIN` 은 아이디·비밀번호 폼이므로 브랜드 토큰이나 일러스트를 들이지 않는다.
+- ⚠️ USS 에는 **브랜드나 일러스트를 쓰는 예외 화면이 없다.** `ADMIN_LOGIN` 은 아이디·비밀번호 폼이므로 브랜드 토큰이나 일러스트를 들이지 않는다.
 
 ## 컴포넌트
 - **shadcn/ui 를 먼저 쓴다.** 직접 만드는 건 shadcn/ui 확장 + 토큰 경유로만 한다. ⚠️ shadcn 기본 radius(6px)는 **다시 정의한다**(카드 14 / 버튼 10 / 모달 16).
 - 아이콘은 `lucide-react`(인라인 16 / 버튼 20 / 상태 48). 한글 폰트는 Pretendard.
 - **컴포넌트는 `DS-01 §5` 의 이름으로 부른다** — Info Card · Metric Row · Data Table · Table Card · Expandable Row · Tab Group · Confirm Modal · Strict Match Modal 등.
-- ⚠️ Gravit 에는 있지만 **USS 에는 없는 것**: Sidebar · Breadcrumb · Filter Bar · Stat Card · Textarea · Radio Group · Checkbox · Search Input · Banner. 만들지 않는다.
+- ⚠️ **USS 에는 없는 것**: Sidebar · Breadcrumb · Filter Bar · Stat Card · Textarea · Radio Group · Checkbox · Search Input · Banner. 만들지 않는다.
 - Primary 는 **액션과 강조에만** 쓴다(넓은 면적 금지). 위험한 액션은 destructive.
 
 ## 공통 패턴 (01 §6~§9, DS-03)

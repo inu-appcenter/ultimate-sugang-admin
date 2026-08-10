@@ -41,7 +41,7 @@ const isAllowed = (file, ruleId) =>
 // ── 규칙: 한 줄 안에서 정규식으로 판정되는 것들 ───────────────
 // id 는 예외 목록에서 쓰는 키다. 바꾸면 allow 파일도 같이 바꿔야 한다.
 const LINE_RULES = [
-  // Gravit 에서 넘어오기 쉬운 습관 (rules/api-contract.md §0)
+  // 가장 흔한 오답 (rules/api-contract.md §0)
   { id: 'auth-header', re: /\bAuthorization\b|\bBearer\b/, msg: '인증 헤더는 `access-token` 이다. Authorization/Bearer 금지' },
   { id: 'refresh-token', re: /\brefreshToken\b|\bRefreshToken\b/, msg: 'refresh 토큰이 존재하지 않는다. access 단일 토큰만' },
   { id: 'auth-client-split', re: /\bauthApiClient\b/, msg: 'axios 인스턴스는 `apiClient` 1개다. 분리 금지' },
@@ -83,7 +83,7 @@ const ALLOWED_ENDPOINTS = new Set([
 ]);
 const ALLOWED_PATHS = new Set([...ALLOWED_ENDPOINTS].map((e) => e.split(' ')[1]));
 // API 경로처럼 생긴 문자열/템플릿 리터럴. 라우트(`/login`, `/`)와 base URL(`/api/v1/admin`)은
-// 접두사가 달라 걸리지 않는다. `admin` 을 포함시키는 이유는 Gravit 의 `/admin/me` 를 잡기 위해서다.
+// 접두사가 달라 걸리지 않는다. `admin` 을 포함시키는 이유는 `/admin/me` 류의 호출을 잡기 위해서다.
 const API_PATH = /['"`](\/(?:auth|semesters|courses|sync|admin)(?:\/[^'"`]*)?)['"`]/g;
 
 // ── 금지 라이브러리 (rules/antipatterns.md) ───────────────────
@@ -171,7 +171,7 @@ if (existsSync(featuresDir)) {
     if (ALLOWED_DOMAINS.has(name)) continue;
     if (isAllowed(`src/features/${name}`, 'feature-domain')) continue;
     violations.push(
-      `src/features/${name}  [feature-domain] 도메인은 auth·semester·sync 3개뿐이다. Gravit 도메인을 만들지 않는다`,
+      `src/features/${name}  [feature-domain] 도메인은 auth·semester·sync 3개뿐이다. 다른 도메인을 만들지 않는다`,
     );
   }
 }

@@ -8,13 +8,13 @@ paths:
 # 규칙 — API 계약 지키기
 
 > 근거는 `03_uss_admin_api_spec.md` 다. 엔드포인트·필드·응답은 **반드시 거기서 확인한다.** 여기에는 바뀌지 않는 규칙과 공통 형태만 적는다.
-> ⚠️ **Gravit 계약과 다른 곳이 많다.** §0 을 먼저 읽는다.
+> ⚠️ **틀리기 쉬운 곳이 많다.** §0 을 먼저 읽는다.
 
-## 0. Gravit 에서 넘어오기 쉬운 습관 (가장 흔한 오염원)
+## 0. 가장 흔한 오답
 
 아래는 전부 uss-contract-lint 가 잡지만, 애초에 쓰지 않는 편이 빠르다.
 
-| 항목 | Gravit (❌ 쓰지 말 것) | **USS (✅ 정답)** |
+| 항목 | ❌ 쓰지 말 것 | **USS (✅ 정답)** |
 |---|---|---|
 | 인증 헤더 | `Authorization: Bearer {t}` | **`access-token: {t}`** |
 | 토큰 구조 | access + refresh, Rotation, Redis | **access 하나. refresh 없음** |

@@ -5,7 +5,10 @@
  * 두 가지로 쓰인다:
  *   1) `checkSpecPresence(specDir)` — SessionStart 훅이 import. 경고 문자열 배열 반환. **비차단**.
  *   2) `node .claude/hooks/checks/spec-presence.mjs` — 직접 실행. `OK` 또는 `FAIL\n{사유}`. 필수 누락·
- *      Gravit 잔재 발견 시 exit 1.
+ *      허용 목록 밖 문서 발견 시 exit 1.
+ *
+ * 판정은 **허용 목록** 방식이다. "이 문서는 있으면 안 된다"를 이름으로 나열하면 목록에 없는 새 문서가
+ * 조용히 통과한다. spec/ 에 무엇이 있어도 되는지는 정해져 있으므로 그 목록으로만 판정한다.
  *
  * ⚠️ export 이름·시그니처는 `hooks/session-start.mjs` 와의 계약이다. 바꾸면 SessionStart 훅이 깨진다.
  */
@@ -26,24 +29,12 @@ const REQUIRED = [
 /** 있어도 되지만 판단 근거로는 쓰지 않는 문서 (없으면 경고만). */
 const OPTIONAL = ['DS-03_interactions.md'];
 
-/** 존재하면 안 되는 Gravit 잔재 — USS 문서와 충돌해 혼선을 부른다. 발견 시 FAIL. */
-const FORBIDDEN = [
-  '01_gravit_admin_wireframe_spec.md',
-  '03_gravit_admin_api_spec.md',
-  '04_gravit_admin_frontend_spec.md',
-  'DS-00_overview.md',
-  'DS-01_design_system.md',
-  'DS-02_screens.md',
-];
-
-/** Gravit 전용이나 USS 검증 대상은 아님 — 경고만(삭제 권장). */
-const DISCOURAGED = ['DS-04_prompt_templates.md'];
-
-const known = new Set([...REQUIRED, ...OPTIONAL, ...FORBIDDEN, ...DISCOURAGED]);
+/** spec/ 에 있어도 되는 문서는 이 둘이 전부다. 그 밖의 `.md` 는 판단을 오염시키므로 FAIL. */
+const ALLOWED = new Set([...REQUIRED, ...OPTIONAL]);
 
 /**
  * specDir 를 감사해 { problems, warnings } 를 반환.
- * problems = 진행 불가(필수 누락 · Gravit 잔재). warnings = 알림만.
+ * problems = 진행 불가(필수 누락 · 허용 목록 밖 문서). warnings = 알림만.
  */
 export function auditSpec(specDir) {
   const problems = [];
@@ -60,7 +51,7 @@ export function auditSpec(specDir) {
     const m = name.match(/^(\d{2}|DS-\d{2})/); // 안정적 식별 prefix(03 / DS-01 ...)
     const prefix = m ? m[1] : name.split('_')[0];
     const candidate = present.find(
-      (f) => f.startsWith(prefix) && f.endsWith('.md') && f !== name && !FORBIDDEN.includes(f),
+      (f) => f.startsWith(prefix) && f.endsWith('.md') && f !== name && !ALLOWED.has(f),
     );
     problems.push(
       candidate
@@ -69,20 +60,12 @@ export function auditSpec(specDir) {
     );
   }
 
-  for (const name of FORBIDDEN) {
-    if (present.includes(name)) {
-      problems.push(`Gravit 잔재 문서 발견: spec/${name} — 삭제 필요 (USS 문서와 충돌).`);
-    }
-  }
-
   for (const name of OPTIONAL) {
     if (!present.includes(name)) warnings.push(`선택 문서 없음: spec/${name}`);
   }
-  for (const name of DISCOURAGED) {
-    if (present.includes(name)) warnings.push(`Gravit 전용 문서: spec/${name} — 판단 근거가 아니다. 삭제 권장.`);
-  }
   for (const f of present) {
-    if (f.endsWith('.md') && !known.has(f)) warnings.push(`알 수 없는 문서: spec/${f}`);
+    if (!f.endsWith('.md') || ALLOWED.has(f)) continue;
+    problems.push(`허용 목록 밖 문서: spec/${f} — spec/ 에는 정해진 7개만 둔다. 삭제하거나 밖으로 옮긴다.`);
   }
 
   return { problems, warnings };
