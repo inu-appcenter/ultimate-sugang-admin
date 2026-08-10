@@ -7,9 +7,10 @@
 
 **1. 읽을 곳은 절 번호로만 적혀 있다. 행은 spec-map 이 준다.**
 ```bash
-node .claude/hooks/checks/spec-map.mjs "03 §6"
-#   Read: offset=421 limit=354
+node .claude/hooks/checks/spec-map.mjs "03 §6-1"
+#   → Read 의 offset / limit 을 그대로 출력한다
 ```
+숫자를 여기에 옮겨 적지 않는다. 이 문단이 경고하는 것이 바로 그 짓이다.
 **spec 파일을 통째로 읽지 않는다** — `04` 한 번 통독이 29,000자다.
 행 범위를 문서에 손으로 박지 않는다. 예전에 박아둔 숫자가 실제로 4줄씩 어긋나 헤딩을 건너뛰고 읽고 있었다.
 

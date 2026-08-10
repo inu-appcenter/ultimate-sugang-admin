@@ -26,6 +26,21 @@ Step 종료마다, 그리고 **Step 5 는 4 하위단계 각각마다**(`step-5-
 - 4상태(Empty/Loading/Error/Data) + 상호작용(모달/토스트/검증) 확인 결과. 스크린샷 또는 수동 확인 체크.
 - 해당되면: 폴링 재개(`runningJobId`) · 진행률 `total` null 분기 · 409 2종 분기 · 페이지 10행.
 
+## §E-2. 리뷰 지적과 처리 계획 ⚠️ 승인이 필요한 지점
+
+`spec-conformance-reviewer` · `ds-conformance-reviewer` 를 각 1회 호출해 받은 지적을 **전부** 적는다. 고치기 전에 낸다.
+
+| # | 리뷰어 | 지적 | 근거 절 | 방침 |
+|---|---|---|---|---|
+| S1 | spec | … | `01 §8-1` | `fixed` |
+| D1 | ds | … | `DS-01 §4-1` | `deferred` → step-7 |
+| S2 | spec | … | — | `dropped` (근거 절 없음) |
+
+- 방침은 4개뿐이다: `fixed` · `deferred` · `dropped` · `question`. 전부 `harness/review/<항목ID>.json` 의 `findings[].resolution` 과 같은 값이어야 한다.
+- `dropped` 는 **왜 버리는지**를 한 줄로 쓴다. 근거 절이 없다는 것도 이유다.
+- `deferred` 는 어느 항목을 겨냥하는지 적고 `build-state.json.deferred` 로 옮긴 뒤 낸다.
+- **여기서 멈춘다.** 승인 전에 `fixed` 를 고치지 않는다. 승인 후 실행하고 재리뷰는 하지 않는다.
+
 ## §F. 미해결 / 다음
 - `manual_review` 항목, 비가역으로 **사람에게 위임한 것**(실제 REPLACE Job 실행 등).
 - 이번 단계에서 **넘긴 지적**(`deferred`) — 각각 어느 항목을 겨냥하는지와 함께. `build-state.json.deferred` 에 이미 옮겨져 있어야 한다.

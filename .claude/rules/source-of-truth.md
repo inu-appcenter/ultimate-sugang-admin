@@ -50,4 +50,18 @@
 - spec 을 고쳤으면 **`node .claude/hooks/checks/spec-map.mjs` 로 map 을 다시 만든다.** 안 하면 fast 게이트가 red 다.
 - 창이 닫힌 상태에서 spec 이 바뀌면 spec-map 의 해시가 걸러낸다 — 의도치 않은 변경을 알리는 장치다. → [[hooks]]
 
+## 5. 표기 규약 — 인용은 주소다
+
+문서 어디에 있는 `01 §6-5` 도 축약이 아니라 **찾아갈 수 있는 주소**다. 세 가지 표기가 각각 어디를 가리키는지 여기서 정한다.
+
+| 표기 | 가리키는 곳 | 찾는 법 |
+|---|---|---|
+| `01 §6-5` · `03 §6-1` · `04 §10` · `DS-01 §4-1` | §1 표의 해당 spec 문서 | `node .claude/hooks/checks/spec-map.mjs "01 §6-5"` → `Read` 의 `offset`/`limit` |
+| `[[name]]` | `.claude/rules/name.md` | 그대로 Read |
+| `Dn` (D1~D12) | `.claude/rules/decisions.md` 의 해당 항목 | 그대로 Read |
+
+- **spec 파일을 통째로 읽지 않는다.** `03`·`04` 는 각 1,000줄이 넘는다. 필요한 절만 map 으로 짚는다.
+- **인용은 하위 절까지 내려 쓴다.** `03 §6` 은 354줄이고 `03 §6-1` 은 수십 줄이다. 상위 절만 적으면 읽는 쪽이 열 배를 읽는다.
+- **행 번호를 문서에 손으로 박지 않는다.** 예전에 박아둔 숫자가 4줄씩 어긋나 헤딩을 건너뛰고 읽었다. → [[hooks]] spec-map
+
 관련: [[decisions]] · [[api-contract]] · [[architecture]] · [[ui-conventions]]

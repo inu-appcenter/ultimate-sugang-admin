@@ -109,6 +109,46 @@ for (const file of walk(claudeDir)) {
   }
 }
 
+// ── 인용 검사 — 절 번호는 주소다 (rules/source-of-truth.md §5) ─
+// 두 가지를 본다: 존재하지 않는 절을 가리키는 인용, 그리고 하위 절이 있는데 상위만 적은 인용.
+// 후자를 잡는 이유: `03 §6` 은 354줄이고 `03 §6-1` 은 수십 줄이다. 상위만 적으면 읽는 쪽이 열 배를 읽는다.
+//
+// ⚠️ coarse 에 임계를 두는 이유: 임계 없이 돌리면 67건이 나온다. phase 문서의 "읽을 것" 표처럼
+//    한 절 전체를 가리키는 게 맞는 인용이 대부분이라, 전량 보고하면 검사가 통째로 무시당한다.
+//    실제로 비싼 것만 남긴다 — 100줄이 넘는 절.
+const COARSE_MIN_LINES = 100;
+const mapPath = join(claudeDir, 'resource', 'spec-map.json');
+if (existsSync(mapPath)) {
+  const sections = JSON.parse(readFileSync(mapPath, 'utf8')).sections || {};
+  const known = new Set(Object.keys(sections));
+  const hasChild = (key) => [...known].some((k) => k.startsWith(key + '-'));
+  const CITE = /\b(0[134]|DS-0[013]) §(\d+(?:-\d+)?)/g;
+
+  for (const file of walk(claudeDir)) {
+    const rel = relative(join(claudeDir, '..'), file);
+    // 규약을 정의하는 문서와 map 생성기 자신은 예시로 인용을 든다 — 대상에서 뺀다.
+    if (/rules\/source-of-truth\.md$|CLAUDE\.md$|checks\/spec-map\.mjs$/.test(rel)) continue;
+    // spec/ 은 읽기 전용이다. 우리가 고칠 수 없는 것을 보고하지 않는다.
+    if (rel.replace(/\\/g, '/').includes('.claude/spec/')) continue;
+    readFileSync(file, 'utf8')
+      .split('\n')
+      .forEach((line, i) => {
+        if (line.includes('doc-lint:allow')) return;
+        for (const m of line.matchAll(CITE)) {
+          const key = `${m[1]} §${m[2]}`;
+          if (!known.has(key)) {
+            violations.push(`${rel}:${i + 1}  [citation-unknown] \`${key}\` 은 spec 에 없는 절이다  (spec-map ${known.size}절 대조)`);
+            continue;
+          }
+          const span = sections[key].lines[1] - sections[key].lines[0] + 1;
+          if (hasChild(key) && span >= COARSE_MIN_LINES) {
+            violations.push(`${rel}:${i + 1}  [citation-coarse] \`${key}\` 는 ${span}줄이다. 하위 절로 좁혀 인용한다`);
+          }
+        }
+      });
+  }
+}
+
 if (violations.length === 0) {
   console.log('doc-lint OK');
   process.exit(0);

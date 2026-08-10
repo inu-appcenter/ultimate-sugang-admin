@@ -60,7 +60,7 @@ SoT 를 읽자마자 **이 단계에서 명세가 정하지 않는 것**을 목�
 
 ## 4. 마무리
 - 토큰 위반/타입/빌드 없는지 게이트 실행: `bash .claude/hooks/checks/gate-runner.sh --full`. green → 항목 ID 로 커밋.
-- 커밋 후 **`spec-conformance-reviewer` + `ds-conformance-reviewer`** 호출 → `harness/review/<항목ID>.json` 기록. 둘 다 PASS 여야 `COMPLETED`. → `build-orchestrator` §1-6
+- 커밋 후 **`spec-conformance-reviewer` + `ds-conformance-reviewer`** 를 **각 1회** 호출 → 지적을 `harness/review/<항목ID>.json` 의 `findings` 에 옮기고, 방침을 정해 패킷 §E-2 로 보고한 뒤 **멈춘다.** 재리뷰는 없다. → `build-orchestrator` §1-6
 - 못 채운 명세/추측 필요 지점은 만들지 말고 패킷에 질문(🙋🏻)으로 남긴다.
 
 참조: [[source-of-truth]] · [[api-contract]] · [[architecture]] · [[ui-conventions]] · [[good-patterns]] · [[decisions]] · [[antipatterns]]
