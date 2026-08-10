@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { DisplaySemesterCard } from '@/features/semester/components/DisplaySemesterCard';
 import { useDisplaySemester } from '@/features/semester/queries';
@@ -23,9 +23,14 @@ export function SyncMainPage() {
   const loadedSemester = summary?.semester ?? null;
   const initialTarget = loadedSemester ?? displaySemester ?? null;
 
+  const expandFailedJob = useCallback((jobId: number) => {
+    setPage(1);
+    setExpandedJobId(jobId);
+  }, []);
+
   const { job, launchedJobId, trackLaunchedJob } = useSyncJobPolling(
     summary?.runningJobId ?? null,
-    setExpandedJobId,
+    expandFailedJob,
   );
   const jobRunning = (summary?.runningJobId ?? null) !== null || launchedJobId !== null;
 
