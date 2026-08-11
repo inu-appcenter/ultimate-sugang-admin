@@ -1,9 +1,9 @@
 {
   "_files": {
     "00_INDEX.md": "c6ee273359448db0",
-    "01_uss_admin_wireframe_spec.md": "66ca1dba94e557d3",
-    "03_uss_admin_api_spec.md": "293693a9f7089dc5",
-    "04_uss_admin_frontend_spec.md": "f918438040d56410",
+    "01_uss_admin_wireframe_spec.md": "dd5478bfbb73b761",
+    "03_uss_admin_api_spec.md": "026bc04c2f92b47b",
+    "04_uss_admin_frontend_spec.md": "b5d1b74a25cadc47",
     "DS-00_uss_overview.md": "5b2678b56007f734",
     "DS-01_uss_design_system.md": "26282421242a3b5b",
     "DS-03_interactions.md": "52401e9816f99730"
@@ -445,7 +445,7 @@
       "file": "03_uss_admin_api_spec.md",
       "lines": [
         402,
-        755
+        753
       ],
       "title": "데이터 업데이트 (Sync)"
     },
@@ -477,207 +477,191 @@
       "file": "03_uss_admin_api_spec.md",
       "lines": [
         579,
-        694
+        692
       ],
       "title": "GET `/sync/jobs/{jobId}` — Job 상세"
     },
     "03 §6-5": {
       "file": "03_uss_admin_api_spec.md",
       "lines": [
-        695,
-        755
+        693,
+        753
       ],
       "title": "GET `/sync/jobs/{jobId}/details` — 변경 항목 목록"
     },
     "03 §7": {
       "file": "03_uss_admin_api_spec.md",
       "lines": [
-        756,
-        816
+        754,
+        787
       ],
       "title": "진행률 표현"
     },
     "03 §7-1": {
       "file": "03_uss_admin_api_spec.md",
       "lines": [
-        768,
-        777
+        766,
+        776
       ],
       "title": "`phase`"
     },
     "03 §7-2": {
       "file": "03_uss_admin_api_spec.md",
       "lines": [
-        778,
-        789
-      ],
-      "title": "`current` / `total`의 단위"
-    },
-    "03 §7-3": {
-      "file": "03_uss_admin_api_spec.md",
-      "lines": [
-        790,
-        805
-      ],
-      "title": "`total = null` 처리"
-    },
-    "03 §7-4": {
-      "file": "03_uss_admin_api_spec.md",
-      "lines": [
-        806,
-        816
+        777,
+        787
       ],
       "title": "폴링"
     },
     "03 §8": {
       "file": "03_uss_admin_api_spec.md",
       "lines": [
-        817,
-        889
+        788,
+        860
       ],
       "title": "도메인 사전"
     },
     "03 §8-1": {
       "file": "03_uss_admin_api_spec.md",
       "lines": [
-        819,
-        831
+        790,
+        802
       ],
       "title": "`CourseTerm`"
     },
     "03 §8-2": {
       "file": "03_uss_admin_api_spec.md",
       "lines": [
-        832,
-        839
+        803,
+        810
       ],
       "title": "`SyncStrategy`"
     },
     "03 §8-3": {
       "file": "03_uss_admin_api_spec.md",
       "lines": [
-        840,
-        848
+        811,
+        819
       ],
       "title": "기타 enum"
     },
     "03 §8-4": {
       "file": "03_uss_admin_api_spec.md",
       "lines": [
-        849,
-        879
+        820,
+        850
       ],
       "title": "`changedFields[].field` 식별자"
     },
     "03 §8-5": {
       "file": "03_uss_admin_api_spec.md",
       "lines": [
-        880,
-        889
+        851,
+        860
       ],
       "title": "`SemesterRef` 공통 객체"
     },
     "03 §9": {
       "file": "03_uss_admin_api_spec.md",
       "lines": [
-        890,
-        928
+        861,
+        899
       ],
       "title": "에러 코드 목록"
     },
     "03 §9-1": {
       "file": "03_uss_admin_api_spec.md",
       "lines": [
-        892,
-        906
+        863,
+        877
       ],
       "title": "재사용 (기존 `ExceptionCode`)"
     },
     "03 §9-2": {
       "file": "03_uss_admin_api_spec.md",
       "lines": [
-        907,
-        928
+        878,
+        899
       ],
       "title": "신설 (백오피스 5000번대)"
     },
     "03 §10": {
       "file": "03_uss_admin_api_spec.md",
       "lines": [
-        929,
-        981
+        900,
+        952
       ],
       "title": "백엔드 구현 요구"
     },
     "03 §10-1": {
       "file": "03_uss_admin_api_spec.md",
       "lines": [
-        933,
-        949
+        904,
+        920
       ],
       "title": "기존 테이블 수정"
     },
     "03 §10-2": {
       "file": "03_uss_admin_api_spec.md",
       "lines": [
-        950,
-        958
+        921,
+        929
       ],
       "title": "신규 테이블"
     },
     "03 §10-3": {
       "file": "03_uss_admin_api_spec.md",
       "lines": [
-        959,
-        964
+        930,
+        935
       ],
       "title": "동시 실행 차단"
     },
     "03 §10-4": {
       "file": "03_uss_admin_api_spec.md",
       "lines": [
-        965,
-        975
+        936,
+        946
       ],
       "title": "enum 미매핑 처리 (D12)"
     },
     "03 §10-5": {
       "file": "03_uss_admin_api_spec.md",
       "lines": [
-        976,
-        981
+        947,
+        952
       ],
       "title": "AUTH_KEY 관리"
     },
     "03 §11": {
       "file": "03_uss_admin_api_spec.md",
       "lines": [
-        982,
-        1009
+        953,
+        980
       ],
       "title": "미확정·실측 확인 항목"
     },
     "03 §11-1": {
       "file": "03_uss_admin_api_spec.md",
       "lines": [
-        984,
-        998
+        955,
+        969
       ],
       "title": "학교 API 실측 (연동 초기 1회)"
     },
     "03 §11-2": {
       "file": "03_uss_admin_api_spec.md",
       "lines": [
-        999,
-        1009
+        970,
+        980
       ],
       "title": "알려진 한계 (의도적 수용)"
     },
     "03 §12": {
       "file": "03_uss_admin_api_spec.md",
       "lines": [
-        1010,
-        1033
+        981,
+        1004
       ],
       "title": "문서 정정 사항"
     },
@@ -917,7 +901,7 @@
       "file": "04_uss_admin_frontend_spec.md",
       "lines": [
         510,
-        705
+        702
       ],
       "title": "횡단 정책"
     },
@@ -925,199 +909,199 @@
       "file": "04_uss_admin_frontend_spec.md",
       "lines": [
         512,
-        559
+        556
       ],
       "title": "Zod 파싱"
     },
     "04 §9-2": {
       "file": "04_uss_admin_frontend_spec.md",
       "lines": [
-        560,
-        611
+        557,
+        608
       ],
       "title": "에러 → 토스트 매핑"
     },
     "04 §9-3": {
       "file": "04_uss_admin_frontend_spec.md",
       "lines": [
-        612,
-        634
+        609,
+        631
       ],
       "title": "날짜·숫자 포맷"
     },
     "04 §9-4": {
       "file": "04_uss_admin_frontend_spec.md",
       "lines": [
-        635,
-        675
+        632,
+        672
       ],
       "title": "enum 한글 매핑"
     },
     "04 §9-5": {
       "file": "04_uss_admin_frontend_spec.md",
       "lines": [
-        676,
-        688
+        673,
+        685
       ],
       "title": "Badge variant 매핑"
     },
     "04 §9-6": {
       "file": "04_uss_admin_frontend_spec.md",
       "lines": [
-        689,
-        698
+        686,
+        695
       ],
       "title": "4상태 구현"
     },
     "04 §9-7": {
       "file": "04_uss_admin_frontend_spec.md",
       "lines": [
-        699,
-        705
+        696,
+        702
       ],
       "title": "페이지 이탈 보호 — 미적용"
     },
     "04 §10": {
       "file": "04_uss_admin_frontend_spec.md",
       "lines": [
-        706,
-        852
+        703,
+        850
       ],
       "title": "SYNC_MAIN 상세 동작"
     },
     "04 §10-1": {
       "file": "04_uss_admin_frontend_spec.md",
       "lines": [
-        710,
-        722
+        707,
+        719
       ],
       "title": "진입 시퀀스"
     },
     "04 §10-2": {
       "file": "04_uss_admin_frontend_spec.md",
       "lines": [
-        723,
-        732
+        720,
+        729
       ],
       "title": "카드 2 렌더 분기"
     },
     "04 §10-3": {
       "file": "04_uss_admin_frontend_spec.md",
       "lines": [
-        733,
-        763
+        730,
+        760
       ],
       "title": "Job 실행 흐름 (M2 → M3/M4 → 실행)"
     },
     "04 §10-4": {
       "file": "04_uss_admin_frontend_spec.md",
       "lines": [
-        764,
-        786
+        761,
+        783
       ],
       "title": "폴링 (핵심)"
     },
     "04 §10-5": {
       "file": "04_uss_admin_frontend_spec.md",
       "lines": [
-        787,
-        804
+        784,
+        802
       ],
       "title": "진행률 렌더"
     },
     "04 §10-6": {
       "file": "04_uss_admin_frontend_spec.md",
       "lines": [
-        805,
-        838
+        803,
+        836
       ],
       "title": "이력 테이블 · 인라인 확장"
     },
     "04 §10-7": {
       "file": "04_uss_admin_frontend_spec.md",
       "lines": [
-        839,
-        852
+        837,
+        850
       ],
       "title": "표시 학기 (M1)"
     },
     "04 §11": {
       "file": "04_uss_admin_frontend_spec.md",
       "lines": [
-        853,
-        909
+        851,
+        906
       ],
       "title": "MSW Mock 전략"
     },
     "04 §11-1": {
       "file": "04_uss_admin_frontend_spec.md",
       "lines": [
-        857,
-        873
+        855,
+        871
       ],
       "title": "구성"
     },
     "04 §11-2": {
       "file": "04_uss_admin_frontend_spec.md",
       "lines": [
-        874,
-        887
+        872,
+        884
       ],
       "title": "Job 폴링 시뮬레이션 (가장 중요)"
     },
     "04 §11-3": {
       "file": "04_uss_admin_frontend_spec.md",
       "lines": [
-        888,
-        904
+        885,
+        901
       ],
       "title": "재현해야 할 시나리오"
     },
     "04 §11-4": {
       "file": "04_uss_admin_frontend_spec.md",
       "lines": [
-        905,
-        909
+        902,
+        906
       ],
       "title": "실서버 전환"
     },
     "04 §12": {
       "file": "04_uss_admin_frontend_spec.md",
       "lines": [
-        910,
-        1023
+        907,
+        1020
       ],
       "title": "단계별 구현 가이드 (Step 1~7)"
     },
     "04 §13": {
       "file": "04_uss_admin_frontend_spec.md",
       "lines": [
-        1024,
-        1057
+        1021,
+        1054
       ],
       "title": "백엔드 추가 요청 사항"
     },
     "04 §13-1": {
       "file": "04_uss_admin_frontend_spec.md",
       "lines": [
-        1028,
-        1036
+        1025,
+        1033
       ],
       "title": "반영 완료"
     },
     "04 §13-2": {
       "file": "04_uss_admin_frontend_spec.md",
       "lines": [
-        1037,
-        1045
+        1034,
+        1042
       ],
       "title": "확인 필요"
     },
     "04 §13-3": {
       "file": "04_uss_admin_frontend_spec.md",
       "lines": [
-        1046,
-        1057
+        1043,
+        1054
       ],
       "title": "알려진 한계 (수용)"
     },

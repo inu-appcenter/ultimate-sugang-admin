@@ -58,7 +58,7 @@ GET  /sync/jobs               GET  /sync/jobs/{id}      GET /sync/jobs/{id}/deta
 ## nullable — 스키마에 그대로 반영한다
 - `courses/summary`: `semester`·`lastJob`·`runningJobId` 가 전부 **nullable**.
 - Job 카운트 4종(`createdCount`/`updatedCount`/`closedCount`/`warningCount`): `SUCCESS` 가 **아니면 `null`** (화면에는 `-`).
-- `progress`: `RUNNING` 일 때만 값이 있다. `progress.total` 은 첫 페이지를 받기 전까지 **`null`**.
+- `progress`: `RUNNING` 일 때만 값이 있다. 필드는 **`phase` 하나뿐**이다 — `current`/`total` 은 없다.
 - `changedFields`: `changeType=UPDATED` 일 때만 값이 있다. `reason` 은 `WARNING` 일 때만. `courseName` 은 `WARNING` 에서 `null` 일 수 있다.
 - ❌ `nullable` 을 `optional` 로 대충 바꾸거나 `?? 0` 으로 덮지 않는다. `null` 과 `0` 은 뜻이 다르다(아직 정해지지 않음 vs 없음).
 

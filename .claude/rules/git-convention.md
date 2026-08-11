@@ -49,11 +49,10 @@ paths:
 
 **본문은 짧게, 없어도 된다.** 제목으로 충분하면 제목만 쓴다.
 
-쓸 때는 이 셋만 넣는다. 각 한 줄.
+쓸 때는 이 둘만 넣는다. 각 한 줄.
 
 1. 왜 필요했나 (제목만으로 안 보일 때)
 2. 게이트 결과 - `게이트 --full OK`
-3. 회귀 검사를 넣었으면 **red 확인 결과** - `red 확인: queries.ts:93 [d4-strategy]` → [[verification]] §2
 
 **상세한 근거를 커밋 메시지에 쓰지 않는다.** 갈 곳이 따로 있다.
 
@@ -89,4 +88,4 @@ paths:
 - ❌ `gh pr merge`, `gh release`, `gh repo delete` - 사람이 한다
 - ✅ 작업 브랜치 push 는 허용된다. 첫 푸시는 `git push -u origin HEAD`
 
-관련: [[hooks]] · [[verification]] · [[antipatterns]]
+관련: [[hooks]] · [[antipatterns]]

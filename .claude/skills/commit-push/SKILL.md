@@ -47,11 +47,10 @@ bash .claude/hooks/checks/gate-runner.sh --full
    * **`feat: 작업 내용` 형식으로 작성한다.**
    * 범위 표기(`feat(step-5):`)와 괄호를 쓰지 않는다.
    * 커밋 메시지는 **40자 이내 명사형**으로 작성한다.
-   * 본문은 짧게 또는 생략. 넣는다면 왜 필요했나 / `게이트 --full OK` / **red 확인 결과** 세 줄까지
+   * 본문은 짧게 또는 생략. 넣는다면 왜 필요했나 / `게이트 --full OK` 두 줄까지
    * 가운데점 대신 콤마, 긴 대시 대신 짧은 대시
 4. **이 저장소에서만 확인할 것:**
 
-   * 회귀 검사를 추가했는데 **red 를 확인하지 않았다면** 본문에 "고정했다"고 쓰지 마라. → [[verification]] §2
    * `.claude/spec/` 이 diff 에 있으면 `spec_edit` 창을 열고 한 작업인지 확인하고, `spec-map.json` 이
      같이 갱신됐는지 본다. 안 됐으면 `node .claude/hooks/checks/spec-map.mjs` 를 먼저 돌린다
 
@@ -88,4 +87,4 @@ bash .claude/hooks/checks/gate-runner.sh --full
 1. `.claude/skills/commit-push/template/output.md` 를 Read 하라.
 2. 템플릿 상단 작성 가이드에 따라 항목을 채워 보고하라. (가이드 주석은 출력에 포함하지 않는다.)
 
-참조: [[git-convention]] · [[hooks]] · [[verification]]
+참조: [[git-convention]] · [[hooks]]

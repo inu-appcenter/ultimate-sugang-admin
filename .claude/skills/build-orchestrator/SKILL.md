@@ -60,7 +60,7 @@ description: USS 백오피스 빌드의 전체 흐름을 소유한다. "빌드 �
 - 한 번에 `IN_PROGRESS` 1개. 끝나면 즉시 다음으로 넘기지 말고 정지 규칙(§2) 확인.
 - `retry`·`probes` 는 **항목 ID 로 키잉된 객체**, `manual_review`·`deferred` 는 배열. `log` 와 함께 사실대로 기록한다. 게이트 red 를 green 으로 보고하지 않는다. → [[antipatterns]]
 - **`retry` 는 손대지 않는다** — `stop-gate` 훅이 red 마다 자동으로 올린다.
-- **원인을 못 밝힌 채 3회 시도했으면 멈춘다**: `probes[항목ID]` 를 올리고 `notes` 에 `unresolved` 태그로 *미규명 사실 + 배제한 가설 + 좁혀진 조건*을 적은 뒤 넘어간다. → [[verification]] §5
+- **원인을 못 밝힌 채 3회 시도했으면 멈춘다**: `probes[항목ID]` 를 올리고 `notes` 에 `unresolved` 태그로 *미규명 사실 + 배제한 가설 + 좁혀진 조건*을 적은 뒤 넘어간다.
 
 ## 5. 가장 흔한 오답
 **`Authorization: Bearer`·refresh 토큰 저장·`/auth/logout`·`/admin/me`·문자열 에러코드·페이지 크기 20·UTC 변환·16화면·STAGING/promote 는 전부 틀렸다.**

@@ -19,15 +19,19 @@
   },
   "spec_edit": false,
   "handoff": {
-    "ts": "2026-08-10",
-    "next": "step-6:expand_detail — Step 5 는 네 하위단계 모두 COMPLETED. 리뷰 패킷 승인을 받았으면 step-6 으로 간다.",
+    "ts": "2026-08-11",
+    "next": "step-6:expand_detail — 미커밋 작업 2건이 워킹트리에 있다. (1) verify 축소 + 폴링 간격 주입, (2) 진행률에서 정량 수치 제거(spec 3파일 18곳 포함). 게이트 --full green.",
     "how": [
+      "진행률 정책이 바뀌었다 — progress 는 { phase } 하나. 표기는 `업데이트 진행 중 · {단계}`. 수치 금지(사용자 결정 2026-08-11). spec·코드·rules 전부 반영 완료. 03 §7-2(단위)·§7-3(total null)은 삭제됐고 옛 §7-4 폴링이 §7-2 로 올라왔다",
+      "verify 는 4파일 123건으로 줄었다(전 8파일 382건). 눈으로 못 보는 것만 본다 — 마크업·문구·색 검사를 다시 넣지 않는다. rules/hooks.md 의 verify 항목이 기준이다",
+      "폴링 간격은 VITE_POLL_INTERVAL_MS(기본 2000). harness/verify/env.mjs 가 40ms 로 덮는다. verify 의 wait 값을 초 단위로 되돌리지 않는다",
+      "rules/verification.md 와 hooks/checks/doc-lint.mjs 는 삭제됐다. red 증명 의무·근거 절 의무는 더 이상 없다(사용자 결정 2026-08-11)",
       "브랜치 fix/step-5-4-polling 이 origin 에 올라가 있다. main 병합은 사람이 한다 — step-6 은 feat/step-6-expand 를 새로 딴다",
       "phase 문서는 .claude/resource/phases/step-6-expand.md. Expandable Row · Tab Group · 더보기(useInfiniteQuery) · FieldDiff · 실패 Job",
       "⚠️ FAILED 종료 시 이력 최상단 행 자동 확장(01 §8-1 · 04 §10-4)도 여기서 붙인다 — 5-4 는 토스트까지만 했다. 트리거 자리는 useSyncJobPolling 의 종료 effect 다",
       "deferred 중 target_item 이 step-6:expand_detail 인 2건을 먼저 읽는다 — academicYear 가 ±2 밖일 때의 처리는 사용자 위임 결정이 적혀 있다",
       "step-7 로 이월된 항목이 9건이다. QA 때 target_item 으로 다시 훑는다",
-      "리뷰는 spec·ds 둘 다 부른다. 라운드 상한 2 — 3라운드째로 가려면 남은 지적을 review json 의 deferred/open_questions 에 먼저 적는다"
+      "리뷰는 spec·ds 를 각 1회씩만 부른다. 재리뷰는 사용자가 요청할 때만 한다 — 라운드 상한이라는 개념은 없다"
     ],
     "unresolved": "폐기한 시나리오에서 종료 effect 는 실행되는데(invalidateQueries 기록됨) sonner 토스트가 jsdom DOM 에 안 나타났다. 배제한 가설 — sonner 싱글턴 누적(신규 프로세스에서도 재현), 늦은 토스트(10초 뒤 단일 Job 은 정상). 좁혀진 조건 — 같은 마운트에서 M2→M3 모달을 열고 409/5200 을 한 번 맞은 뒤. 범위 밖이라 추적하지 않는다. 실제 브라우저에서 이상하면 step-7 Playwright 에서 본다."
   },
@@ -45,7 +49,7 @@
       "text": "RUNNING 중 카드 2 에 주황이 두 번 뜬다 — 진행률 줄(text-warning-text)과 `마지막 업데이트 … [진행 중]` 배지가 동시에 보인다. 01 §8-1 와이어프레임은 실행 중 카드에 타이틀·진행률·비활성 버튼만 그린다." },
     { "from": "step-5-4:polling", "target_item": "step-5-4:polling", "needs": "none", "status": "resolved",
       "decision": "ⓑ total === null 일 때만 접두어를 뺀다 (사용자 위임 2026-08-10). 화면 표기의 담당은 03 §7-3 이고 거기 표기가 `{단계} 중…` 이다. 접두어는 total 이 있을 때만 붙인다.",
-      "resolution": "[해소됨 2026-08-10] progressText 가 세 갈래다 — progress 없음 `업데이트 진행 중` / total null `강의 수집 중…` / total 있음 `업데이트 진행 중 · 강의 수집 3/12 페이지`. 회귀 검사: step-5-4.mjs 'total null 이면 분모 없이'(진행률 줄만 뽑아 문자열 전체를 비교한다).",
+      "resolution": "[폐기됨 2026-08-11] 진행률에서 정량 수치를 전부 걷어내며(사용자 결정) 이 분기 자체가 사라졌다. 표기는 `업데이트 진행 중 · {단계}` 한 가지고 접두어는 항상 붙는다. 근거 절이던 03 §7-3 도 삭제됐다. 그 전 처리는 — progressText 가 세 갈래였다(progress 없음 / total null / total 있음).",
       "text": "total === null 일 때 '중'이 두 번 읽힌다 — `업데이트 진행 중 · 강의 수집 중…`. SyncProgressText.tsx" },
     { "from": "step-5-4:polling", "target_item": "step-5-4:polling", "needs": "none", "status": "resolved",
       "decision": "ⓐ 폴링 쿼리만 전역 에러 토스트에서 제외한다 (사용자 위임 2026-08-10). ⓑ(N회 후 중단)는 명세에 없는 상태를 새로 만든다 — 폴링이 멈춘 화면을 어떻게 보여줄지 01 §9 가 정하지 않는다. 진행률은 다음 성공 응답에서 알아서 따라잡는다.",
@@ -72,7 +76,7 @@
     { "from": "step-5-2:M2_preflight", "target_item": "step-7:qa", "needs": "none", "status": "open",
       "text": "'현재 적재' 라벨 컬럼을 공용 컴포넌트로 뽑으면 폰트 폴백 시 오버플로가 커지는 문제를 한 곳에서 관리할 수 있다." },
     { "from": "step-5-4:polling", "target_item": "step-7:qa", "needs": "none", "status": "open",
-      "text": "폴링 주기 2초가 어느 검사에도 고정돼 있지 않다. step-5-4.mjs 의 'RUNNING 동안 여러 번 돈다' 가 부등호(>=3)라 간격이 500ms 로 바뀌어도 통과한다. 소스의 POLL_INTERVAL_MS=2000 은 맞으니 지금 동작은 정상이다. 폴 간 경과시간을 재는 쪽으로 조이거나, 실타이머라 flaky 하면 파일 헤더에서 '2초' 문구를 빼는 편이 정직하다. 근거 03 §7-4 · 01 §8-1." },
+      "text": "폴링 주기 2초가 어느 검사에도 고정돼 있지 않다. step-5-4.mjs 의 'RUNNING 동안 여러 번 돈다' 가 부등호(>=3)라 간격이 500ms 로 바뀌어도 통과한다. 소스의 POLL_INTERVAL_MS=2000 은 맞으니 지금 동작은 정상이다. 폴 간 경과시간을 재는 쪽으로 조이거나, 실타이머라 flaky 하면 파일 헤더에서 '2초' 문구를 빼는 편이 정직하다. 근거 03 §7-2 · 01 §8-1. ⚠️ 2026-08-11 이후 간격이 VITE_POLL_INTERVAL_MS(기본 2000)에서 오므로 이 지적은 더 유효해졌다." },
     { "from": "step-5-4:polling", "target_item": "step-7:qa", "needs": "none", "status": "open",
       "text": "폴링이 첫 응답부터 계속 실패하면 [데이터 업데이트] 가 잠긴 채로 남는다 — launchedJobId 를 비우는 경로가 job 데이터 도착에만 달려 있다. 폴링 토스트를 껐으므로 그 화면엔 '업데이트 진행 중' + 비활성 버튼만 남고 설명이 없다. 01 §9 에 그 상태 규정이 없어 위반은 아니다. 새로고침하면 summary 가 실제 RUNNING 여부를 알려주므로 잠금 자체는 틀린 표시가 아니다. 육안 확인 대상." },
     { "from": "step-5-4:polling", "target_item": "step-7:qa", "needs": "none", "status": "open",
@@ -120,12 +124,12 @@
     {
       "tag": "trap",
       "item": "all",
-      "text": "Tailwind 모션 특이도 — 맨 `duration-200` 은 (0,1,0) 이라 `data-[state=open]:animate-in` 이 만드는 (0,2,0) 규칙의 150ms 를 못 이긴다. variant animate 를 쓰면 duration 도 반드시 variant 로 건다(`data-[state=open]:duration-200`). step-3 부터 모달이 150ms 로 떠 있었고 step-5-1 리뷰에서 잡혔다. harness/verify/step-5-1.mjs 의 'shared/ui 모션' 섹션이 src/shared/components/ui/**.tsx 를 소스 스캔해 짝을 강제한다 — 새 shadcn 컴포넌트를 넣을 때 여기서 걸린다."
+      "text": "Tailwind 모션 특이도 — 맨 `duration-200` 은 (0,1,0) 이라 `data-[state=open]:animate-in` 이 만드는 (0,2,0) 규칙의 150ms 를 못 이긴다. variant animate 를 쓰면 duration 도 반드시 variant 로 건다(`data-[state=open]:duration-200`). step-3 부터 모달이 150ms 로 떠 있었고 step-5-1 리뷰에서 잡혔다. 이걸 강제하던 소스 스캔 섹션은 verify 축소(2026-08-11)로 제거됐다 — 새 shadcn 컴포넌트를 넣을 때 손으로 확인한다."
     },
     {
       "tag": "trap",
       "item": "all",
-      "text": "에러 토스트는 queryClient 의 QueryCache/MutationCache onError 가 전역에서 띄운다. mutate 호출부에 `onError: showErrorToast` 를 또 걸면 같은 문구가 두 개 쌓인다(04 §9-2 위반). 호출부에는 onSuccess 만 둔다. 존재 검사(includes)로는 안 잡히므로 하네스는 개수를 센다 — harness/verify/step-5-2.mjs 의 '판정 실패' 섹션."
+      "text": "에러 토스트는 queryClient 의 QueryCache/MutationCache onError 가 전역에서 띄운다. mutate 호출부에 `onError: showErrorToast` 를 또 걸면 같은 문구가 두 개 쌓인다(04 §9-2 위반). 호출부에는 onSuccess 만 둔다. 토스트를 셀 때는 존재(includes)가 아니라 개수를 센다 — harness/verify/step-5-3.mjs 의 409/5200 섹션이 그 형태다."
     },
     {
       "tag": "decision",
@@ -151,7 +155,7 @@
     {
       "tag": "decision",
       "item": "step-5-4:polling",
-      "text": "넘긴 지적 5건을 처리하며 정한 것 — (1) 실행 버튼 잠금의 판정자가 SyncMainPage 로 올라갔다. CourseSummaryCard 는 `jobRunning` 을 prop 으로 받는다. 카드가 스스로 summary 를 읽어 판정하던 걸 그대로 두고 조건만 넓히면 판정자가 둘이 되는데, 애초에 이 버그가 그래서 났다. (2) 전역 에러 토스트의 예외 통로는 `meta.skipErrorToast` 하나다. 쿼리별 onError 를 다시 만들지 않는다 — 04 §9-2 의 '한 곳에서 띄운다' 가 그대로 유지된다. 새 예외를 늘리기 전에 정말 2초마다 도는 쿼리인지 본다. (3) 진행률 접두어(`업데이트 진행 중 · `)는 total 이 있을 때만 붙는다(03 §7-3). 표기를 바꾸면 step-5-4.mjs 가 진행률 줄 전체를 문자열 비교하므로 바로 걸린다."
+      "text": "넘긴 지적 5건을 처리하며 정한 것 — (1) 실행 버튼 잠금의 판정자가 SyncMainPage 로 올라갔다. CourseSummaryCard 는 `jobRunning` 을 prop 으로 받는다. 카드가 스스로 summary 를 읽어 판정하던 걸 그대로 두고 조건만 넓히면 판정자가 둘이 되는데, 애초에 이 버그가 그래서 났다. (2) 전역 에러 토스트의 예외 통로는 `meta.skipErrorToast` 하나다. 쿼리별 onError 를 다시 만들지 않는다 — 04 §9-2 의 '한 곳에서 띄운다' 가 그대로 유지된다. 새 예외를 늘리기 전에 정말 2초마다 도는 쿼리인지 본다. (3) [폐기됨 2026-08-11] 진행률 접두어가 total 유무로 갈린다는 서술은 더 이상 유효하지 않다 — 수치를 걷어내며 표기가 `업데이트 진행 중 · {단계}` 하나로 통일됐고 접두어는 항상 붙는다(03 §7). 표기를 바꾸면 step-5-4.mjs 가 진행률 줄 전체를 문자열 비교하므로 바로 걸린다는 점은 그대로다."
     },
     {
       "tag": "decision",
@@ -242,7 +246,7 @@
     {
       "id": "step-5-4:polling",
       "ts": "2026-08-10",
-      "commit": "caec735",
+      "commit": "caec735", 
       "gate": "--full OK",
       "review": "spec=PASS(4라운드) · ds=PASS(2라운드)",
       "retry": 0,

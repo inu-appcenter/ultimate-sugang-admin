@@ -16,11 +16,12 @@ import {
   fetchSyncJobs,
   requestSyncPreflight,
 } from '@/features/sync/api';
+import { env } from '@/env';
 import type { SyncChangeType } from '@/features/sync/schemas';
 import { getErrorCode } from '@/shared/api/errorHandler';
 import { ERROR_CODE } from '@/shared/constants/errorCodes';
 
-const POLL_INTERVAL_MS = 2000;
+const POLL_INTERVAL_MS = env.VITE_POLL_INTERVAL_MS;
 
 export const syncKeys = {
   all: ['sync'] as const,

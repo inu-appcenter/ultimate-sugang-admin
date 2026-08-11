@@ -3,6 +3,7 @@ import { z } from 'zod';
 const schema = z.object({
   VITE_API_HOST: z.string().url(),
   VITE_USE_MSW: z.enum(['true', 'false']).default('false'),
+  VITE_POLL_INTERVAL_MS: z.coerce.number().int().positive().default(2000),
 });
 
 const parsed = schema.safeParse(import.meta.env);

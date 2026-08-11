@@ -65,7 +65,7 @@ DS-01_uss_design_system.md       토큰·컴포넌트
 
 ### 2-3. 실측 미검증 항목
 
-`03 §11-1` 의 학교 API 실측 8항목은 미검증이다. **결과에 의존하는 값(페이지당 건수·예상 소요시간)을 하드코딩하지 않는다.** 진행률은 서버가 주는 `current`/`total` 을 그대로 표시한다.
+`03 §11-1` 의 학교 API 실측 8항목은 미검증이다. **결과에 의존하는 값(페이지당 건수·예상 소요시간)을 하드코딩하지 않는다.** 진행률은 서버가 주는 `phase` 만 표시하므로 실측 결과에 의존하지 않는다.
 
 ---
 
@@ -537,8 +537,6 @@ export const coursesSummarySchema = z.object({
 
 export const syncProgressSchema = z.object({
   phase: z.enum(['COURSE_FETCH', 'TIMETABLE_FETCH', 'PERSIST']),
-  current: z.number(),
-  total: z.number().nullable(),      // ⚠️ 첫 페이지 수신 전 null
 });
 ```
 
@@ -553,7 +551,6 @@ export const syncProgressSchema = z.object({
 | `runningJobId` | 진행 중 Job 없음 | 폴링 안 함 |
 | `createdCount` 외 3종 | Job 이 `SUCCESS` 가 아님 | `-` 표기 |
 | `progress` | `RUNNING` 아님 | 진행률 숨김 |
-| `progress.total` | 전체 페이지 미확정 | `{단계} 중…` (분모 없음) |
 | `changedFields` | `changeType ≠ UPDATED` | 변경 내용 열 비움 |
 | `courseName` | 경고 항목에서 확보 실패 | `-` |
 
@@ -788,17 +785,18 @@ const { data: job } = useQuery({
 
 ```typescript
 function progressText(p: SyncProgress): string {
-  const label = phaseLabels[p.phase];               // 강의 수집 / 시간표 수집 / 적재
-  if (p.total === null) return `${label} 중…`;      // 첫 페이지 수신 전
-  const unit = p.phase === 'PERSIST' ? '건' : ' 페이지';
-  return `${label} ${formatNumber(p.current)}/${formatNumber(p.total)}${unit}`;
+  return `업데이트 진행 중 · ${phaseLabels[p.phase]}`;   // 강의 수집 / 시간표 수집 / 적재
 }
 ```
 
-| phase | 단위 | 예 |
-|---|---|---|
-| `COURSE_FETCH` · `TIMETABLE_FETCH` | 페이지 | `강의 수집 3/12 페이지` |
-| `PERSIST` | **건** | `적재 450/1,203건` |
+| phase | 표기 |
+|---|---|
+| `COURSE_FETCH` | `업데이트 진행 중 · 강의 수집` |
+| `TIMETABLE_FETCH` | `업데이트 진행 중 · 시간표 수집` |
+| `PERSIST` | `업데이트 진행 중 · 적재` |
+
+> ⚠️ **수치를 넣지 않는다** — 페이지·건수·백분율·남은 시간 모두 (사용자 결정 2026-08-11).
+> `progress` 가 `null` 인 첫 폴링 응답 전에는 `업데이트 진행 중` 만 쓴다(`01 §8-1`).
 
 > ⚠️ **폴링 갱신에 트랜지션을 걸지 않는다**(`DS-01 §4-3`). 2초마다 화면이 움직이면 산만하다.
 
@@ -876,14 +874,13 @@ if (env.VITE_USE_MSW === 'true') {
 `POST /sync/jobs` 호출 시 in-memory job 을 만들고 타이머로 단계를 전이시킨다.
 
 ```
-t=0s   RUNNING · COURSE_FETCH    current 0  total null    ← total null 구간 필수 재현
-t=2s   RUNNING · COURSE_FETCH    current 1  total 12
-t=8s   RUNNING · TIMETABLE_FETCH current 3  total 28
-t=16s  RUNNING · PERSIST         current 450 total 1203
+t=0s   RUNNING · COURSE_FETCH
+t=8s   RUNNING · TIMETABLE_FETCH
+t=16s  RUNNING · PERSIST
 t=22s  SUCCESS  (카운트·details 채움)
 ```
 
-> **`total: null` 구간을 반드시 재현한다.** 이 구간을 빼면 `{단계} 중…` 분기가 검증되지 않는다.
+> **세 단계를 모두 거치게 한다.** 단계가 바뀔 때 문구가 따라 바뀌는지가 이 시뮬레이션의 목적이다.
 
 ### 11-3. 재현해야 할 시나리오
 
@@ -973,12 +970,12 @@ t=22s  SUCCESS  (카운트·details 채움)
 - `refetchInterval` 조건부, 종료 시 `false`
 - `SUCCESS`/`FAILED` 분기 처리
 - **진입 시 `runningJobId` 로 자동 재개**
-- `total === null` → `{단계} 중…`, `PERSIST` 단위 `건`
+- 진행률은 단계만 표기 — `업데이트 진행 중 · {단계}`
 - ⚠️ 트랜지션 금지
 
 | 완료 기준 |
 |---|
-| 3전략 분기 정확. 409 2종 처리. 새로고침 후 폴링 재개. `total null` 구간 표기 |
+| 3전략 분기 정확. 409 2종 처리. 새로고침 후 폴링 재개. 단계 전이 표기 |
 
 ### Step 6 — 인라인 확장
 
@@ -1006,7 +1003,7 @@ t=22s  SUCCESS  (카운트·details 채움)
 | 9 | `RUNNING` 중 재요청 → 409/5200 토스트 |
 | 10 | preflight 후 상태 변경 → 409/5201 → 모달 닫힘 |
 | 11 | Job 실행 중 새로고침 → 폴링 재개 |
-| 12 | `total null` 구간 → `{단계} 중…` |
+| 12 | 단계 전이(수집 → 적재) → 진행률 문구가 따라 바뀜 |
 | 13 | 실패 Job 확장 → `failureReason` + 최상단 자동 확장 |
 | 14 | `warningCount > 0` + `SUCCESS` → 경고 탭 활성, 배지는 성공 |
 
@@ -1032,14 +1029,14 @@ t=22s  SUCCESS  (카운트·details 채움)
 | 1 | `/auth/login`·`/auth/refresh` 응답에 **`name`** | `03 §3-1, §3-2` |
 | 2 | `/courses/summary` 에 **`runningJobId`** | `03 §5-1` |
 | 3 | `POST /sync/jobs` 의 **`expectedStrategy`** 검증 → 409/5201 | `03 §6-2` |
-| 4 | `progress` 구조화(`phase`/`current`/`total`) + `total` nullable | `03 §7` |
+| 4 | `progress` 는 `{ phase }` 만 — 정량 수치 없음 | `03 §7` |
 
 ### 13-2. 확인 필요
 
 | # | 항목 | 영향 |
 |---|---|---|
 | 1 | `RUNNING` Job 유일성을 **DB 제약**으로 보장 | 미보장 시 동시 요청이 둘 다 통과해 Job 중복 |
-| 2 | `03 §11-1` 실측 8항목 | 진행률 분모·수집량. 결과에 따라 `03` 수정 |
+| 2 | `03 §11-1` 실측 8항목 | 수집량. 결과에 따라 `03` 수정 |
 | 3 | CORS — 백오피스 도메인 화이트리스트 | 미설정 시 로컬 개발 불가 |
 | 4 | 관리자 계정 시드(Flyway) | 로그인 테스트 선행 조건 |
 

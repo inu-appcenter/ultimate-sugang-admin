@@ -1,4 +1,5 @@
-/** step-2:infra — apiClient · 401 재발급 큐 · MSW 9개 엔드포인트 계약. */
+/** step-2:infra — apiClient · 401 재발급 큐 · MSW 9개 엔드포인트 계약 · D4 가드 · D10 캐시 격리. */
+import { D4_PRODUCES } from '../../.claude/hooks/checks/d4-strategy.mjs';
 import { createChecker, createRuntime, installDom } from './env.mjs';
 
 const dom = installDom();
@@ -9,6 +10,10 @@ const { apiClient } = await load('/src/shared/api/client.ts');
 const { tokenManager } = await load('/src/shared/api/tokenManager.ts');
 const { installRefreshInterceptor } = await load('/src/shared/api/refreshQueue.ts');
 const { toKstLocalString } = await load('/src/mocks/db.ts');
+const { queryClient } = await load('/src/shared/api/queryClient.ts');
+const { semesterKeys } = await load('/src/features/semester/queries.ts');
+const { syncKeys } = await load('/src/features/sync/queries.ts');
+const probe = await load('/harness/verify/probe.tsx');
 
 installRefreshInterceptor();
 
@@ -124,7 +129,7 @@ section('계약 — D4 전략 판정 · 409 2종 · 10행 페이지네이션');
   const jobId = created.data.jobId;
   const running = await apiClient.get(`/sync/jobs/${jobId}`);
   eq('RUNNING 상태', running.data.status, 'RUNNING');
-  eq('첫 진행률 total 은 null', running.data.progress.total, null);
+  eq('진행률은 단계 하나뿐', Object.keys(running.data.progress), ['phase']);
   eq('진행 중 카운트는 null', running.data.createdCount, null);
 
   const summary = await apiClient.get('/courses/summary');
@@ -161,6 +166,68 @@ section('표시 학기 변경이 적재 데이터를 건드리지 않는다 (D10
   const after = await apiClient.get('/courses/summary');
   eq('적재 학기 그대로', after.data.semester, before.data.semester);
   eq('강의 건수 그대로', after.data.courseCount, before.data.courseCount);
+}
+
+section('D10 — 저장은 표시 학기 캐시만 무효화한다 (카드 2 무영향)');
+{
+  mockDb.reset();
+  queryClient.clear();
+  queryClient.setQueryData(semesterKeys.display(), { academicYear: 2026, term: 'SECOND' });
+  queryClient.setQueryData(syncKeys.summary(), {
+    semester: { academicYear: 2026, term: 'FIRST' },
+    courseCount: 1203,
+    scheduleCount: 2847,
+    lastJob: null,
+    runningJobId: null,
+  });
+
+  await probe.runDisplaySemesterUpdate({ academicYear: 2026, term: 'WINTER' });
+
+  check(
+    '표시 학기 캐시는 무효화된다',
+    queryClient.getQueryState(semesterKeys.display())?.isInvalidated === true,
+  );
+  check(
+    '적재 현황 캐시는 건드리지 않는다',
+    queryClient.getQueryState(syncKeys.summary())?.isInvalidated === false,
+  );
+  eq('적재 현황 값 그대로', queryClient.getQueryData(syncKeys.summary())?.courseCount, 1203);
+  queryClient.clear();
+}
+
+section('D4 가드가 진짜 잡는지 (03 §6-1 · decisions D4)');
+{
+  // 실제 소스 검사는 uss-contract-lint 의 `d4-strategy` 규칙이 fast 게이트에서 한다.
+  // 여기서는 그 규칙이 잡아야 할 것과 통과시켜야 할 것을 고정한다 — 규칙이 헛돌면 여기서 red 가 난다.
+  const produces = D4_PRODUCES;
+  check(
+    '가드가 대입을 잡는다',
+    produces.some((rule) => rule.test("const strategy = 'REPLACE';")),
+  );
+  check(
+    '가드가 expectedStrategy 하드코딩을 잡는다',
+    produces.some((rule) => rule.test("{ expectedStrategy: 'UPSERT' }")),
+  );
+  check(
+    '가드가 삼항 alternate 를 잡는다',
+    produces.some((rule) => rule.test("const s = cond ? compute() : 'REPLACE';")),
+  );
+  check(
+    '가드가 호출 인자를 잡는다',
+    produces.some((rule) => rule.test("setStrategy('REPLACE')")),
+  );
+  check(
+    'z.enum 배열은 통과시킨다',
+    !produces.some((rule) => rule.test("z.enum(['INITIAL', 'UPSERT', 'REPLACE'])")),
+  );
+  check(
+    '서버 값 비교는 통과시킨다',
+    !produces.some((rule) => rule.test("preflight.strategy === 'REPLACE'")),
+  );
+  check(
+    '전략을 키로 쓰는 맵은 통과시킨다',
+    !produces.some((rule) => rule.test('const COPY = { UPSERT: {}, INITIAL: {} };')),
+  );
 }
 
 await close();
