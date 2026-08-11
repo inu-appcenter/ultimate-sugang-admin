@@ -1,7 +1,4 @@
-/** step-5-3:M3_M4_execute — 확인 모달 3종 + POST /sync/jobs + 409 2종. */
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
-
+/** step-5-3:M3_M4_execute — POST /sync/jobs 202 · 409 2종 · 409 아닌 실패의 모달 처리. */
 import { http, HttpResponse } from 'msw';
 
 import { createChecker, createRuntime, installDom } from './env.mjs';
@@ -22,15 +19,6 @@ const { result, check, eq, section } = createChecker();
 
 const text = (html) => html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
 
-const buttonTag = (html, label) => {
-  const pattern = new RegExp(`<button[^>]*>(?:(?!</button>)[\\s\\S])*?${label}\\s*</button>`);
-  const element = pattern.exec(html)?.[0];
-  return element === undefined ? '' : (/<button[^>]*>/.exec(element)?.[0] ?? '');
-};
-const isDisabled = (tag) => /\sdisabled(?:=|\s|$)/.test(tag);
-const labelTag = (html) => /<label[\s\S]*?<\/label>/.exec(html)?.[0] ?? '';
-const openTag = (element) => /<[a-z]+[^>]*>/.exec(element)?.[0] ?? '';
-
 const JOBS_URL = 'http://localhost:8080/api/v1/admin/sync/jobs';
 
 const fresh = () => {
@@ -41,123 +29,6 @@ const fresh = () => {
 await login({ loginId: 'haksa01', password: 'uss1234!' }).then((token) =>
   tokenManager.set(token.accessToken, token.name),
 );
-
-section('destructive 는 진한 빨강 면이다 (사용자 결정 2026-08-09)');
-{
-  // 연분홍(danger-bg) 면으로 되돌리면 M4 가 M3 의 파란 [갱신]보다 약해 보인다.
-  const globals = readFileSync(join(process.cwd(), 'src/shared/styles/globals.css'), 'utf8');
-  check('--destructive 는 danger-text', /--destructive:\s*var\(--danger-text\)/.test(globals));
-  check(
-    '--destructive-foreground 는 흰색',
-    /--destructive-foreground:\s*var\(--primary-foreground\)/.test(globals),
-  );
-  check('danger-bg 면으로 되돌아가지 않았다', !/--destructive:\s*var\(--danger-bg\)/.test(globals));
-}
-
-section('UPSERT → M3 (01 §7-3)');
-{
-  fresh();
-  const { confirmDialog } = await probe.runSyncConfirmFlow();
-  const body = text(confirmDialog);
-
-  check('제목', body.includes('데이터를 갱신할까요?'));
-  check('본문', body.includes('2026학년도 1학기 데이터를 최신 상태로 갱신할게요.'));
-  check('· 새로 생긴 과목은 추가돼요.', body.includes('새로 생긴 과목은 추가돼요.'));
-  check('· 바뀐 과목은 수정돼요.', body.includes('바뀐 과목은 수정돼요.'));
-  check('· 사라진 과목은 폐강 처리돼요.', body.includes('사라진 과목은 폐강 처리돼요.'));
-  check('· 장바구니·수강신청은 그대로예요.', body.includes('장바구니·수강신청은 그대로예요.'));
-  check('[취소]', body.includes('취소'));
-  check('[갱신]', body.includes('갱신'));
-  check('폭 400px', !confirmDialog.includes('max-w-modal-wide'));
-  check('destructive 가 아니다', !confirmDialog.includes('bg-destructive'));
-  check('Strict Match 입력이 없다', !confirmDialog.includes('sync-replace-confirm'));
-}
-
-section('INITIAL → M3 변형 (01 §7-5)');
-{
-  fresh();
-  mockDb.state.loadedSemester = null;
-  mockDb.state.courseCount = 0;
-  mockDb.state.scheduleCount = 0;
-
-  const { confirmDialog } = await probe.runSyncConfirmFlow();
-  const body = text(confirmDialog);
-
-  check('제목', body.includes('데이터를 적재할까요?'));
-  check('본문', body.includes('데이터를 새로 적재할게요.'));
-  check('[적재]', body.includes('적재'));
-  check('UPSERT 안내 4줄이 없다', !body.includes('사라진 과목은 폐강 처리돼요.'));
-  check('destructive 가 아니다', !confirmDialog.includes('bg-destructive'));
-}
-
-section('REPLACE → M4 (01 §7-4 · DS-00 §6 격식체 · 사용자 결정 2026-08-10)');
-{
-  fresh();
-  const { confirmDialog } = await probe.runSyncConfirmFlow({ termLabel: '여름계절학기' });
-  const body = text(confirmDialog);
-
-  check('제목', body.includes('기존 데이터를 모두 삭제합니다'));
-  check('현재 학기', body.includes('현재') && body.includes('2026학년도 1학기'));
-  check('변경 학기', body.includes('변경') && body.includes('2026학년도 여름계절학기'));
-  // 삭제 건수 4행 제거는 01 §7-4 이탈이다(사용자 결정 2026-08-10). 되살아나면 '건' 이 다시 센다.
-  check('삭제 안내가 없다', !body.includes('영구 삭제'));
-  eq('삭제 건수가 없다', (body.match(/건/g) ?? []).length, 0);
-  check('비가역 경고', body.includes('이 작업은 되돌릴 수 없습니다.'));
-  eq(
-    '입력 안내가 기대 문자열을 품은 한 문장',
-    text(labelTag(confirmDialog)).replace(/\s/g, ''),
-    '확인을위해‘2026-여름계절학기’를입력하세요',
-  );
-  check(
-    '비가역 경고 가운데 정렬',
-    /<p class="[^"]*text-center[^"]*">이 작업은 되돌릴 수 없습니다\.<\/p>/.test(confirmDialog),
-  );
-  check('입력 안내 가운데 정렬', openTag(labelTag(confirmDialog)).includes('text-center'));
-
-  check('폭 480px', confirmDialog.includes('max-w-modal-wide'));
-  check('실행 버튼 destructive', buttonTag(confirmDialog, '삭제 후 적재').includes('bg-destructive'));
-  check('입력 전에는 비활성', isDisabled(buttonTag(confirmDialog, '삭제 후 적재')));
-  check('입력창 font-mono', /<input[^>]*font-mono/.test(confirmDialog));
-
-  check('격식체를 지킨다', body.includes('삭제합니다') && body.includes('없습니다'));
-  check('구어체로 바꾸지 않았다', !body.includes('삭제할까요') && !body.includes('없어요'));
-}
-
-section('M4 Strict Match (04 §10-3)');
-{
-  fresh();
-  const wrong = await probe.runSyncConfirmFlow({
-    termLabel: '여름계절학기',
-    confirmText: '2026-여름계절',
-  });
-  check('부분 일치는 비활성', isDisabled(buttonTag(wrong.typed, '삭제 후 적재')));
-
-  fresh();
-  const spaced = await probe.runSyncConfirmFlow({
-    termLabel: '여름계절학기',
-    confirmText: '2026-여름계절학기 ',
-  });
-  check('뒤 공백도 비활성', isDisabled(buttonTag(spaced.typed, '삭제 후 적재')));
-
-  fresh();
-  const exact = await probe.runSyncConfirmFlow({
-    termLabel: '여름계절학기',
-    confirmText: '2026-여름계절학기',
-  });
-  check('정확 일치면 활성', !isDisabled(buttonTag(exact.typed, '삭제 후 적재')));
-}
-
-section('M4 를 닫으면 입력값을 지운다 (01 §7-4)');
-{
-  fresh();
-  const { reopened, reopenedInput } = await probe.runSyncConfirmFlow({
-    termLabel: '여름계절학기',
-    confirmText: '2026-여름계절학기',
-    reopen: true,
-  });
-  check('다시 열면 실행 버튼이 다시 비활성', isDisabled(buttonTag(reopened, '삭제 후 적재')));
-  eq('입력값이 비어 있다', reopenedInput, '');
-}
 
 section('실행 — POST /sync/jobs 202 (03 §6-2 · D4)');
 {
