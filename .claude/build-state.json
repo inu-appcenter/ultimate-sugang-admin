@@ -20,17 +20,14 @@
   "spec_edit": false,
   "handoff": {
     "ts": "2026-08-11",
-    "next": "step-6:expand_detail — 미커밋 작업 2건이 워킹트리에 있다. (1) verify 축소 + 폴링 간격 주입, (2) 진행률에서 정량 수치 제거(spec 3파일 18곳 포함). 게이트 --full green.",
+    "next": "step-7:qa — step-6 은 리뷰 종결하고 COMPLETED. 지금은 QA 다: Playwright 설치 → 스모크 3흐름 → 시나리오 14개 → DS 일관성 → 이월 처리.",
     "how": [
-      "진행률 정책이 바뀌었다 — progress 는 { phase } 하나. 표기는 `업데이트 진행 중 · {단계}`. 수치 금지(사용자 결정 2026-08-11). spec·코드·rules 전부 반영 완료. 03 §7-2(단위)·§7-3(total null)은 삭제됐고 옛 §7-4 폴링이 §7-2 로 올라왔다",
-      "verify 는 4파일 123건으로 줄었다(전 8파일 382건). 눈으로 못 보는 것만 본다 — 마크업·문구·색 검사를 다시 넣지 않는다. rules/hooks.md 의 verify 항목이 기준이다",
+      "사용자 결정 2026-08-11 — Playwright 를 설치해서 최고위험 3흐름을 자동화한다. smoke.sh 가 .claude/resource/smoke 를 돌리고, 미설치면 조용히 스킵하므로 설치 전에는 --with-smoke 가 green 이어도 의미가 없다",
+      "verify 는 눈으로 못 보는 것만 본다(4파일). 14개 시나리오 중 브라우저에서만 드러나는 것들 — 로그인 가드·인라인 에러·Strict Match·경고 탭·빈 상태 — 은 verify 에 다시 넣지 말고 스모크로 잡는다. rules/hooks.md 의 verify 항목이 기준이다",
+      "step-7 phase 문서(.claude/resource/phases/step-7-qa.md)의 절차 4번 '리뷰어 3종(spec·architecture·ds)' 은 낡았다 — architecture-reviewer 는 커밋 6cc95f4 에서 삭제됐고 그 일은 uss-contract-lint 의 구조 규칙 6종이 한다. 리뷰어는 spec·ds 둘뿐이다",
+      "deferred 에 step-7 대상이 11건 열려 있다. 그중 needs=user 1건은 spec 정정이라 사람이 spec_edit 창을 열어야 한다 — notes 의 human-step(step-6) 참조",
       "폴링 간격은 VITE_POLL_INTERVAL_MS(기본 2000). harness/verify/env.mjs 가 40ms 로 덮는다. verify 의 wait 값을 초 단위로 되돌리지 않는다",
-      "rules/verification.md 와 hooks/checks/doc-lint.mjs 는 삭제됐다. red 증명 의무·근거 절 의무는 더 이상 없다(사용자 결정 2026-08-11)",
-      "브랜치 fix/step-5-4-polling 이 origin 에 올라가 있다. main 병합은 사람이 한다 — step-6 은 feat/step-6-expand 를 새로 딴다",
-      "phase 문서는 .claude/resource/phases/step-6-expand.md. Expandable Row · Tab Group · 더보기(useInfiniteQuery) · FieldDiff · 실패 Job",
-      "⚠️ FAILED 종료 시 이력 최상단 행 자동 확장(01 §8-1 · 04 §10-4)도 여기서 붙인다 — 5-4 는 토스트까지만 했다. 트리거 자리는 useSyncJobPolling 의 종료 effect 다",
-      "deferred 중 target_item 이 step-6:expand_detail 인 2건을 먼저 읽는다 — academicYear 가 ±2 밖일 때의 처리는 사용자 위임 결정이 적혀 있다",
-      "step-7 로 이월된 항목이 9건이다. QA 때 target_item 으로 다시 훑는다",
+      "브랜치는 feat/step-6-expand 이고 origin 에 올라가 있다. main 병합은 사람이 한다",
       "리뷰는 spec·ds 를 각 1회씩만 부른다. 재리뷰는 사용자가 요청할 때만 한다 — 라운드 상한이라는 개념은 없다"
     ],
     "unresolved": "폐기한 시나리오에서 종료 effect 는 실행되는데(invalidateQueries 기록됨) sonner 토스트가 jsdom DOM 에 안 나타났다. 배제한 가설 — sonner 싱글턴 누적(신규 프로세스에서도 재현), 늦은 토스트(10초 뒤 단일 Job 은 정상). 좁혀진 조건 — 같은 마운트에서 M2→M3 모달을 열고 409/5200 을 한 번 맞은 뒤. 범위 밖이라 추적하지 않는다. 실제 브라우저에서 이상하면 step-7 Playwright 에서 본다."
@@ -55,11 +52,17 @@
       "decision": "ⓐ 폴링 쿼리만 전역 에러 토스트에서 제외한다 (사용자 위임 2026-08-10). ⓑ(N회 후 중단)는 명세에 없는 상태를 새로 만든다 — 폴링이 멈춘 화면을 어떻게 보여줄지 01 §9 가 정하지 않는다. 진행률은 다음 성공 응답에서 알아서 따라잡는다.",
       "resolution": "[해소됨 2026-08-10] 폴링 쿼리에 `meta: { skipErrorToast: true }` 를 달고 QueryCache.onError 가 그 표시만 건너뛴다. Register 인터페이스를 확장해 meta 에 타입을 줬다(오타가 조용히 통과하지 않게). 회귀 검사 2개: '폴링 에러 토스트가 없다' + '현황 조회 실패는 토스트 1개'(예외가 폴링 하나로 좁혀졌는지).",
       "text": "폴링 중 네트워크가 죽으면 2초마다 에러 토스트가 쌓인다. 폴링 쿼리가 마지막 성공 데이터(RUNNING)를 유지해 refetchInterval 이 계속 2000 을 돌려주고 전역 QueryCache.onError 가 매번 띄운다. queryClient.ts" },
-    { "from": "step-5-1:M1_semester", "target_item": "step-6:expand_detail", "needs": "none", "status": "open",
+    { "from": "step-5-1:M1_semester", "target_item": "step-6:expand_detail", "needs": "none", "status": "resolved",
       "decision": "서버가 준 academicYear 가 ±2 밖이면 그 값을 옵션에 추가해 표시한다 (사용자 위임 2026-08-10). 01 §7-1 의 두 요구('옵션은 ±2', '초기값은 현재 설정값') 중 초기값 보존이 우선이다 — 트리거가 빈칸이 되면 무엇이 설정돼 있는지 화면에서 사라진다. 옵션을 늘리는 게 값을 감추는 것보다 작은 일탈이다.",
+      "resolution": "[해소됨 2026-08-11 · 커밋 469e7ac] shared/lib/academicYearOptions.ts 의 academicYearOptions(current) 가 ±2 목록에 current 가 없으면 얹고 정렬한다. spec 리뷰어가 명세 위반 아님을 확인했다.",
       "text": "서버의 academicYear 가 현재 연도 ±2 밖일 때 동작이 명세에 없다. 지금은 매칭 옵션이 없어 트리거가 빈칸이 되고 isDirty=false 라 [저장]도 꺼진다." },
-    { "from": "step-5-3:M3_M4_execute", "target_item": "step-6:expand_detail", "needs": "none", "status": "open",
+    { "from": "step-5-3:M3_M4_execute", "target_item": "step-6:expand_detail", "needs": "none", "status": "resolved",
+      "resolution": "[해소됨 2026-08-11 · 커밋 469e7ac] SyncMainPage.expandFailedJob 이 setPage(1) + setExpandedJobId(jobId) 를 하고 useSyncJobPolling 의 종료 effect 가 FAILED 에서만 부른다. 회귀 검사 3섹션(자동 확장 · 2페이지에서 되돌아오기 · SUCCESS 는 안 열림).",
       "text": "FAILED 종료 시 이력 최상단 행 자동 확장(01 §8-1 · 04 §10-4). Expandable Row 가 step-6 이라 그때 붙인다. 5-4 에서는 토스트까지만 했다." },
+    { "from": "step-6:expand_detail", "target_item": "step-7:qa", "needs": "user", "status": "open",
+      "text": "spec 정정 2건이 사람 손을 기다린다(spec_edit 창 필요). (1) 01 §7-4 와이어프레임·사양표와 04 §10-3 의 M4 삭제 건수 표기 — 사용자 결정 2026-08-11 로 코드에서 뺐으므로 이제 spec 쪽이 틀리다. (2) DS-01 §5-3 의 Progress Text 서술이 아직 '{단계} {current}/{total}' 이다 — 2026-08-11 결정으로 01 §8-1·03 §7 만 고쳐졌다. 고친 뒤 node .claude/hooks/checks/spec-map.mjs 로 map 을 다시 만든다." },
+    { "from": "step-6:expand_detail", "target_item": "step-7:qa", "needs": "none", "status": "open",
+      "text": "'부분 적용' 배지(SyncJobDetailPanel.tsx:50)가 badgeVariants.ts 를 안 타고 variant=\"muted\" 직접 지정이다. enum 이 아니라 boolean 이라 자연스럽긴 한데, UPSERT Job 에서는 이력 행의 '갱신' 배지와 회색이 똑같아진다. 04 §10-6 은 이 표시를 실패 확장 문맥에 두는데 코드는 메타 행이라 모든 status 에 뜬다(mock job 39 가 SUCCESS + partiallyApplied). 근거가 03 과 04 로 갈려 위반으로 안 올렸다 — 육안 확인 대상." },
     { "from": "step-5-3:M3_M4_execute", "target_item": "step-7:qa", "needs": "none", "status": "open",
       "decision": "기본값을 `text-body text-fg-secondary` 로 올리고, M3·M4 는 색만(`text-foreground`) 덮는다 (사용자 위임 2026-08-10). 근거는 DS-03 §1-1 의 14px regular = USS body. M1·M2 는 크기만 13→15 로 오르고 색은 그대로라 위계가 바뀌지 않는다. step-7 에서 ds 리뷰어로 M1·M2 재확인한다.",
       "text": "DialogDescription 기본값이 text-caption text-fg-secondary 인데 호출부 4곳 중 2곳(M3·M4)이 text-body text-foreground 로 덮는다. 모달이 하나 더 생기면 덮는 걸 잊는다. dialog.tsx" },
@@ -67,7 +70,8 @@
       "text": "tooltip.tsx 의 bg-foreground + text-primary-foreground 는 DS-01 에서 strategy REPLACE('교체') 배지용으로 정의된 neutral-strong 페어다. 카드 2 툴팁과 이력의 교체 배지가 한 화면에 같이 뜰 수 있다. DS 일관성 점검 대상." },
     { "from": "step-5-2:M2_preflight", "target_item": "step-7:qa", "needs": "none", "status": "open",
       "text": "a11y — Radix 가 aria-describedby 를 래퍼 span 에 붙여서 disabled 버튼에 도달한 스크린리더는 차단 사유를 못 읽는다. CourseSummaryCard 의 Tooltip 래퍼." },
-    { "from": "step-5-3:M3_M4_execute", "target_item": "step-7:qa", "needs": "none", "status": "open",
+    { "from": "step-5-3:M3_M4_execute", "target_item": "step-7:qa", "needs": "none", "status": "dropped",
+      "resolution": "[폐기됨 2026-08-11] 지적 대상이 사라졌다 — 커밋 8340dbe 가 M4 의 삭제 건수 블록을 통째로 지웠고 사용자가 2026-08-11 에 그대로 두기로 결정했다. 남은 일은 spec 정정이고 별도 항목으로 열려 있다.",
       "text": "M4 삭제 건수의 ml-auto 가 480px 모달 오른쪽 끝까지 숫자를 민다. 01 §7-4 와이어프레임은 라벨 바로 옆이다. DS 는 수치 우측 정렬로, spec 은 계약 위반 아님으로 통과시켰지만 리더 도트 없이 읽히는지는 실제 브라우저에서 봐야 한다. SyncReplaceModal.tsx" },
     { "from": "step-5-3:M3_M4_execute", "target_item": "step-7:qa", "needs": "none", "status": "open",
       "text": "hover:brightness-90 은 filter 라 흰 라벨과 Loader2 스피너까지 10% 어두워지고, transition-colors 가 filter 를 보간하지 않아 hover 전환이 순간이다(다른 variant 는 150ms). danger-hover 토큰 신설이 금지라 현 선택이 현실적이지만 육안 확인 대상." },
@@ -91,8 +95,8 @@
     { "id": "step-5-2:M2_preflight",   "status": "COMPLETED", "note": "학기 선택 + preflight. 응답은 onPreflight 로 올린다" },
     { "id": "step-5-3:M3_M4_execute",  "status": "COMPLETED", "note": "preflight 응답 보관 + M3/M4/최초적재 변형 + POST jobs + 409 2종. M4 격식체 유지" },
     { "id": "step-5-4:polling",        "status": "COMPLETED", "note": "202 jobId 를 onSuccess 에서 보관해 폴링 시작 · refetchInterval 조건부 · runningJobId 재개 · total null 분기 · PERSIST 단위 건" },
-    { "id": "step-6:expand_detail",    "status": "IN_PROGRESS", "note": "Expandable Row·Tab Group·더보기(useInfiniteQuery)·FieldDiff·실패 Job. ⚠️ FAILED 종료 시 이력 최상단 행 자동 확장(01 §8-1 · 04 §10-4)도 여기서 붙인다 — 5-4 에서 토스트까지만 했다" },
-    { "id": "step-7:qa",               "status": "TODO", "note": "시나리오 14개 + DS 일관성 점검" }
+    { "id": "step-6:expand_detail",    "status": "COMPLETED", "note": "Expandable Row(RUNNING 행은 제외)·Tab Group·더보기(useInfiniteQuery)·FieldDiff·실패 Job·FAILED 종료 시 최상단 자동 확장" },
+    { "id": "step-7:qa",               "status": "IN_PROGRESS", "note": "시나리오 14개 + DS 일관성 점검 + Playwright 스모크 3흐름" }
   ],
   "notes": [
     {
@@ -166,6 +170,21 @@
       "tag": "carry-forward",
       "item": "step-5-3:M3_M4_execute",
       "text": "[해소됨 — step-5-3] 에러 표시 모양 통일 건은 종료됐다. M4 에는 인라인 검증 에러가 없다(01 §7-4 는 '정확 일치 시 실행 버튼 활성' 만 정하고 에러 문구를 정하지 않는다). 남은 둘(FieldError 아이콘 없음 · 로그인 401 카드 에러 AlertTriangle)은 서로 역할이 달라 그대로 둔다. 아직 유효한 항목: 헤더 로그아웃 버튼이 size=sm(32px)에 아이콘 20px 라 답답해 보이면 아이콘을 줄이지 말고 버튼 높이를 올린다(20px 이 DS-01 §7 값)."
+    },
+    {
+      "tag": "human-step",
+      "item": "step-6:expand_detail",
+      "text": "⚠️ spec 이 코드보다 뒤처진 곳이 2군데다. 사람이 spec_edit 창을 열어야 고칠 수 있다. (1) 01 §7-4 M4 와이어프레임의 '다음 데이터가 영구 삭제됩니다.' 4행과 사양표 '삭제 건수 | 전략 판정 응답에서 수신', 그리고 04 §10-3 의 'deleteCounts 표시' — 커밋 8340dbe 가 코드에서 지웠고 사용자가 2026-08-11 에 그대로 두기로 확정했다. preflight 응답의 deleteCounts 필드 자체는 03 계약이라 건드리지 않는다(schemas.ts 도 유지). (2) DS-01 §5-3 Progress Text 서술이 아직 '{단계} {current}/{total}' 이다 — 8/11 결정 때 01 §8-1·03 §7 만 고쳤다. 둘 다 고친 뒤 node .claude/hooks/checks/spec-map.mjs 로 map 을 재생성한다. ⚠️ 이건 '코드를 편하게 하려고 spec 을 고치는' 경우가 아니다 — 사용자가 화면을 먼저 확정했고 spec 이 그 기록을 못 따라간 상태다."
+    },
+    {
+      "tag": "decision",
+      "item": "step-6:expand_detail",
+      "text": "명세 빈칸을 사용자 결정으로 채운 값 — (1) 진행 중(RUNNING) Job 행은 펼쳐지지 않는다(2026-08-11). 01 §6-5 는 완료·실패 두 모양만 그리고 03 §6-4 의 탭 활성 판정은 '카운트 0' 기준이라 카운트가 전부 null 인 RUNNING 을 말하지 않는다. 그냥 두면 탭 4개가 다 비활성인 채 details 헛호출이 나갔다. 판정자는 DataTable 의 rowExpandable prop 이고 SyncJobTable 이 status !== 'RUNNING' 을 건다 — 클릭 핸들러와 확장 패널 렌더를 같이 막아야 한다(둘 중 하나만 막으면 자동 확장 경로로 열린다). (2) M4 삭제 건수 블록은 뺀 채로 둔다(2026-08-11). spec 정정이 사람 손에 남아 있다 → 같은 항목의 human-step 노트. ⚠️ 되돌리지 마라 — 다음 세션이 01 §7-4 만 읽고 '누락' 으로 판단하기 쉬운 자리다."
+    },
+    {
+      "tag": "trap",
+      "item": "all",
+      "text": "syncKeys.job(id)(폴링, ['sync','job',id])과 syncKeys.jobDetail(id)(확장 패널, ['sync','jobDetail',id])은 같은 엔드포인트 GET /sync/jobs/{id} 를 두 키로 캐싱한다. 종료 effect 가 summary·jobList 만 무효화하면 jobDetail 은 접두 매칭에 안 걸리고 staleTime 30초 + refetchOnWindowFocus false + 폴링 대상 아님이라 재조회 트리거가 하나도 없다 — 열려 있던 패널이 옛 status 에 굳는다. 종료 effect 의 jobDetail 무효화 한 줄이 그걸 막는다. red 실측: rowExpandable 과 이 한 줄을 같이 빼면 step-6.mjs 의 '열린 내용이 종료 후 상태다' 가 FAIL 한다."
     },
     {
       "tag": "decision",
@@ -251,6 +270,15 @@
       "review": "spec=PASS(4라운드) · ds=PASS(2라운드)",
       "retry": 0,
       "text": "2초 폴링·진행률·자동 재개·종료 처리. 리뷰가 네 라운드 간 이유는 전부 '검사가 회귀를 못 잡고 있었다' 였다 — 1라운드 폴링 대상 우선순위, 2라운드 마운트 리셋으로 옛 코드도 통과, 3라운드 존재/부등호 판정이 버그 쪽 값을 통과시킴. 4라운드에서 넘긴 지적 3건(202 직후 버튼 잠금·total null 표기·폴링 에러 토스트)을 반영하고 셋 다 red 를 실측한 뒤 PASS. 검증 31건 추가(총 315건). 넘긴 지적 5건 중 3 해소·1 유지(주황 두 번, 사용자 위임 ⓐ)·1 이동(버튼 잠깐 잠김 → step-7). 새 이월 3건은 전부 step-7."
+    },
+    {
+      "id": "step-6:expand_detail",
+      "ts": "2026-08-11",
+      "commit": "469e7ac",
+      "gate": "--full OK",
+      "review": "spec·ds 각 1회 — 지적 8건(fixed 5 · dropped 1 · deferred 2)",
+      "retry": 1,
+      "text": "Expandable Row·Tab Group·더보기(useInfiniteQuery)·FieldDiff·Warning Row·실패 Job 확장·FAILED 종료 시 최상단 자동 확장. Radix Tabs 를 DS-01 로 재정의해 들였다. 리뷰가 잡은 것 중 무거운 건 둘 — (1) syncKeys.job 과 syncKeys.jobDetail 이 같은 엔드포인트를 두 키로 캐싱하는데 종료 effect 가 jobDetail 을 안 건드려 열린 패널이 옛 status 에 굳었다(trap 으로 보관), (2) M4 삭제 건수 블록이 커밋 8340dbe 에서 근거 기록 없이 사라져 01 §7-4 와 어긋났다 — 사용자가 뺀 채로 두기로 확정해 이번엔 spec 쪽이 정정 대상이 됐다(human-step). RUNNING 행 확장 금지는 사용자 결정. 검증 28건, red 실측 2회로 두 수정을 독립 증명. 넘긴 지적 2건(academicYear ±2 밖·FAILED 자동 확장) 모두 해소."
     }
   ]
 }
