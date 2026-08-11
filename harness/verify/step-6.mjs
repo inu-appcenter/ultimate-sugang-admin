@@ -135,6 +135,22 @@ section('[더 보기] — 10건씩 누적, hasNextPage=false 면 숨김 (03 §6-
   eq('page 를 1씩 올린다', pages, ['1', '2']);
 }
 
+section('진행 중인 Job 행은 펼쳐지지 않는다 (01 §6-5 · 사용자 결정 2026-08-11)');
+{
+  const job = seedRunningJob();
+
+  const [, running, failed] = await probe.renderSyncMainSteps([
+    { wait: 250 },
+    { clickRow: '2026-08-09 10:00', wait: 250 },
+    { wait: 400, before: () => failJob(job) },
+  ]);
+
+  eq('RUNNING 행을 눌러도 안 열린다', panelCount(running), 0);
+  eq('목록도 부르지 않는다', requestUrls.filter((url) => url.includes(`/${RUNNING_JOB_ID}/details`)).length, 0);
+  eq('끝난 뒤에는 열린다', panelCount(failed), 1);
+  check('열린 내용이 종료 후 상태다', text(failed).includes('학교 API 응답이 없습니다.'));
+}
+
 section('FAILED 종료 시 이력 최상단 행 자동 확장 (01 §8-1 · 04 §10-4)');
 {
   const job = seedRunningJob();

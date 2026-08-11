@@ -24,6 +24,7 @@ interface DataTableProps<T, K extends string | number> {
   rowKey: (row: T) => K;
   expandedKey?: K | null;
   onRowToggle?: (key: K) => void;
+  rowExpandable?: (row: T) => boolean;
   renderExpanded?: (row: T) => ReactNode;
   className?: string;
 }
@@ -34,6 +35,7 @@ export function DataTable<T, K extends string | number>({
   rowKey,
   expandedKey = null,
   onRowToggle,
+  rowExpandable,
   renderExpanded,
   className,
 }: DataTableProps<T, K>) {
@@ -56,8 +58,10 @@ export function DataTable<T, K extends string | number>({
       <TableBody>
         {rows.map((row) => {
           const key = rowKey(row);
-          const expanded = expandedKey === key;
-          const toggle = onRowToggle === undefined ? undefined : () => onRowToggle(key);
+          const expandable = rowExpandable === undefined || rowExpandable(row);
+          const toggle =
+            onRowToggle === undefined || !expandable ? undefined : () => onRowToggle(key);
+          const expanded = toggle !== undefined && expandedKey === key;
 
           return (
             <Fragment key={key}>

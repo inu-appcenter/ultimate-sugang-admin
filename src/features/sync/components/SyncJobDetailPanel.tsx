@@ -1,5 +1,5 @@
 import { AlertTriangle } from 'lucide-react';
-import { useState } from 'react';
+import { type ReactNode, useState } from 'react';
 
 import { SyncChangeList } from '@/features/sync/components/SyncChangeList';
 import { useSyncJobDetail } from '@/features/sync/queries';
@@ -22,7 +22,12 @@ const countsOf = (job: SyncJobDetail): Record<SyncChangeType, number | null> => 
   WARNING: job.warningCount,
 });
 
-function MetaItem({ label, value }: { label: string; value: string }) {
+const Dash = () => <span className="text-muted-ds-text">-</span>;
+
+const countText = (value: number | null) =>
+  value === null ? <Dash /> : `${formatNumber(value)}건`;
+
+function MetaItem({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="flex items-center gap-2">
       <span className="text-caption text-fg-secondary">{label}</span>
@@ -34,10 +39,11 @@ function MetaItem({ label, value }: { label: string; value: string }) {
 function JobMeta({ job }: { job: SyncJobDetail }) {
   const { fetchedCourseCount, fetchedScheduleCount } = job;
   const collected =
-    fetchedCourseCount === null && fetchedScheduleCount === null
-      ? null
-      : `강의 ${fetchedCourseCount === null ? '-' : `${formatNumber(fetchedCourseCount)}건`}` +
-        ` · 시간표 ${fetchedScheduleCount === null ? '-' : `${formatNumber(fetchedScheduleCount)}건`}`;
+    fetchedCourseCount === null && fetchedScheduleCount === null ? null : (
+      <>
+        강의 {countText(fetchedCourseCount)} · 시간표 {countText(fetchedScheduleCount)}
+      </>
+    );
 
   return (
     <div className="flex flex-col gap-2">
@@ -45,7 +51,7 @@ function JobMeta({ job }: { job: SyncJobDetail }) {
         <MetaItem label="실행자" value={job.executedBy} />
         <MetaItem
           label="소요"
-          value={job.durationSeconds === null ? '-' : formatDuration(job.durationSeconds)}
+          value={job.durationSeconds === null ? <Dash /> : formatDuration(job.durationSeconds)}
         />
         {job.partiallyApplied && <Badge variant="muted">부분 적용</Badge>}
       </div>
@@ -66,7 +72,7 @@ function FailureBlock({ failureReason }: { failureReason: string | null }) {
           <p className="mt-1 text-caption text-danger-text">{failureReason}</p>
         )}
       </div>
-      <p className="text-caption text-fg-secondary">변경 사항은 적용되지 않았어요.</p>
+      <p className="text-body text-fg-secondary">변경 사항은 적용되지 않았어요.</p>
     </div>
   );
 }
