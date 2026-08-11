@@ -19,21 +19,27 @@ const courseNameColumn: DataTableColumn<SyncChangeItem> = {
   key: 'courseName',
   header: '과목명',
   width: 260,
-  render: (item) => item.courseName ?? '-',
+  render: (item) =>
+    item.courseName ?? <span className="text-muted-ds-text">-</span>,
 };
 
 const changedFieldsColumn: DataTableColumn<SyncChangeItem> = {
   key: 'changedFields',
   header: '변경 내용',
   width: 340,
-  render: (item) => (item.changedFields === null ? '-' : <FieldDiff fields={item.changedFields} />),
+  render: (item) =>
+    item.changedFields === null ? (
+      <span className="text-muted-ds-text">-</span>
+    ) : (
+      <FieldDiff fields={item.changedFields} />
+    ),
 };
 
 const reasonColumn: DataTableColumn<SyncChangeItem> = {
   key: 'reason',
   header: '사유',
   width: 600,
-  render: (item) => item.reason ?? '-',
+  render: (item) => item.reason ?? <span className="text-muted-ds-text">-</span>,
 };
 
 const columnsOf = (changeType: SyncChangeType): Array<DataTableColumn<SyncChangeItem>> => {

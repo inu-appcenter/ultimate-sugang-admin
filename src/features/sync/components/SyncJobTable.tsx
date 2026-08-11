@@ -13,7 +13,8 @@ import { formatNumber } from '@/shared/lib/formatNumber';
 import { formatSemesterCompact } from '@/shared/lib/formatSemester';
 import { formatDateTime } from '@/shared/lib/formatDateTime';
 
-const countCell = (value: number | null) => (value === null ? '-' : formatNumber(value));
+const countCell = (value: number | null) =>
+  value === null ? <span className="text-muted-ds-text">-</span> : formatNumber(value);
 
 const columns: Array<DataTableColumn<SyncJobListItem>> = [
   {
@@ -81,6 +82,7 @@ export function SyncJobTable({
               rowKey={(job) => job.jobId}
               expandedKey={expandedJobId}
               onRowToggle={onExpandToggle}
+              rowExpandable={(job) => job.status !== 'RUNNING'}
               renderExpanded={(job) => <SyncJobDetailPanel jobId={job.jobId} />}
             />
             <PaginationControl

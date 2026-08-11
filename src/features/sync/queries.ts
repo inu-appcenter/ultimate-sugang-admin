@@ -110,6 +110,7 @@ export function useSyncJobPolling(
     setLaunchedJobId(null);
     void queryClient.invalidateQueries({ queryKey: syncKeys.summary() });
     void queryClient.invalidateQueries({ queryKey: syncKeys.jobList() });
+    void queryClient.invalidateQueries({ queryKey: syncKeys.jobDetail(job.jobId) });
   }, [job, onJobFailed, queryClient]);
 
   return { job, launchedJobId, trackLaunchedJob: setLaunchedJobId };

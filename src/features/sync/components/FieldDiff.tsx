@@ -9,8 +9,8 @@ export function FieldDiff({ fields }: { fields: ChangedField[] }) {
           <p className="text-caption text-fg-secondary">
             {fieldLabels[change.field] ?? change.field}
           </p>
-          <p className="text-caption text-foreground">{change.before}</p>
-          <p className="text-caption text-foreground">→ {change.after}</p>
+          <p className="text-body text-foreground">{change.before}</p>
+          <p className="text-body font-medium text-foreground">→ {change.after}</p>
         </div>
       ))}
     </div>
