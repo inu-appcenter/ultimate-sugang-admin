@@ -52,8 +52,6 @@ export type SyncPhase = z.infer<typeof syncPhaseSchema>;
 
 export const syncProgressSchema = z.object({
   phase: syncPhaseSchema,
-  current: z.number(),
-  total: z.number().nullable(),
 });
 export type SyncProgress = z.infer<typeof syncProgressSchema>;
 

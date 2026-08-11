@@ -607,9 +607,7 @@ access-token: {accessToken}
   "closedCount": null,
   "warningCount": null,
   "progress": {
-    "phase": "COURSE_FETCH",
-    "current": 3,
-    "total": 12
+    "phase": "COURSE_FETCH"
   },
   "partiallyApplied": false,
   "failureReason": null
@@ -672,7 +670,7 @@ access-token: {accessToken}
 | `fetchedCourseCount` | number \| null | 학교 API에서 수집한 강의 건수. `SUCCESS`에서만 값 존재 |
 | `fetchedScheduleCount` | number \| null | 수집한 시간표 건수. 동일 |
 | `createdCount` 외 3종 | number \| null | 탭 라벨용 건수. `SUCCESS`에서만 값 존재 |
-| `progress` | object \| **null** | `RUNNING`일 때만 값 존재. 7장 참조 |
+| `progress` | object \| **null** | `RUNNING`일 때만 값 존재. 필드는 `phase` 하나. 7장 참조 |
 | `partiallyApplied` | boolean | 적재 중 실패로 일부만 커밋된 상태 (와이어프레임 §8-3) |
 | `failureReason` | string \| null | 실패 사유 원문. `FAILED`에서만 값 존재 |
 
@@ -759,11 +757,11 @@ access-token: {accessToken}
 
 ```json
 {
-  "phase": "COURSE_FETCH",
-  "current": 3,
-  "total": 12
+  "phase": "COURSE_FETCH"
 }
 ```
+
+**필드는 `phase` 하나뿐이다.** 수집 페이지 수·적재 건수·백분율 같은 정량 수치를 담지 않는다 — 관리자에게 필요한 것은 "지금 어느 단계인가"이지 "몇 퍼센트인가"가 아니다. (사용자 결정 2026-08-11)
 
 ### 7-1. `phase`
 
@@ -774,36 +772,9 @@ access-token: {accessToken}
 | `PERSIST` | 적재 | DB 반영 |
 
 > 한글 라벨 매핑은 **클라이언트 책임**이다. 서버는 enum만 반환한다.
+> 화면 표기는 `업데이트 진행 중 · {단계}` 한 가지다. 단계마다 다른 모양을 쓰지 않는다.
 
-### 7-2. `current` / `total`의 단위
-
-단계마다 단위가 다르다.
-
-| `phase` | `current` | `total` | 화면 표기 |
-|---|---|---|---|
-| `COURSE_FETCH` | 수집 완료 페이지 | 전체 페이지 | `강의 수집 3/12 페이지` |
-| `TIMETABLE_FETCH` | 수집 완료 페이지 | 전체 페이지 | `시간표 수집 7/28 페이지` |
-| `PERSIST` | 처리 완료 과목 건수 | 전체 과목 건수 | `적재 450/1,203건` |
-
-> 와이어프레임 §8-1의 "페이지" 표기는 **수집 단계 한정**이다. 적재 단계는 페이지 개념이 없어 건수로 표시한다.
-
-### 7-3. `total = null` 처리
-
-학교 API는 `totalpageSize`를 **첫 페이지 응답 본문에 담아** 반환한다. 즉 1페이지를 수신하기 전까지 서버는 전체 페이지 수를 알 수 없다.
-
-```
-t=0s   { "phase": "COURSE_FETCH", "current": 0, "total": null }
-t=2s   { "phase": "COURSE_FETCH", "current": 1, "total": 12   }
-```
-
-| 조건 | 화면 표기 |
-|---|---|
-| `total = null` | **`강의 수집 중…`** (분모 없이) |
-| `total ≠ null` | `강의 수집 3/12 페이지` |
-
-`PERSIST` 단계는 수집이 끝난 뒤 시작되므로 `total`이 항상 확정돼 있다.
-
-### 7-4. 폴링
+### 7-2. 폴링
 
 | 항목 | 값 |
 |---|---|
@@ -953,7 +924,7 @@ courses
 |---|---|
 | `admins` | `login_id`, `password`(BCrypt), `name` → 3-1의 인증, 6-4의 `executedBy` |
 | `semester_setting` | `academic_year`, `term` → 4장. **항상 1행** |
-| `course_sync_job` | 6-3·6-4의 모든 필드. 진행률 3종 컬럼 포함 |
+| `course_sync_job` | 6-3·6-4의 모든 필드. 진행 단계(`phase`) 컬럼 포함 |
 | `course_sync_detail` | 6-5. `haksu_code`, `course_name`, `change_type`, `changed_fields`(JSON), `reason` |
 
 ### 10-3. 동시 실행 차단
@@ -988,12 +959,12 @@ courses
 | # | 항목 | 본 문서에 미치는 영향 |
 |---|---|---|
 | 1 | `MOD_DATE`에 과거 날짜(`{연도}0101`) 정상 동작 | 전량 수집 가능 여부 (D1의 전제) |
-| 2 | `YEAR` 파라미터 필터 동작 | 수집량, `total` 페이지 수 |
+| 2 | `YEAR` 파라미터 필터 동작 | 수집량 |
 | 3 | `TERM_CODE` 파라미터 필터 동작 | 미동작 시 앱에서 필터링 → `fetchedCourseCount` 의미 변화 |
 | 4 | `TERM_CODE` 반환값이 `10/20/30/40`인지 | 8-1 enum 매핑 |
 | 5 | 두 API의 `TERM_CODE` 체계 동일 여부 | 강의-시간표 조인 |
 | 6 | HTTP 메서드 (POST / GET) | 클라이언트 구현 |
-| 7 | 페이지당 최대 건수 | 7-2 진행률 분모의 체감 정확도 |
+| 7 | 페이지당 최대 건수 | 수집 소요 시간 (진행률 표기에는 영향 없음) |
 | 8 | 호출 서버 IP가 `117.16.191.59`와 일치 | 연동 가능 여부 |
 
 ### 11-2. 알려진 한계 (의도적 수용)

@@ -11,8 +11,6 @@ export interface SemesterRef {
 
 export interface JobProgress {
   phase: Phase;
-  current: number;
-  total: number | null;
 }
 
 export interface JobRecord {
@@ -232,10 +230,9 @@ const initialState = (): MockState => ({
 let state = initialState();
 
 const JOB_TIMELINE: Array<{ atMs: number; progress: JobProgress }> = [
-  { atMs: 0, progress: { phase: 'COURSE_FETCH', current: 0, total: null } },
-  { atMs: 2_000, progress: { phase: 'COURSE_FETCH', current: 1, total: 12 } },
-  { atMs: 8_000, progress: { phase: 'TIMETABLE_FETCH', current: 3, total: 28 } },
-  { atMs: 16_000, progress: { phase: 'PERSIST', current: 450, total: 1203 } },
+  { atMs: 0, progress: { phase: 'COURSE_FETCH' } },
+  { atMs: 8_000, progress: { phase: 'TIMETABLE_FETCH' } },
+  { atMs: 16_000, progress: { phase: 'PERSIST' } },
 ];
 const JOB_FINISH_MS = 22_000;
 const JOB_DURATION_SECONDS = JOB_FINISH_MS / 1000;
@@ -324,7 +321,7 @@ export const mockDb = {
       updatedCount: null,
       closedCount: null,
       warningCount: null,
-      progress: { phase: 'COURSE_FETCH', current: 0, total: null },
+      progress: { phase: 'COURSE_FETCH' },
       partiallyApplied: false,
       failureReason: null,
     };

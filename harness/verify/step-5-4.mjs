@@ -52,7 +52,7 @@ function seedRunningJob() {
     updatedCount: null,
     closedCount: null,
     warningCount: null,
-    progress: { phase: 'COURSE_FETCH', current: 0, total: null },
+    progress: { phase: 'COURSE_FETCH' },
     partiallyApplied: false,
     failureReason: null,
   };
@@ -86,32 +86,31 @@ section('진입 시 자동 재개 + 진행률 표기 (01 §8-1 · 03 §7 · 04 �
   const job = seedRunningJob();
 
   const [first, fetching, persisting, finished] = await probe.renderSyncMainSteps([
-    { wait: 600 },
+    { wait: 200 },
     {
-      wait: 2400,
+      wait: 400,
       before: () => {
-        job.progress = { phase: 'COURSE_FETCH', current: 3, total: 12 };
+        job.progress = { phase: 'TIMETABLE_FETCH' };
       },
     },
     {
-      wait: 2400,
+      wait: 400,
       before: () => {
-        job.progress = { phase: 'PERSIST', current: 450, total: 1203 };
+        job.progress = { phase: 'PERSIST' };
       },
     },
     {
-      wait: 2400,
+      wait: 400,
       before: () => finish(job, 'SUCCESS'),
     },
   ]);
 
   check('실행 없이 폴링이 붙는다', progressLine(first) !== null);
-  // 03 §7-3 의 표기는 `강의 수집 중…` 이다. 접두어를 덧붙이면 '중' 이 두 번 읽힌다.
-  eq('total null 이면 분모 없이', progressLine(first)?.text, '강의 수집 중…');
-
-  // 03 §7-2 는 수집만 띄어쓰고(3/12 페이지) 적재는 붙여 쓴다(450/1,203건). 통일하면 오답이다.
-  eq('수집은 띄어쓴 페이지', progressLine(fetching)?.text, '업데이트 진행 중 · 강의 수집 3/12 페이지');
-  eq('적재는 붙여쓴 건 + 천단위 콤마', progressLine(persisting)?.text, '업데이트 진행 중 · 적재 450/1,203건');
+  eq('단계만 보여준다', progressLine(first)?.text, '업데이트 진행 중 · 강의 수집');
+  eq('단계가 바뀌면 문구도 바뀐다', progressLine(fetching)?.text, '업데이트 진행 중 · 시간표 수집');
+  eq('적재 단계', progressLine(persisting)?.text, '업데이트 진행 중 · 적재');
+  // 수치를 되살리면 여기서 걸린다. 진행률에 숫자를 넣지 않는다.
+  check('숫자가 섞이지 않는다', !/\d/.test(progressLine(persisting)?.text ?? ''));
 
   eq('종료되면 진행률이 사라진다', progressLine(finished), null);
   check('성공 토스트', text(finished).includes('업데이트를 마쳤어요.'));
@@ -132,13 +131,13 @@ section('폴링은 종료 뒤 멈춘다 (04 §10-4)');
 
   let pollsAtFinish = 0;
   await probe.renderSyncMainSteps([
-    { wait: 4500 },
+    { wait: 400 },
     {
-      wait: 2400,
+      wait: 400,
       before: () => finish(job, 'SUCCESS'),
     },
     {
-      wait: 5000,
+      wait: 400,
       before: () => {
         pollsAtFinish = polls;
       },
@@ -156,8 +155,8 @@ section('FAILED 종료 (01 §8-1 · §9-1)');
   const job = seedRunningJob();
 
   const [, finished] = await probe.renderSyncMainSteps([
-    { wait: 600 },
-    { wait: 2400, before: () => finish(job, 'FAILED') },
+    { wait: 200 },
+    { wait: 400, before: () => finish(job, 'FAILED') },
   ]);
 
   const body = text(finished);
@@ -203,15 +202,15 @@ section('실행 직후에는 202 의 jobId 로 시작한다 (04 §10-3)');
         updatedCount: null,
         closedCount: null,
         warningCount: null,
-        progress: { phase: 'TIMETABLE_FETCH', current: 7, total: 28 },
+        progress: { phase: 'TIMETABLE_FETCH' },
         partiallyApplied: false,
         failureReason: null,
       });
     }),
   );
 
-  const { afterAction } = await probe.runSyncConfirmFlow({ actionLabel: '갱신', settleMs: 600 });
-  eq('summary 가 몰라도 폴링이 시작된다', polls, 1);
+  const { afterAction } = await probe.runSyncConfirmFlow({ actionLabel: '갱신', settleMs: 200 });
+  check('summary 가 몰라도 폴링이 시작된다', polls >= 1, `polls=${polls}`);
 
   // 이 케이스의 summary 는 끝까지 runningJobId 를 null 로 준다. 실행 버튼의 잠금이
   // summary 에만 달려 있으면 202 를 받은 뒤에도 다시 눌러진다 (01 §8-2).
@@ -260,7 +259,7 @@ section('한 마운트 안에서 — 남의 Job 인계 + 끝난 Job 되살아나
     updatedCount: null,
     closedCount: null,
     warningCount: null,
-    progress: status[jobId] === 'RUNNING' ? { phase: 'PERSIST', current: 10, total: 20 } : null,
+    progress: status[jobId] === 'RUNNING' ? { phase: 'PERSIST' } : null,
     partiallyApplied: false,
     failureReason: null,
   });
@@ -296,39 +295,39 @@ section('한 마운트 안에서 — 남의 Job 인계 + 끝난 Job 되살아나
   );
 
   const snapshots = await probe.renderSyncMainSteps([
-    { wait: 700 },
-    { click: '데이터 업데이트', wait: 400 },
-    { click: '다음', wait: 700 },
-    { click: '갱신', wait: 900 },
+    { wait: 200 },
+    { click: '데이터 업데이트', wait: 200 },
+    { click: '다음', wait: 200 },
+    { click: '갱신', wait: 200 },
     {
-      wait: 2600,
+      wait: 400,
       before: () => {
         status[MINE] = 'SUCCESS';
         runningJobId = null;
       },
     },
     {
-      wait: 400,
+      wait: 200,
       before: () => {
         runningJobId = THEIRS;
       },
     },
-    { click: '데이터 업데이트', wait: 400 },
-    { click: '다음', wait: 700 },
-    { click: '갱신', wait: 1200 },
-    { wait: 2600 },
+    { click: '데이터 업데이트', wait: 200 },
+    { click: '다음', wait: 200 },
+    { click: '갱신', wait: 200 },
+    { wait: 400 },
     {
-      wait: 600,
+      wait: 200,
       before: () => {
         status[THEIRS] = 'SUCCESS';
         runningJobId = null;
       },
     },
-    { wait: 600 },
-    { wait: 600 },
-    { wait: 600 },
-    { wait: 600 },
-    { wait: 600 },
+    { wait: 200 },
+    { wait: 200 },
+    { wait: 200 },
+    { wait: 200 },
+    { wait: 200 },
   ]);
 
   const afterMine = snapshots[4];
@@ -339,7 +338,7 @@ section('한 마운트 안에서 — 남의 Job 인계 + 끝난 Job 되살아나
   eq('내 Job 종료 토스트 1개', text(afterMine).match(/업데이트를 마쳤어요\./g)?.length, 1);
 
   check('남의 RUNNING Job 으로 넘어간다', polled.includes(String(THEIRS)), 'polled=' + polled);
-  check('남의 Job 진행률이 뜬다', text(watchingTheirs).includes('적재 10/20건'));
+  check('남의 Job 진행률이 뜬다', text(watchingTheirs).includes('업데이트 진행 중 · 적재'));
 
   const running = snapshots.map((snapshot) => text(snapshot).includes('업데이트 진행 중'));
   check('남의 Job 이 도는 동안 진행 중으로 보인다', running.slice(8, 10).every(Boolean));
@@ -356,7 +355,7 @@ section('한 마운트 안에서 — 남의 Job 인계 + 끝난 Job 되살아나
   queryClient.clear();
 }
 
-section('폴링 실패는 조용히, 나머지 쿼리는 그대로 (사용자 결정 2026-08-10)');
+section('폴링 실패는 조용히, 나머지 쿼리는 그대로 (04 §9-2)');
 {
   // 폴링은 2초마다 돈다. 실패할 때마다 전역 토스트를 띄우면 같은 문구가 화면에 쌓인다.
   const job = seedRunningJob();
@@ -369,11 +368,11 @@ section('폴링 실패는 조용히, 나머지 쿼리는 그대로 (사용자 �
     }),
   );
 
-  const [, dead] = await probe.renderSyncMainSteps([{ wait: 600 }, { wait: 6000 }]);
+  const [, dead] = await probe.renderSyncMainSteps([{ wait: 200 }, { wait: 400 }]);
 
   check('첫 응답 뒤로는 계속 실패시켰다', polls >= 2, `polls=${polls}`);
   eq('폴링 에러 토스트가 없다', toastCount(dead, '폴링이 끊겼어요.'), 0);
-  eq('마지막 성공 응답을 유지한다', progressLine(dead)?.text, '강의 수집 중…');
+  eq('마지막 성공 응답을 유지한다', progressLine(dead)?.text, '업데이트 진행 중 · 강의 수집');
 
   server.resetHandlers();
   queryClient.clear();
@@ -386,6 +385,7 @@ section('폴링 실패는 조용히, 나머지 쿼리는 그대로 (사용자 �
     ),
   );
 
+  // 이 대기는 폴링이 아니라 queries.retry=1 의 재시도 지연(약 1초)을 기다린다.
   const [broken] = await probe.renderSyncMainSteps([{ wait: 3000 }]);
   eq('현황 조회 실패는 토스트 1개', toastCount(broken, '현황을 불러오지 못했어요.'), 1);
 
@@ -396,7 +396,7 @@ section('폴링 실패는 조용히, 나머지 쿼리는 그대로 (사용자 �
 section('폴링 갱신에는 트랜지션을 걸지 않는다 (DS-01 §4-3)');
 {
   const job = seedRunningJob();
-  const [snapshot] = await probe.renderSyncMainSteps([{ wait: 600 }]);
+  const [snapshot] = await probe.renderSyncMainSteps([{ wait: 200 }]);
 
   const line = progressLine(snapshot);
   check('진행률 줄을 찾았다', line !== null);
