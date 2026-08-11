@@ -6,7 +6,7 @@
  *
  * 두 곳이 이 파일을 쓴다:
  *   - uss-contract-lint.mjs  → 실제 소스를 검사(fast 게이트)
- *   - harness/verify/step-5-2.mjs → 이 규칙이 진짜 잡는지 증명(rules/verification.md §2)
+ *   - harness/verify/step-2.mjs → 이 규칙이 잡아야 할 것과 통과시켜야 할 것을 고정
  */
 const STRATEGY = '(?:INITIAL|UPSERT|REPLACE)';
 

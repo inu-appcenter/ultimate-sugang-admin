@@ -22,7 +22,7 @@
 ## 게이트 강도 (상세는 rules/hooks.md)
 - **fast**(Stop 훅·매 턴): validate-state · typecheck · token-lint · uss-contract-lint.
 - **`--full`**(커밋/리뷰패킷 전): + `npm run verify`(동작 검증) + vite build. **`--with-smoke`**(QA): + Playwright.
-- 검사를 추가·수정할 때의 규율(red 증명·근거 절·탐색 상한)은 `rules/verification.md`.
+- `harness/verify` 는 눈으로 확인할 수 없는 것만 본다(폴링·인증·쿼리 무효화·409·계약). 상세는 `rules/hooks.md`.
 - lint 는 PostToolUse 에서 자동수정(소프트, 비차단).
 - 자가수정 3회 초과 → `manual_review` + 정지(사람 검수). 데드락 없음.
 - 안전 차단(PreToolUse): rm -rf · force push · `main` push · 배포/publish · `.claude/spec/` 쓰기(`spec_edit` 창 제외) · `.env` 비밀값. 비가역(**실제 REPLACE Job 실행**·배포·비밀값)은 코드 구조만, 실행은 사람.
