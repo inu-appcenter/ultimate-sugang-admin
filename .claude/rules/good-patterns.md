@@ -38,9 +38,10 @@ SUCCESS/FAILED → 폴링 중단 + summary·이력 invalidate + 토스트
 - `RUNNING` 인 동안에는 [데이터 업데이트] 버튼을 끄고 툴팁을 붙인다.
 
 ## 진행률 표시 (03 §7)
+- `progress` 의 필드는 **`phase` 하나뿐이다.** `current`·`total` 이 없다(사용자 결정 2026-08-11).
 - `phase` 의 한글 이름은 **클라이언트가 매핑한다**(`shared/constants/labels.ts`).
-- `total === null` 이면 분모 없이 `{단계} 중…`. `total` 이 있으면 `{단계} {current}/{total} 페이지`.
-- `phase === 'PERSIST'` 면 단위가 **건수**다. `{적재} {current}/{total}건`.
+- 표기는 `업데이트 진행 중 · {단계}` 하나다. **정량 수치를 되살리지 않는다.**
+- `progress === null`(첫 폴링 응답 전)이면 접두어만 쓴다.
 
 ## 이력·상세
 - 확장은 **한 번에 한 행만.** 펼친 행의 `jobId` 하나만 state 로 들고 있는다.
