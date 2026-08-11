@@ -1,0 +1,81 @@
+{
+  "id": "step-6:expand_detail",
+  "reviewed": { "spec": "2026-08-11", "ds": "2026-08-11" },
+  "findings": [
+    {
+      "id": "S1",
+      "reviewer": "spec",
+      "ref": "01 §6-5 · 01 §8-1 · 04 §10-4",
+      "text": "queries.ts:111-112 — 종료 effect 가 syncKeys.summary()·syncKeys.jobList() 만 무효화한다. 확장 패널이 쓰는 syncKeys.jobDetail(id) = ['sync','jobDetail',id] 는 접두 매칭에 안 걸리고, staleTime 30초 + refetchOnWindowFocus false + 폴링 대상 아님이라 재조회 트리거가 하나도 없다. RUNNING 행을 먼저 펼쳐 두면 status=RUNNING 스냅샷이 캐시에 남고, Job 이 FAILED 로 끝나도 expandedJobId 가 이미 그 값이라 리마운트가 없어 패널이 굳는다 — failureReason 과 '변경 사항은 적용되지 않았어요.' 가 화면에 안 나온다.",
+      "resolution": "fixed",
+      "note": "종료 effect 에 jobDetail(job.jobId) 무효화 추가. S2 로 RUNNING 행 확장을 막았지만 두 키가 같은 엔드포인트를 가리키는 구조는 그대로라 무효화도 같이 건다."
+    },
+    {
+      "id": "S2",
+      "reviewer": "spec",
+      "ref": "01 §6-5 · 03 §6-4",
+      "text": "RUNNING Job 행의 확장 동작이 명세에 없다. 카운트 4종이 전부 null 이라 탭 4개가 모두 disabled 인데 activeTab 이 ?? 'CREATED' 로 떨어져 TabsContent 가 렌더되고 GET /sync/jobs/{id}/details?changeType=CREATED 가 나간다. 01 §6-5 는 완료·실패 두 모양만 그리고, 03 §6-4 의 탭 활성 판정은 '카운트가 0' 기준이라 null 케이스를 말하지 않는다.",
+      "resolution": "fixed",
+      "note": "사용자 결정 2026-08-11 — 진행 중 행은 못 펼치게 한다. DataTable 에 rowExpandable prop 을 더하고 SyncJobTable 이 status !== 'RUNNING' 을 건다. 클릭 핸들러와 확장 패널 렌더를 같이 막는다."
+    },
+    {
+      "id": "S3",
+      "reviewer": "spec",
+      "ref": "03 §7 · source-of-truth §2",
+      "text": "rules/good-patterns.md:42-43 이 total === null 이면 '{단계} 중…', PERSIST 는 '{current}/{total}건' 이라고 아직 적고 있다. 2026-08-11 결정으로 progress 는 { phase } 하나가 됐고 spec 3문서와 다른 rules 는 전부 정리됐는데 여기만 남았다. rules 가 spec 보다 위라 다음 세션이 수치를 되살릴 여지가 있다.",
+      "resolution": "fixed",
+      "note": "진행률 절을 '표기는 업데이트 진행 중 · {단계} 하나' 로 다시 씀."
+    },
+    {
+      "id": "D1",
+      "reviewer": "ds",
+      "ref": "01 §7-4 · 04 §10-3 · source-of-truth §2-4",
+      "text": "SyncReplaceModal.tsx — M4 의 '다음 데이터가 영구 삭제됩니다.' + 강의/시간표/장바구니/수강신청 4행이 커밋 8340dbe 에서 통째로 사라졌다. 01 §7-4 와이어프레임과 사양표('삭제 건수 | 전략 판정 응답에서 수신')·04 §10-3 이 모두 요구하고 preflight 응답은 지금도 deleteCounts 를 준다. 그 커밋은 본문도 build-state 기록도 없어 근거가 제목 한 줄뿐이다. 지금 M4 에서 위험을 알리는 건 '이 작업은 되돌릴 수 없습니다.' 한 줄이다.",
+      "resolution": "dropped",
+      "note": "사용자 결정 2026-08-11 — 뺀 채로 둔다. 대신 코드가 아니라 spec 이 틀린 상태가 됐다: 01 §7-4 와 04 §10-3 을 사람이 spec_edit 창에서 고쳐야 한다(notes 의 human-step 참조). step-5-3 에서 넘어온 'M4 삭제 건수 ml-auto' 지적도 대상이 사라져 같이 dropped."
+    },
+    {
+      "id": "D2",
+      "reviewer": "ds",
+      "ref": "DS-00 §4-1 원칙 1 · DS-01 §2",
+      "text": "FieldDiff.tsx:9-13 — 세 줄이 전부 text-caption(13px)이고 라벨 vs 값은 색으로만 갈린다. before 와 after 는 클래스가 완전히 동일해 '→' 글자 하나가 유일한 구분이다. 게다가 같은 행의 학수번호·과목명은 table.tsx 가 text-body(15px)로 잡아서 데이터가 라벨보다 작게 읽힌다.",
+      "resolution": "fixed",
+      "note": "라벨만 text-caption 유지, before/after 는 text-body, after 에 font-medium. 같은 뿌리인 '변경 사항은 적용되지 않았어요.'(실패 확장의 결론 문장)도 text-body 로 올렸다. 메타 행이 caption 인 건 DS-01 §2 의 '메타 정보' 라 그대로 둔다."
+    },
+    {
+      "id": "D3",
+      "reviewer": "ds",
+      "ref": "DS-01 §1-2 · 01 §6-5",
+      "text": "tabs.tsx:26 — disabled:text-fg-disabled 위에 disabled:opacity-50 을 겹쳤다. 실제 렌더 색이 토큰 값(#B4B9C5)이 아니게 되고(흰 배경 위 ≈#DADDE3, 대비 1.4:1) border 토큰(#E5E8EF)과 구분이 안 된다. 01 §6-5 는 0건 탭을 비활성으로 두랬지 안 보이게 하랬던 게 아니다. input.tsx·select.tsx 는 색 토큰만 쓴다 — opacity 를 겹친 건 tabs 뿐이다.",
+      "resolution": "fixed",
+      "note": "disabled:opacity-50 제거."
+    },
+    {
+      "id": "D4",
+      "reviewer": "ds",
+      "ref": "DS-01 §1-3",
+      "text": "'-' 폴백이 muted-ds 매핑을 안 탄다 — SyncJobDetailPanel.tsx:48(소요)·JobMeta 수집 건수·SyncChangeList.tsx:22,36(과목명·사유). 부모의 text-foreground 를 그대로 받아 실제 값과 같은 농도로 찍힌다. DS-01 §1-3 Muted 행이 '- 표기' 를 명시 케이스로 든다.",
+      "resolution": "fixed",
+      "note": "네 곳 전부 text-muted-ds-text. 이번 변경분이 아니지만 같은 패턴인 SyncJobTable.tsx:16 countCell 도 같이 맞췄다."
+    },
+    {
+      "id": "D5",
+      "reviewer": "ds",
+      "ref": "DS-01 §5-3",
+      "text": "DS-01 §5-3 의 Progress Text 서술이 아직 '{단계} {current}/{total}' 또는 '{단계} 중…' 이다(spec 파일 209행). 2026-08-11 결정으로 01 §8-1·03 §7 은 '업데이트 진행 중 · {단계}' 로 고쳤는데 DS-01 만 안 따라왔다. 코드 판정에는 영향 없다(화면 표기 관할은 01) — DS-01 만 읽은 다음 세션이 수치를 되살릴 수 있다.",
+      "resolution": "deferred",
+      "note": "spec 은 읽기 전용이라 스스로 못 고친다. build-state.deferred 로 넘겨 D1 의 spec 정정과 같은 창에서 처리한다."
+    }
+  ],
+  "open_questions": [],
+  "reviewer_notes_accepted": [
+    "확장 Error State 에 [다시 시도]가 없는 건 01 §9 표가 인라인 확장만 버튼 없이 적어서 그대로 따른 것이다. DS-01 §5-6 서술과 어긋나지만 화면 구성은 01 이 이긴다(source-of-truth §1).",
+    "'부분 적용' 배지가 badgeVariants.ts 를 안 타는 건 enum 매핑이 아니라 boolean 이라서다. 다만 UPSERT Job 에서는 행의 '갱신' 배지와 회색이 같아진다. 04 §10-6 은 이 표시를 실패 확장 문맥에 두는데 코드는 메타 행이라 SUCCESS 에서도 뜬다(mock job 39). 판단 근거가 03 과 04 로 갈려 위반으로 올리지 않았다 — step-7 육안 확인.",
+    "Header 의 sticky top-0 z-40 과 globals.css 의 --toast-offset-top: calc(56px + 24px) 은 01 §4·DS-01 §3 이 정하지 않은 빈칸을 header-height + 24 조합으로 채운 것이다. raw 값이 아니다.",
+    "확장 모션은 tailwindcss-animate 의 duration 유틸이 .animate-in 뒤에 나와 기본 150ms 를 덮는다(둘 다 특이도 (0,1,0)). build-state 의 150ms 함정은 variant 를 안 썼으니 해당 없음.",
+    "5cbd710 으로 useSyncJobDetail 이 폴링과 분리돼(refetchInterval 없음) 확장 패널이 2초마다 다시 그려지지 않는다."
+  ],
+  "verify": "harness/verify/step-6.mjs 28건 (전체 4스크립트). 새 섹션 '진행 중인 Job 행은 펼쳐지지 않는다' 4건. red 실측 2회 — (1) rowExpandable 제거 → 'RUNNING 행을 눌러도 안 열린다 got 1' · '목록도 부르지 않는다 got 1' FAIL (2) rowExpandable + jobDetail 무효화 둘 다 제거 → 위 둘 + '열린 내용이 종료 후 상태다' 까지 3건 FAIL. 즉 S1 과 S2 가 각각 독립적으로 증명된다.",
+  "gate": "--full OK",
+  "ts": "2026-08-11"
+}
