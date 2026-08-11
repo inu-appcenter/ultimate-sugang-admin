@@ -89,6 +89,8 @@ export function installDom() {
 export async function createRuntime() {
   process.env.VITE_API_HOST = 'http://localhost:8080';
   process.env.VITE_USE_MSW = 'true';
+  // 폴링 간격을 실시간으로 기다리면 폴링 검사만 50초다. 프로덕션 기본값은 2000ms 그대로.
+  process.env.VITE_POLL_INTERVAL_MS = '40';
 
   const vite = await createServer({
     server: { middlewareMode: true },
